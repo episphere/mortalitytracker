@@ -44,13 +44,19 @@ dtrack.ui=async(div)=>{
     dtrack.data.all=await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$limit=10000')).json()
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
-    let h='<hr>Comparing causes of death in 2019 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare()"></select> [<a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">source</a>]'
+    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2019 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare()"></select> [<a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">source</a>]'
     h+='<div id=plotlyCompareDiv></div>' 
     div.innerHTML=h
     dtrack.data.states.forEach(s=>{
         let opt=document.createElement('option')
         opt.value=opt.innerText=s
         selectState.appendChild(opt)
+    })
+    Object.keys(dtrack.data.causes).forEach(c=>{
+        let opt=document.createElement('option')
+        opt.value=c
+        opt.innerText=dtrack.data.causes[c]
+        selectCause.appendChild(opt)
     })
     dtrack.plotlyCompare()
 }
@@ -82,7 +88,30 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     let stateData = dtrack.data.all.filter(x=>x.jurisdiction_of_occurrence==selectState.value)
     let data2020 = stateData.filter(x=>x.mmwryear==2020)
     let weeks = data2020.map(x=>parseInt(x.mmwrweek))
-    let data2019 = stateData.filter(x=>(x.mmwryear==2020&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
-    div.innerHTML=Date()
+    let data2019 = stateData.filter(x=>(x.mmwryear==2019&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
+    let trace2019 = {
+        x:weeks,
+        y:data2019.map(x=>x[selectCause.value]),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2019'
+    }
+    let trace2020 = {
+        x:weeks,
+        y:data2020.map(x=>x[selectCause.value]),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2020'
+    }
+    Plotly.newPlot(div,[trace2019,trace2020],{
+        title:`Comparing 2019 and 2020 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
+        xaxis: {
+            title: 'deaths'
+        },
+        yaxis: {
+            title: 'Week'
+        },
+    })
+    //div.innerHTML=Date()
 }
 
