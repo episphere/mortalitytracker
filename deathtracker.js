@@ -106,10 +106,10 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     Plotly.newPlot(div,[trace2019,trace2020],{
         title:`Comparing 2019 and 2020 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
-            title: 'deaths'
+            title: 'Week'
         },
         yaxis: {
-            title: 'Week'
+            title: 'Deaths'
         },
     })
     //div.innerHTML=Date()
