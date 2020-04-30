@@ -35,6 +35,25 @@ dtrack.data.causes={
     symptoms_signs_and_abnormal: 'Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)',
     //weekendingdate: true
 }
+dtrack.data.form={
+    allcause: 0,
+    alzheimer_disease_g30: 0,
+    cerebrovascular_diseases: 0,
+    chronic_lower_respiratory: 0,
+    diabetes_mellitus_e10_e14: 0,
+    diseases_of_heart_i00_i09: 0,
+    influenza_and_pneumonia_j10: 0,
+    //jurisdiction_of_occurrence: '',
+    malignant_neoplasms_c00_c97: 0,
+    //mmwrweek: 0,
+    //mmwryear: 0,
+    naturalcause: 0,
+    nephritis_nephrotic_syndrome: 0,
+    other_diseases_of_respiratory: 0,
+    septicemia_a40_a41: 0,
+    symptoms_signs_and_abnormal: 0,
+    //weekendingdate: 0
+}
 
 dtrack.ui=async(div)=>{
     if(typeof(div)=='string'){
@@ -44,6 +63,8 @@ dtrack.ui=async(div)=>{
     dtrack.data.all=await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$limit=10000')).json()
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
+    // move All States from end to beginning
+    dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2019 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare()"></select> [<a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">source</a>]'
     h+='<div id=plotlyCompareDiv></div>' 
     div.innerHTML=h
@@ -64,7 +85,7 @@ dtrack.ui=async(div)=>{
 dtrack.cleanData=(dt=dtrack.data.all)=>{
     // find all possible causes
     //let parms={} // get list of parameters in al entries
-    return dt.map(d=>{
+    dt = dt.map(d=>{
         let parms=Object.keys(d)
         parms.forEach(p=>{
             if(dtrack.data.flags[p]){
@@ -79,6 +100,31 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
         d.weekendingdate=Date(d.weekendingdate)
         return d
     })
+    // all states
+    let allStates=[]
+    let parmsNum = Object.keys(dtrack.data.form)
+    dtrack.data.weeks=[... new Set(dtrack.data.all.filter(d=>d.mmwryear==2020).map(d=>d.mmwrweek))]
+    yrs=[2019,2020]
+    yrs.forEach(yr=>{
+        dtrack.data.weeks.forEach(wk=>{
+            let dd = dtrack.data.all.filter(d=>(d.mmwryear==yr&d.mmwrweek==wk))
+            let dSum={}
+            Object.assign(dSum,dtrack.data.form)
+            dd.forEach(d=>{
+                parmsNum.forEach(p=>{
+                    if(!isNaN(d[p])){
+                        dSum[p]+=d[p]
+                    }
+                })
+            })
+            dSum.jurisdiction_of_occurrence='All States'
+            dSum.mmwrweek=wk
+            dSum.mmwryear=yr
+            dt.push(dSum) // push at the beguinning of array
+            //debugger
+        })
+    })
+    return dt
 }
 
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
@@ -87,7 +133,8 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     }
     let stateData = dtrack.data.all.filter(x=>x.jurisdiction_of_occurrence==selectState.value)
     let data2020 = stateData.filter(x=>x.mmwryear==2020)
-    let weeks = data2020.map(x=>parseInt(x.mmwrweek))
+    //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
+    let weeks = dtrack.data.weeks
     let data2019 = stateData.filter(x=>(x.mmwryear==2019&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
     let trace2019 = {
         x:weeks,
