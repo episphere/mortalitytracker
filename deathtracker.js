@@ -1,0 +1,1 @@
+console.log('deathtracker.js loaded')
