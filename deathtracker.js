@@ -61,6 +61,8 @@ dtrack.ui=async(div)=>{
     }
     //dtrack.data.states = (await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$select=distinct%20jurisdiction_of_occurrence')).json()).map(x=>x.jurisdiction_of_occurrence)
     dtrack.data.all=await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$limit=10000')).json()
+    dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000')).json())
+    dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
     // move All States from end to beginning
@@ -104,14 +106,16 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
     let allStates=[]
     let parmsNum = Object.keys(dtrack.data.form)
     dtrack.data.weeks=[... new Set(dtrack.data.all.filter(d=>d.mmwryear==2020).map(d=>d.mmwrweek))]
+    dtrack.data.weekends2018=[]
     dtrack.data.weekends2019=[]
     dtrack.data.weekends2020=[]
     dtrack.data.weeks.forEach((wk,i)=>{
         //debugger
+        dtrack.data.weekends2018[i]=dtrack.data.all.filter(d=>d.mmwrweek==wk&d.mmwryear==2018).map(d=>d.weekendingdate)[0]
         dtrack.data.weekends2019[i]=dtrack.data.all.filter(d=>d.mmwrweek==wk&d.mmwryear==2019).map(d=>d.weekendingdate)[0]
         dtrack.data.weekends2020[i]=dtrack.data.all.filter(d=>d.mmwrweek==wk&d.mmwryear==2020).map(d=>d.weekendingdate)[0]
     })
-    yrs=[2019,2020]
+    yrs=[2018,2019,2020]
     yrs.forEach(yr=>{
         dtrack.data.weeks.forEach(wk=>{
             let dd = dtrack.data.all.filter(d=>(d.mmwryear==yr&d.mmwrweek==wk))
@@ -146,6 +150,18 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     let data2020 = stateData.filter(x=>x.mmwryear==2020)
     //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
     let weeks = dtrack.data.weeks
+    let data2018 = stateData.filter(x=>(x.mmwryear==2018&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
+    let trace2018 = {
+        x:dtrack.data.weekends2018.map(d=>{
+            d.setYear(2020)
+            return d
+            //debugger
+        }), //weeks,
+        y:data2018.map(x=>x[selectCause.value]),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2018'
+    }
     let data2019 = stateData.filter(x=>(x.mmwryear==2019&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
     let trace2019 = {
         x:dtrack.data.weekends2019.map(d=>{
@@ -168,7 +184,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         mode: 'lines+markers',
         name: '2020',
         marker: {
-            color:'orange',
+            color:'maroon',
         }
     }
     let trace2020temp = {
@@ -186,7 +202,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             dash: 'dot'
             }
     }
-    Plotly.newPlot(div,[trace2019,trace2020,trace2020temp],{
+    Plotly.newPlot(div,[trace2018,trace2019,trace2020,trace2020temp],{
         title:`Comparing 2019 and 2020 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
