@@ -174,6 +174,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         }
         traces.push(trace)
     }
+    dtrack.data.traces=traces
     dtrack.data.years.sort().slice(0,-1).forEach(yr=>{ // all years exept the last, 2020
         addTrace(yr)
     })
@@ -181,32 +182,6 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     let data2020 = stateData.filter(x=>x.mmwryear==2020)
     //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
     let weeks = dtrack.data.weeks
-    /*
-    let data2018 = stateData.filter(x=>(x.mmwryear==2018&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
-    let trace2018 = {
-        x:dtrack.data.weekends2018.map(d=>{
-            d.setYear(2020)
-            return d
-            //debugger
-        }), //weeks,
-        y:data2018.map(x=>x[selectCause.value]),
-        type: 'scatter',
-        mode: 'lines+markers',
-        name: '2018'
-    }
-    let data2019 = stateData.filter(x=>(x.mmwryear==2019&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
-    let trace2019 = {
-        x:dtrack.data.weekends2019.map(d=>{
-            d.setYear(2020)
-            return d
-            //debugger
-        }), //weeks,
-        y:data2019.map(x=>x[selectCause.value]),
-        type: 'scatter',
-        mode: 'lines+markers',
-        name: '2019'
-    }
-    */
     let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
     y2020=data2020.map(x=>x[selectCause.value]).slice(0,-3+delay) 
     //debugger
@@ -244,8 +219,42 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             dash: 'dot'
             }
     }
-    //Plotly.newPlot(div,[trace2018,trace2019,trace2020,trace2020temp],{
-    Plotly.newPlot(div,traces.slice(1).concat([trace2020,trace2020temp]),{
+
+    // shaded range
+    let valueRange={
+        x:dtrack.data.weeks,
+        avg:dtrack.data.weeks.map(x=>0)     
+    }
+    let ni = [] // number of valid counts
+    dtrack.data.traces.slice(1).forEach(r=>{
+        r.y.map((v,i)=>{
+            if(ni.length<=i){ni[i]=0}
+            if(v){
+                ni[i]++
+                valueRange.avg[i]+=r.y[i]
+            }
+        })
+        //debugger
+    })
+    valueRange.avg=valueRange.avg.map((v,i)=>v/ni[i]) // average
+
+    let traceAvg={
+        x:dtrack.data.weekends2020,
+        y:valueRange.avg,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2015-9<br> average',
+        line: {
+            color:'black',
+            width:3
+        },
+        marker:{
+            size:9
+        }
+    }
+
+
+    Plotly.newPlot(div,traces.slice(1).concat([traceAvg,trace2020,trace2020temp]),{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
