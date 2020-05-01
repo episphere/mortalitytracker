@@ -207,7 +207,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         mode: 'markers',
         name: 'counting <br>in progress',
         marker: {
-            color:'rgb(255, 255, 255,200)',
+            color:'rgba(255, 255, 255,0.25)',
             size:7,
             line:{
                 color:'maroon',
@@ -223,7 +223,9 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     // shaded range
     let valueRange={
         x:dtrack.data.weeks,
-        avg:dtrack.data.weeks.map(x=>0)     
+        avg:dtrack.data.weeks.map(x=>0),
+        max:dtrack.data.weeks.map(x=>0),
+        min:dtrack.data.weeks.map(x=>0)
     }
     let ni = [] // number of valid counts
     dtrack.data.traces.slice(1).forEach(r=>{
@@ -232,6 +234,9 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             if(v){
                 ni[i]++
                 valueRange.avg[i]+=r.y[i]
+                if(v>valueRange.max[i]){valueRange.max[i]=v}
+                if(valueRange.min[i]==0){valueRange.min[i]=v}
+                if(v<valueRange.min[i]){valueRange.min[i]=v}
             }
         })
         //debugger
@@ -243,7 +248,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         y:valueRange.avg,
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2015-9<br> average',
+        name: '2015-19<br>average',
         line: {
             color:'black',
             width:3
@@ -252,9 +257,34 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             size:9
         }
     }
+    /*var traceBase = {
+      x: dtrack.data.weekends2020,
+      y: dtrack.data.weekends2020.map,
+      type: 'scatter',
+      name:'base'
+    }
+    */
+    var traceMin = {
+      x: dtrack.data.weekends2020,
+      y: valueRange.min,
+      fill: 'toself',
+      type: 'scatter',
+      mode: 'none',
+      fillcolor: 'rgba(200,200,200,0)',
+      name:'(2015-19)'
+    }
+    var traceMax = {
+      x: dtrack.data.weekends2020,
+      y: valueRange.max,
+      fill: 'tonexty',
+      type: 'scatter',
+      mode: 'none',
+      fillcolor: 'rgba(200,200,200,0.75)',
+      name:'value range'
+    };
 
 
-    Plotly.newPlot(div,traces.slice(1).concat([traceAvg,trace2020,trace2020temp]),{
+    Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
