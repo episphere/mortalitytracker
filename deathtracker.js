@@ -225,7 +225,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         }
     }
     let trace2020temp = {
-        x:dtrack.data.weekends2020.slice(-4),  //weeks,
+        x:dtrack.data.weekends2020.slice(-4,-1),  //weeks,
         y:data2020.map(x=>x[selectCause.value]).slice(-4+delay),
         type: 'scatter',
         mode: 'lines+markers',
