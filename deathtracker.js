@@ -228,8 +228,8 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             }
     }
     //Plotly.newPlot(div,[trace2018,trace2019,trace2020,trace2020temp],{
-    Plotly.newPlot(div,traces.concat([trace2020,trace2020temp]),{
-        title:`Comparing 2020 with 2014-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
+    Plotly.newPlot(div,traces.slice(1).concat([trace2020,trace2020temp]),{
+        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
