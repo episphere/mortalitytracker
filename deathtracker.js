@@ -176,7 +176,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         y:data2020.map(x=>x[selectCause.value]).slice(-4+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: 'temp',
+        name: 'counting <br>in progress',
         marker: {
             color:'silver',
             size:4,
