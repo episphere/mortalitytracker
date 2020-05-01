@@ -225,14 +225,19 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         }
     }
     let trace2020temp = {
-        x:dtrack.data.weekends2020.slice(-4,-1),  //weeks,
-        y:data2020.map(x=>x[selectCause.value]).slice(-4+delay),
+        x:dtrack.data.weekends2020.slice(-3,-1),  //weeks,
+        y:data2020.map(x=>x[selectCause.value]).slice(-3+delay),
         type: 'scatter',
-        mode: 'lines+markers',
+        //mode: 'lines+markers',
+        mode: 'markers',
         name: 'counting <br>in progress',
         marker: {
-            color:'silver',
-            size:4,
+            color:'rgb(255, 255, 255,200)',
+            size:7,
+            line:{
+                color:'maroon',
+                width:1
+            }
         },
         line: {
             color:'silver',
@@ -248,6 +253,10 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         yaxis: {
             title: 'Deaths per week'
         },
+        legend:{
+            bordercolor: 'gray',
+            borderwidth: 2
+        }
     })
     //div.innerHTML=Date()
 }
