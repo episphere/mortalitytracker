@@ -158,14 +158,35 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         mode: 'lines+markers',
         name: '2019'
     }
+    let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
+    y2020=data2020.map(x=>x[selectCause.value]).slice(0,-3+delay) 
+    //debugger
     let trace2020 = {
-        x:dtrack.data.weekends2020,  //weeks,
-        y:data2020.map(x=>x[selectCause.value]),
+        x:dtrack.data.weekends2020.slice(0,-3+delay),  //weeks,
+        y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020'
+        name: '2020',
+        marker: {
+            color:'orange',
+        }
     }
-    Plotly.newPlot(div,[trace2019,trace2020],{
+    let trace2020temp = {
+        x:dtrack.data.weekends2020.slice(-4),  //weeks,
+        y:data2020.map(x=>x[selectCause.value]).slice(-4+delay),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'temp',
+        marker: {
+            color:'silver',
+            size:4,
+        },
+        line: {
+            color:'silver',
+            dash: 'dot'
+            }
+    }
+    Plotly.newPlot(div,[trace2019,trace2020,trace2020temp],{
         title:`Comparing 2019 and 2020 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
