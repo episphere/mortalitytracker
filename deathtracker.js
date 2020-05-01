@@ -97,13 +97,20 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
         })
         d.mmwrweek=parseInt(d.mmwrweek)
         d.mmwryear=parseInt(d.mmwryear)
-        d.weekendingdate=Date(d.weekendingdate)
+        d.weekendingdate=new Date(d.weekendingdate)
         return d
     })
     // all states
     let allStates=[]
     let parmsNum = Object.keys(dtrack.data.form)
     dtrack.data.weeks=[... new Set(dtrack.data.all.filter(d=>d.mmwryear==2020).map(d=>d.mmwrweek))]
+    dtrack.data.weekends2019=[]
+    dtrack.data.weekends2020=[]
+    dtrack.data.weeks.forEach((wk,i)=>{
+        //debugger
+        dtrack.data.weekends2019[i]=dtrack.data.all.filter(d=>d.mmwrweek==wk&d.mmwryear==2019).map(d=>d.weekendingdate)[0]
+        dtrack.data.weekends2020[i]=dtrack.data.all.filter(d=>d.mmwrweek==wk&d.mmwryear==2020).map(d=>d.weekendingdate)[0]
+    })
     yrs=[2019,2020]
     yrs.forEach(yr=>{
         dtrack.data.weeks.forEach(wk=>{
@@ -127,6 +134,10 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
     return dt
 }
 
+dtrack.getCovid=async(url='https://data.cdc.gov/resource/pj7m-y5uh.json')=>{
+    
+}
+
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
@@ -137,14 +148,18 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     let weeks = dtrack.data.weeks
     let data2019 = stateData.filter(x=>(x.mmwryear==2019&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
     let trace2019 = {
-        x:weeks,
+        x:dtrack.data.weekends2019.map(d=>{
+            d.setYear(2020)
+            return d
+            //debugger
+        }), //weeks,
         y:data2019.map(x=>x[selectCause.value]),
         type: 'scatter',
         mode: 'lines+markers',
         name: '2019'
     }
     let trace2020 = {
-        x:weeks,
+        x:dtrack.data.weekends2020,  //weeks,
         y:data2020.map(x=>x[selectCause.value]),
         type: 'scatter',
         mode: 'lines+markers',
@@ -156,7 +171,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             title: 'Week'
         },
         yaxis: {
-            title: 'Deaths'
+            title: 'Deaths per week'
         },
     })
     //div.innerHTML=Date()
