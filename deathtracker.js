@@ -17,8 +17,8 @@ dtrack.data.flags={
     flag_stroke: 'cerebrovascular_diseases'
 }
 dtrack.data.causes={
-    allcause: 'All Cause',
-    alzheimer_disease_g30: 'Alzheimer disease (G30)',
+    allcause: 'All Causes',
+    alzheimer_disease_g30: 'Alzheimer\'s disease (G30)',
     cerebrovascular_diseases: 'Cerebrovascular diseases (I60-I69)',
     chronic_lower_respiratory: 'Chronic lower respiratory diseases (J40-J47)',
     diabetes_mellitus_e10_e14: 'Diabetes mellitus (E10-E14)',
@@ -28,9 +28,9 @@ dtrack.data.causes={
     malignant_neoplasms_c00_c97: 'Malignant neoplasms (C00-C97)',
     //mmwrweek: true,
     //mmwryear: true,
-    naturalcause: 'Natural Cause',
+    naturalcause: 'Natural Causes',
     nephritis_nephrotic_syndrome: 'Nephritis, nephrotic syndrome and nephrosis (N00-N07,N17-N19,N25-N27)',
-    other_diseases_of_respiratory: 'Other diseases of respiratory system (J00-J06,J30-J39,J67,J70-J98)',
+    other_diseases_of_respiratory: 'Other diseases of the respiratory system (J00-J06,J30-J39,J67,J70-J98)',
     septicemia_a40_a41: 'Septicemia (A40-A41)',
     symptoms_signs_and_abnormal: 'Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)',
     //weekendingdate: true
@@ -224,23 +224,24 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             width:3
         }
     }
-    let trace2020temp = {
-        x:dtrack.data.weekends2020.slice(-4),  //weeks,
-        y:data2020.map(x=>x[selectCause.value]).slice(-4+delay),
-        type: 'scatter',
-        mode: 'lines+markers',
-        name: 'counting <br>in progress',
-        marker: {
-            color:'silver',
-            size:4,
-        },
-        line: {
-            color:'silver',
-            dash: 'dot'
-            }
-    }
+    // let trace2020temp = {
+    //     x:dtrack.data.weekends2020.slice(-4),  //weeks,
+    //     y:data2020.map(x=>x[selectCause.value]).slice(-4+delay),
+    //     type: 'scatter',
+    //     mode: 'lines+markers',
+    //     name: 'counting <br>in progress',
+    //     marker: {
+    //         color:'silver',
+    //         size:4,
+    //     },
+    //     line: {
+    //         color:'silver',
+    //         dash: 'dot'
+    //         }
+    // }
     //Plotly.newPlot(div,[trace2018,trace2019,trace2020,trace2020temp],{
-    Plotly.newPlot(div,traces.slice(1).concat([trace2020,trace2020temp]),{
+    // Plotly.newPlot(div,traces.slice(1).concat([trace2020,trace2020temp]),{
+    Plotly.newPlot(div,traces.slice(1).concat([trace2020]),{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
