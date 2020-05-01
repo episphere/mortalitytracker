@@ -164,7 +164,13 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             y:data.map(x=>x[selectCause.value]),
             type: 'scatter',
             mode: 'lines+markers',
-            name: yr
+            name: yr,
+            line: {
+                width:1
+            },
+            marker:{
+                size:4
+            }
         }
         traces.push(trace)
     }
@@ -175,6 +181,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     let data2020 = stateData.filter(x=>x.mmwryear==2020)
     //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
     let weeks = dtrack.data.weeks
+    /*
     let data2018 = stateData.filter(x=>(x.mmwryear==2018&x.mmwrweek<=weeks.reduce((a,b)=>Math.max(a,b))))
     let trace2018 = {
         x:dtrack.data.weekends2018.map(d=>{
@@ -199,6 +206,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         mode: 'lines+markers',
         name: '2019'
     }
+    */
     let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
     y2020=data2020.map(x=>x[selectCause.value]).slice(0,-3+delay) 
     //debugger
@@ -210,6 +218,10 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         name: '2020',
         marker: {
             color:'maroon',
+            size:8
+        },
+        line:{
+            width:3
         }
     }
     let trace2020temp = {
