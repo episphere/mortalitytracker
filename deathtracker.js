@@ -81,6 +81,15 @@ dtrack.ui=async(div)=>{
         opt.innerText=dtrack.data.causes[c]
         selectCause.appendChild(opt)
     })
+    if(location.hash.length>2){
+        dtrack.ui.parms=dtrack.ui.parms||{}
+        location.hash.slice(1).split('&').forEach(av=>{
+            av=av.split("=")
+            dtrack.ui.parms[av[0]]=av[1]
+        })
+        if(dtrack.ui.parms.cause){selectCause.value=dtrack.ui.parms.cause}
+        if(dtrack.ui.parms.state){selectState.value=dtrack.ui.parms.state}
+    }
     dtrack.plotlyCompare()
 }
 
@@ -148,6 +157,7 @@ dtrack.getCovid=async(url='https://data.cdc.gov/resource/pj7m-y5uh.json')=>{
 }
 
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
+    location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
