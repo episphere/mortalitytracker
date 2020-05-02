@@ -86,7 +86,7 @@ dtrack.ui=async(div)=>{
         dtrack.ui.parms=dtrack.ui.parms||{}
         location.hash.slice(1).split('&').forEach(av=>{
             av=av.split("=")
-            dtrack.ui.parms[av[0]]=av[1]
+            dtrack.ui.parms[av[0]]=decodeURIComponent(av[1])
         })
         if(dtrack.ui.parms.cause){selectCause.value=dtrack.ui.parms.cause}
         if(dtrack.ui.parms.state){selectState.value=dtrack.ui.parms.state}
@@ -153,8 +153,12 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
     return dt
 }
 
-dtrack.getCovid=async(url='https://data.cdc.gov/resource/pj7m-y5uh.json')=>{
-    
+dtrack.getCovid=async()=>{
+    dtrack.data.covid={
+        states:corona.byState(await corona.getUSA()),
+        global:await corona.progression()
+    }
+    debugger
 }
 
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
