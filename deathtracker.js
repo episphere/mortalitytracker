@@ -68,7 +68,8 @@ dtrack.ui=async(div)=>{
     // move All States from end to beginning
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare()"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>]'
-    h+='<div id=plotlyCompareDiv></div>' 
+    h+='<div id="plotlyCompareDiv"></div>'
+    h+='<div id="plotlyWithCovidDiv"></div>'
     div.innerHTML=h
     dtrack.data.states.forEach(s=>{
         let opt=document.createElement('option')
@@ -157,6 +158,160 @@ dtrack.getCovid=async(url='https://data.cdc.gov/resource/pj7m-y5uh.json')=>{
 }
 
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
+    location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
+    if(typeof(div)=='string'){
+        div=document.getElementById(div)
+    }
+    let stateData = dtrack.data.all.filter(x=>x.jurisdiction_of_occurrence==selectState.value)
+    let traces = []
+    let addTrace = yr=>{
+        //let data = stateData.filter(x=>x.mmwryear==yr)
+        let data=stateData.filter(x=>(x.mmwryear==yr&x.mmwrweek<=dtrack.data.weeks.slice(-1)[0]))
+        let trace={
+            x:dtrack.data['weekends'+yr].map(d=>{
+                d.setYear(2020)
+                return d
+            }),
+            y:data.map(x=>x[selectCause.value]),
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: yr,
+            line: {
+                width:1
+            },
+            marker:{
+                size:4
+            }
+        }
+        traces.push(trace)
+    }
+    dtrack.data.traces=traces
+    dtrack.data.years.sort().slice(0,-1).forEach(yr=>{ // all years exept the last, 2020
+        addTrace(yr)
+    })
+
+    let data2020 = stateData.filter(x=>x.mmwryear==2020)
+    //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
+    let weeks = dtrack.data.weeks
+    let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
+    y2020=data2020.map(x=>x[selectCause.value]).slice(0,-3+delay) 
+    //debugger
+    let trace2020 = {
+        x:dtrack.data.weekends2020.slice(0,-3+delay),  //weeks,
+        y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2020',
+        marker: {
+            color:'maroon',
+            size:8
+        },
+        line:{
+            width:3
+        }
+    }
+    let trace2020temp = {
+        x:dtrack.data.weekends2020.slice(-3,-1),  //weeks,
+        y:data2020.map(x=>x[selectCause.value]).slice(-3+delay),
+        type: 'scatter',
+        //mode: 'lines+markers',
+        mode: 'markers',
+        name: 'counting <br>in progress',
+        marker: {
+            color:'rgba(255, 255, 255,0.25)',
+            size:7,
+            line:{
+                color:'maroon',
+                width:1
+            }
+        },
+        line: {
+            color:'silver',
+            dash: 'dot'
+            }
+    }
+
+    // shaded range
+    let valueRange={
+        x:dtrack.data.weeks,
+        avg:dtrack.data.weeks.map(x=>0),
+        max:dtrack.data.weeks.map(x=>0),
+        min:dtrack.data.weeks.map(x=>0)
+    }
+    let ni = [] // number of valid counts
+    dtrack.data.traces.slice(1).forEach(r=>{
+        r.y.map((v,i)=>{
+            if(ni.length<=i){ni[i]=0}
+            if(v){
+                ni[i]++
+                valueRange.avg[i]+=r.y[i]
+                if(v>valueRange.max[i]){valueRange.max[i]=v}
+                if(valueRange.min[i]==0){valueRange.min[i]=v}
+                if(v<valueRange.min[i]){valueRange.min[i]=v}
+            }
+        })
+        //debugger
+    })
+    valueRange.avg=valueRange.avg.map((v,i)=>v/ni[i]) // average
+
+    let traceAvg={
+        x:dtrack.data.weekends2020,
+        y:valueRange.avg,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2015-19<br>average',
+        line: {
+            color:'black',
+            width:3
+        },
+        marker:{
+            size:9
+        }
+    }
+    /*var traceBase = {
+      x: dtrack.data.weekends2020,
+      y: dtrack.data.weekends2020.map,
+      type: 'scatter',
+      name:'base'
+    }
+    */
+    var traceMin = {
+      x: dtrack.data.weekends2020,
+      y: valueRange.min,
+      fill: 'toself',
+      type: 'scatter',
+      mode: 'none',
+      fillcolor: 'rgba(200,200,200,0)',
+      name:'(2015-19)'
+    }
+    var traceMax = {
+      x: dtrack.data.weekends2020,
+      y: valueRange.max,
+      fill: 'tonexty',
+      type: 'scatter',
+      mode: 'none',
+      fillcolor: 'rgba(200,200,200,0.75)',
+      name:'value range'
+    };
+
+
+    Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
+        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
+        xaxis: {
+            title: 'Date of calendar day in 2020'
+        },
+        yaxis: {
+            title: 'Deaths per week'
+        },
+        legend:{
+            bordercolor: 'gray',
+            borderwidth: 2
+        }
+    })
+    //div.innerHTML=Date()
+}
+
+dtrack.plotlyWithCovid=(div='plotlyWithCovidDiv')=>{
     location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
     if(typeof(div)=='string'){
         div=document.getElementById(div)
