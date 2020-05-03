@@ -526,7 +526,9 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         line:{
             width:4,
             color:'red'
-        }
+        },
+        fill:'tozeroy',
+        fillcolor:'rgba(100,100,100,0.5)',
     }
 
 
