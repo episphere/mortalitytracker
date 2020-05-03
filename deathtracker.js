@@ -482,9 +482,16 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         type: 'scatter',
         mode: 'lines'
     }
+    let traceNaturalCause={
+        x:dtrack.data.weekends2020.slice(0,-3+delay),
+        y:data2020.map(s=>s.naturalcause).slice(0,-3+delay),
+        name:'Natural Cause',
+        type: 'scatter',
+        mode: 'lines'
+    }
     let causeTraces=[]
     Object.keys(dtrack.data.causes).reverse().forEach((c,i)=>{
-        if(c!='allcause'){
+        if(c!='allcause'&c!='naturalcause'){
             let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[c]).length // different states / causes updating at different rates
             let trace={
                 x:dtrack.data.weekends2020.slice(0,-3+delay),
@@ -514,9 +521,9 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
 
 
     //Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
-    Plotly.newPlot(div,causeTraces.concat([traceCovid]),{
+    Plotly.newPlot(div,causeTraces.concat([traceNaturalCause,traceAllCause,traceCovid]),{
         title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span>`,
-        //height:550,
+        height:550,
         xaxis: {
             title: 'Date'
         },
