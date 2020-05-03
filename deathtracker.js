@@ -480,14 +480,22 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         y:data2020.map(s=>s.allcause).slice(0,-3+delay),
         name:'All Cause',
         type: 'scatter',
-        mode: 'lines'
+        mode: 'lines',
+        line:{
+            width:3,
+            color:'black'
+        }
     }
     let traceNaturalCause={
         x:dtrack.data.weekends2020.slice(0,-3+delay),
         y:data2020.map(s=>s.naturalcause).slice(0,-3+delay),
         name:'Natural Cause',
         type: 'scatter',
-        mode: 'lines'
+        mode: 'lines',
+        line:{
+            dash:'dot',
+            color:'black'
+        }
     }
     let causeTraces=[]
     Object.keys(dtrack.data.causes).reverse().forEach((c,i)=>{
@@ -499,8 +507,10 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
                 name:dtrack.data.causes[c].slice(0,10),
                 type: 'scatter',
                 mode: 'lines',
+                opacity:0.5,
                 //fill: 'tonexty',
-                stackgroup: 'causes'
+                stackgroup: 'causes',
+                //fill:'none'
             }
             causeTraces.push(trace)  
         }
@@ -514,7 +524,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         type: 'scatter',
         mode: 'lines',
         line:{
-            width:5,
+            width:4,
             color:'red'
         }
     }
@@ -523,7 +533,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     //Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
     Plotly.newPlot(div,causeTraces.concat([traceNaturalCause,traceAllCause,traceCovid]),{
         title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span>`,
-        height:550,
+        height:500,
         xaxis: {
             title: 'Date'
         },
