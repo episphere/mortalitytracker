@@ -192,6 +192,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
     let weeks = dtrack.data.weeks
     let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
+    if(delay>2){delay=-delay} // for unusually short series
     y2020=data2020.map(x=>x[selectCause.value]).slice(0,-3+delay) 
     //debugger
     let trace2020 = {
@@ -374,6 +375,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let weeks = dtrack.data.weeks
     let selectCause_value='All Cause'
     let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause_value]).length // different states / causes updating at different rates
+    if(delay>2){delay=-delay+2}
     let y2020=data2020.map(x=>x[selectCause_value]).slice(0,-3+delay) 
     //debugger
     /*
@@ -477,7 +479,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     };
     //let stateData2020=stateData.filter(s=>s.mmwryear==2020).slice(0,-2)
     let delayAllCause=dtrack.data.weekends2020.length-data2020.map(x=>x["All Cause"]).length // different states / causes updating at different rates
-    
+    if(delayAllCause>2){delayAllCause=-delayAllCause+2} // for unusually short series
     let traceAllCause={
         x:dtrack.data.weekends2020.slice(0,-3+delay),
         y:data2020.map(s=>s.allcause).slice(0,-3+delay),
@@ -504,6 +506,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     Object.keys(dtrack.data.causes).reverse().forEach((c,i)=>{
         if(c!='allcause'&c!='naturalcause'){
             let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[c]).length // different states / causes updating at different rates
+            if(delay>2){delay=-delay+2} // for unusually short series
             let trace={
                 x:dtrack.data.weekends2020.slice(0,-3+delay),
                 y:data2020.map(s=>s[c]).slice(0,-3+delay),
