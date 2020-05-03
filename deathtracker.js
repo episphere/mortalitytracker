@@ -520,7 +520,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let traceCovid={
         x:dtrack.data.covid[selectState.value].dates.slice(7),
         y:dtrack.data.covid[selectState.value].deaths.slice(7).map((d,i)=>d-dtrack.data.covid[selectState.value].deaths[i]),
-        name:'COVID-19',
+        name:'COVID-19<br><span style="font-size:x-small">7 day totals</span>',
         type: 'scatter',
         mode: 'lines',
         line:{
