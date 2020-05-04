@@ -41,8 +41,8 @@ dtrack.data.shortName={
     cerebrovascular_diseases: 'Cereb Vasc',
     chronic_lower_respiratory: 'Chron.resp',
     diabetes_mellitus_e10_e14: 'Diabetes',
-    diseases_of_heart_i00_i09: 'Heart dis.',
-    influenza_and_pneumonia_j10: 'Infl&Pneum',
+    diseases_of_heart_i00_i09: 'Heart disease',
+    influenza_and_pneumonia_j10: 'Influ&Pneum',
     //jurisdiction_of_occurrence: true,
     malignant_neoplasms_c00_c97: 'Cancer',
     //mmwrweek: true,
@@ -88,7 +88,8 @@ dtrack.ui=async(div)=>{
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
-    h+='<hr><p style="color:red">Plot under development:</p>'
+    h+='<hr>'
+    //h+='<p style="color:red">Plot under development:</p>'
     h+='<div id="plotlyWithCovidDiv"></div>'
     div.innerHTML=h
     dtrack.data.states.forEach(s=>{
@@ -502,7 +503,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         y:valueRange.avg,
         type: 'scatter',
         mode: 'lines',
-        name: 'average <sub> 2015-9</sub>',
+        name: 'average<sub>2015-9</sub>',
         line: {
             color:'gray',
             width:1
@@ -553,7 +554,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let traceNaturalCause={
         x:dtrack.data.weekends2020.slice(0,-3+delay),
         y:data2020.map(s=>s.naturalcause).slice(0,-3+delay),
-        name:'Natural Cause',
+        name:'NaturalCause',
         type: 'scatter',
         mode: 'lines',
         line:{
