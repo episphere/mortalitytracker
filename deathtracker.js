@@ -35,6 +35,25 @@ dtrack.data.causes={
     symptoms_signs_and_abnormal: 'Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)',
     //weekendingdate: true
 }
+dtrack.data.shortName={
+    allcause: 'All Cause',
+    alzheimer_disease_g30: 'Alzheimer',
+    cerebrovascular_diseases: 'Cereb Vasc',
+    chronic_lower_respiratory: 'Chron.resp',
+    diabetes_mellitus_e10_e14: 'Diabetes',
+    diseases_of_heart_i00_i09: 'Heart dis.',
+    influenza_and_pneumonia_j10: 'Infl&Pneum',
+    //jurisdiction_of_occurrence: true,
+    malignant_neoplasms_c00_c97: 'Cancer',
+    //mmwrweek: true,
+    //mmwryear: true,
+    naturalcause: 'Natural Cause',
+    nephritis_nephrotic_syndrome: 'Kidney',
+    other_diseases_of_respiratory: 'Other resp',
+    septicemia_a40_a41: 'Septicemia',
+    symptoms_signs_and_abnormal: 'Illdefined',
+    //weekendingdate: true
+}
 dtrack.data.form={
     allcause: 0,
     alzheimer_disease_g30: 0,
@@ -550,7 +569,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
             let trace={
                 x:dtrack.data.weekends2020.slice(0,-3+delay),
                 y:data2020.map(s=>s[c]).slice(0,-3+delay),
-                name:dtrack.data.causes[c].slice(0,10),
+                //name:dtrack.data.causes[c].slice(0,10),
+                name:dtrack.data.shortName[c].slice(0,10),
                 type: 'scatter',
                 mode: 'lines',
                 opacity:0.5,
