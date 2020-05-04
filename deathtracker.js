@@ -155,6 +155,15 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
     return dt
 }
 
+dtrack.trim=function(x){ // trims NaNs trails
+    if(isNaN(x.slice(-1)[0])){
+        x.pop()
+        return dtrack.trim(x)
+    }else{
+        return x
+    }
+}
+
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
     if(typeof(div)=='string'){
@@ -209,9 +218,13 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             width:3
         }
     }
+    let tempy=dtrack.trim(data2020.map(x=>x[selectCause.value]))
+    let tempx=dtrack.data.weekends2020.slice(0,tempy.length)
     let trace2020temp = {
-        x:dtrack.data.weekends2020.slice(-3,-1),  //weeks,
-        y:data2020.map(x=>x[selectCause.value]).slice(-3+delay),
+        //x:dtrack.data.weekends2020.slice(-3,-1),  //weeks,
+        //y:data2020.map(x=>x[selectCause.value]).slice(-3+delay),
+        x:tempx.slice(-3),
+        y:tempy.slice(-3),
         type: 'scatter',
         //mode: 'lines+markers',
         mode: 'markers',
@@ -327,10 +340,37 @@ dtrack.getCovid=async()=>{
             })
         }
     })
-
-
-    
-    //debugger
+    // wrangle NYC out of NY state to match CDC regions
+    dtrack.data.covid['New York City']={
+        Population:0,
+        dates:dtrack.data.covid['New York'].dates,
+        confirmed:dtrack.data.covid['New York'].dates.map(x=>0),
+        deaths:dtrack.data.covid['New York'].dates.map(x=>0),
+        county:{}
+    }
+    let nycCounties=['Bronx','Kings','New York','Queens','Richmond']
+    nycCounties.forEach(nm=>{
+        dtrack.data.covid['New York City'].county[nm]={}
+        Object.assign(dtrack.data.covid['New York City'].county[nm],dtrack.data.covid['New York'].county[nm])
+        delete dtrack.data.covid['New York'].county[nm]
+        // Population
+        dtrack.data.covid['New York City'].Population+=dtrack.data.covid['New York City'].county[nm].Population
+        dtrack.data.covid['New York'].Population-=dtrack.data.covid['New York City'].county[nm].Population
+        // Confirmed
+        dtrack.data.covid['New York City'].confirmed=dtrack.data.covid['New York City'].confirmed.map((v,i)=>{
+            return v+dtrack.data.covid['New York City'].county[nm].confirmed[i]
+        })
+        dtrack.data.covid['New York'].confirmed=dtrack.data.covid['New York'].confirmed.map((v,i)=>{
+            return v-dtrack.data.covid['New York City'].county[nm].confirmed[i]
+        })
+        // deaths
+        dtrack.data.covid['New York City'].deaths=dtrack.data.covid['New York City'].deaths.map((v,i)=>{
+            return v+dtrack.data.covid['New York City'].county[nm].deaths[i]
+        })
+        dtrack.data.covid['New York'].deaths=dtrack.data.covid['New York'].deaths.map((v,i)=>{
+            return v-dtrack.data.covid['New York City'].county[nm].deaths[i]
+        })
+    })
 }
 
 dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
@@ -466,7 +506,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
       type: 'scatter',
       mode: 'none',
       fillcolor: 'rgba(200,200,200,0)',
-      name:'________'
+      name:'__________'
     }
     var traceMax = {
       x: dtrack.data.weekends2020,
