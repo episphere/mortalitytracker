@@ -90,7 +90,9 @@ dtrack.ui=async(div)=>{
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
-    h+='<div id="plotlyWithCovidDiv"></div>'
+    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locading COVID-19 data ... </span></span></div>'
+    h+='<hr>'
+    h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
     dtrack.data.states.forEach(s=>{
         let opt=document.createElement('option')
@@ -101,6 +103,9 @@ dtrack.ui=async(div)=>{
         let opt=document.createElement('option')
         opt.value=c
         opt.innerText=dtrack.data.causes[c]
+        //if(opt.innerText.indexOf('(')>0){
+        //    opt.innerText=opt.innerText.slice(0,opt.innerText.indexOf('(')-1)
+        //}
         selectCause.appendChild(opt)
     })
     if(location.hash.length>2){
@@ -182,6 +187,18 @@ dtrack.trim=function(x){ // trims NaNs trails
     }else{
         return x
     }
+}
+
+dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
+    if(typeof(div)=='string'){
+        div=document.getElementById(div)
+    }
+    h='<h3>Data dictionary</h3><p>'
+    Object.keys(dtrack.data.causes).forEach(c=>{
+        h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
+    })
+    h+='</p>'
+    div.innerHTML=h
 }
 
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
@@ -600,6 +617,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
 
 
     //Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
+    div.innerHTML='' // clear
     Plotly.newPlot(div,causeTraces.concat([traceMin,traceMax,traceAvg,traceAllCause,traceNaturalCause,traceCovid]),{
         title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span>`,
         height:550,
