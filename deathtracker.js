@@ -51,7 +51,7 @@ dtrack.data.shortName={
     nephritis_nephrotic_syndrome: 'Kidney',
     other_diseases_of_respiratory: 'Other resp',
     septicemia_a40_a41: 'Septicemia',
-    symptoms_signs_and_abnormal: 'Illdefined',
+    symptoms_signs_and_abnormal: 'Unclassified',
     //weekendingdate: true
 }
 dtrack.data.form={
@@ -86,7 +86,7 @@ dtrack.ui=async(div)=>{
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
     // move All States from end to beginning
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
-    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series" target="_blank">COVID</a>]'
+    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
@@ -571,7 +571,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
                 x:dtrack.data.weekends2020.slice(0,-3+delay),
                 y:data2020.map(s=>s[c]).slice(0,-3+delay),
                 //name:dtrack.data.causes[c].slice(0,10),
-                name:dtrack.data.shortName[c].slice(0,10),
+                name:dtrack.data.shortName[c].slice(0,12),
                 type: 'scatter',
                 mode: 'lines',
                 opacity:0.5,
