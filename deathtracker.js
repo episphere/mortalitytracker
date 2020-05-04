@@ -119,6 +119,7 @@ dtrack.ui=async(div)=>{
     }
     dtrack.plotlyCompare()
     setTimeout(dtrack.plotlyWithCovid,1000)
+    setTimeout(dtrack.dataDictionary,600)
 }
 
 dtrack.cleanData=(dt=dtrack.data.all)=>{
