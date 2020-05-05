@@ -343,10 +343,13 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
       fillcolor: 'rgba(200,200,200,0.75)',
       name:'value range'
     };
-
+    let titleCause = dtrack.data.causes[selectCause.value]
+    if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
+        titleCause = 'Unclassified symptoms, signs and abnormal findings'
+    }
 
     Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
-        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${dtrack.data.causes[selectCause.value]}</b>`,
+        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
@@ -620,7 +623,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     //Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
     div.innerHTML='' // clear
     Plotly.newPlot(div,causeTraces.concat([traceMin,traceMax,traceAvg,traceAllCause,traceNaturalCause,traceCovid]),{
-        title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span>`,
+        title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString()}</b>`,
         height:550,
         xaxis: {
             title: 'Date'
