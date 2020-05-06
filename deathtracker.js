@@ -1,4 +1,15 @@
-console.log('deathtracker.js loaded')
+console.log('deathtracker.js loaded');
+
+if('serviceWorker' in navigator){
+    try {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./serviceWorker.js');
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
 
 dtrack={data:{}}
 dtrack.data.flags={
@@ -360,7 +371,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             bordercolor: 'gray',
             borderwidth: 2
         }
-    })
+    }, {responsive: true})
     //div.innerHTML=Date()
 }
 
@@ -635,7 +646,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
             bordercolor: 'gray',
             borderwidth: 2
         }
-    })
+    }, {responsive: true})
     //div.innerHTML=Date()
 }
 
