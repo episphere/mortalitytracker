@@ -279,7 +279,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         mode: 'markers',
         name: 'counting <br>in progress',
         marker: {
-            color:'rgba(255, 255, 255,0.25)',
+            color:'rgba(255, 255, 255,0.5)',
             size:7,
             line:{
                 color:'maroon',
@@ -323,10 +323,10 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         name: '2015-19<br>average',
         line: {
             color:'black',
-            width:3
+            width:2
         },
         marker:{
-            size:9
+            size:5
         }
     }
     /*var traceBase = {
