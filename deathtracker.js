@@ -198,15 +198,12 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
 }
 
 dtrack.trim=function(x){ // trims NaNs trails
-    /*
     if(isNaN(x.slice(-1)[0])){
         x.pop()
         return dtrack.trim(x)
     }else{
         return x
     }
-    */
-    return x
 }
 
 dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
