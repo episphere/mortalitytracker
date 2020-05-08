@@ -23,7 +23,7 @@ registerRoute(/\.(?:png|jpg|jpeg|svg|gif|ico)$/,
 
 registerRoute(
     new RegExp('https://data.cdc.gov/.+'),
-    new StaleWhileRevalidate({
+    new NetworkFirst({
         cacheName: 'api-cache',
         plugins: [
             new CacheableResponsePlugin({
