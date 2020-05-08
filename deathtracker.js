@@ -148,6 +148,11 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
         })
         d.mmwrweek=parseInt(d.mmwrweek)
         d.mmwryear=parseInt(d.mmwryear)
+        if(!d.weekendingdate){
+            d.weekendingdate=d.week_ending_date
+            d.allcause=parseInt(d.all_cause)
+            d.naturalcause=parseInt(d.natural_cause)
+        }
         d.weekendingdate=new Date(d.weekendingdate)
         return d
     })
@@ -193,12 +198,15 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
 }
 
 dtrack.trim=function(x){ // trims NaNs trails
+    /*
     if(isNaN(x.slice(-1)[0])){
         x.pop()
         return dtrack.trim(x)
     }else{
         return x
     }
+    */
+    return x
 }
 
 dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
@@ -258,7 +266,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020',
+        name: '2020.',
         marker: {
             color:'maroon',
             size:8
