@@ -85,8 +85,8 @@ excess.ui = async (divId) => {
 
   const parentDiv = document.getElementById(divId)
   const plotDivId = "plotlyCompareDiv"
-  let h = `<hr> Excess deaths Associated With COVID-19 by <select id="selectOutcome" onchange="excess.plotlyCompare()"></select>\
-  in 2017-19 and 2020 for <select id="selectState" onchange="excess.plotlyCompare();"></select><br/>\
+  let h = `<hr> Excess deaths Associated With COVID-19 by <select id="selectOutcome" onchange="excess.renderPlots(${plotDivId})"></select>\
+  in 2017-19 and 2020 for <select id="selectState" onchange="excess.renderPlots(${plotDivId});"></select><br/>\
   [CDC sources <a href=${datasetURL} target="_blank">Excess Deaths</a>]<br>`
   h += '<div id="typeSelect" style="width:100%; text-align:center;">'
   h+= excess.params.types.map((type)=> {
@@ -115,11 +115,10 @@ excess.ui = async (divId) => {
   })
 
   loadHashParams()
-  excess.scatterPlot(plotDivId)
-  excess.barChart(plotDivId)
+  excess.renderPlots(plotDivId)
 }
 
-const selectTypeRadioBtn = (value) => {
+const selectTypeRadioBtn = (value, plotsParentDivId="plotlyCompareDiv") => {
   document.querySelectorAll(".dataTypeRadioBtn").forEach(el => {
     if (el.value != value) {
       el.removeAttribute("checked")
@@ -128,8 +127,12 @@ const selectTypeRadioBtn = (value) => {
       el.setAttribute("checked", "true")
     }
   })
-  excess.scatterPlot()
-  excess.barChart()
+  excess.renderPlots(plotsParentDivId)
+}
+
+excess.renderPlots = (plotsParentDivId="plotlyCompareDiv") => {
+  excess.scatterPlot(plotsParentDivId)
+  excess.barChart(plotsParentDivId)
 }
 
 excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
