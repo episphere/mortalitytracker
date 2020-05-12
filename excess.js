@@ -138,11 +138,11 @@ excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
 
   excess.data.stateSelected = dataToPlot.filter(row => row.state === excess.stateSelected && row.outcome === excess.outcomeSelected)
   excess.params.maxMMWRWeek = excess.data.stateSelected.reduce((prev, current) => prev < current.mmwrWeek ? current.mmwrWeek : prev, 0)
-  const weeks2020 = excess.data.stateSelected.filter(row => row.mmwrYear === 2020).map(row => new Date(row.week_ending_date))
+  const weeks2020 = [...new Set(excess.data.stateSelected.filter(row => row.mmwrYear === 2020 && row.type==="Predicted (weighted)").map(row => new Date(row.week_ending_date)))]
 
   const getScatterTrace = (year, type="Predicted (weighted)") => {
     const dataForYear = excess.data.stateSelected.filter(row => (row.mmwrYear === year && row.mmwrWeek <= excess.params.maxMMWRWeek && row.observed_number && row.threshold && row.type === type))
-    
+
     const marker = {}
     marker.size = year === 2020 ? 8 : 4
     if (type === "Unweighted") {
@@ -167,7 +167,6 @@ excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
         return undefined
       }
     })
-    
     const trace = {
       x,
       y,
@@ -184,6 +183,7 @@ excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
   
   const scatterTrace = excess.params.years.map(year => getScatterTrace(year, "Predicted (weighted)"))
   scatterTrace.push(getScatterTrace(2020, "Unweighted"))
+  
   const scatterPlotDivId = "excessDeathsScatterPlot"
   let scatterPlotDiv = document.getElementById(scatterPlotDivId)
   if (!scatterPlotDiv) {
@@ -236,9 +236,9 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
     }).join("")
     yearSelect.onchange = () => {
       if (parseInt(yearSelect.value) !== 2020) {
-        typeSelectDiv.style.display = "none"
+        typeSelectDiv.style.visibility = "hidden"
       } else {
-        typeSelectDiv.style.display = "flex"
+        typeSelectDiv.style.visibility = "visible"
       }
       excess.barChart(plotsParentDivId)
     }
@@ -337,10 +337,17 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
   const observedNumberBarTraces = getBarChartTrace("observed_number")
 
   const dataForBarChart = [thresholdBarTraces, observedNumberBarTraces]
+  const maxYAxisValue = Math.max(...excess.data.stateSelected.map(row => row.threshold), ...excess.data.stateSelected.map(row => row.observed_number))
+  const orderOfMagnitudeOfMaxValue = 10 ** (Math.floor(Math.log10(maxYAxisValue)))
+  const maxYAxisRangeValue = orderOfMagnitudeOfMaxValue * Math.floor(maxYAxisValue/orderOfMagnitudeOfMaxValue + 1)
+
   const layout = { 
     title:`Comparing Thresholds To Observed Deaths during the year <b>${yearSelected}</b> in <b style="color:green">${excess.stateSelected}</b> for <br><b style="color:maroon">${excess.outcomeSelected}</b></b>`,
     barmode: 'group', 
-    legend: {"orientation": "h"} 
+    legend: {"orientation": "h"},
+    yaxis: {
+      "range": [0, maxYAxisRangeValue]
+    }
   }
 
   Plotly.newPlot(barChartDivId, dataForBarChart, layout, {responsive: true})
