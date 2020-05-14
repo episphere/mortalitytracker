@@ -11,7 +11,11 @@ if('serviceWorker' in navigator){
     }
 }
 
-dtrack={data:{}}
+dtrack={
+    data:{},
+    ytitle:'Deaths per week'
+}
+
 dtrack.data.flags={
     flag_allcause: 'allcause',
     flag_alz: 'alzheimer_disease_g30',
@@ -230,7 +234,8 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<h3>Data dictionary</h3><p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as annual rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
     })
@@ -310,13 +315,17 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             fill:'tozeroy',
             fillcolor:'rgba(100,10,10,0.3)',
         }
-        Plotly.newPlot(div,[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid],{
+        let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+        if(mortalityRate.checked){
+            allTraces=dtrack.traceAll(allTraces)
+        }
+    Plotly.newPlot(div,allTraces,{
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
             xaxis: {
                 title: 'Date of calendar day in 2020'
             },
             yaxis: {
-                title: 'Deaths per week'
+                title:dtrack.ytitle
             },
             legend:{
                 bordercolor: 'gray',
@@ -324,7 +333,6 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 traceorder:'reversed'
             }
         }, {responsive: true})
-
     }
 }
 
@@ -473,14 +481,20 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-
-    Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp])
+    if(document.getElementById('mortalityRate')){
+        if(mortalityRate.checked){
+            allTraces=dtrack.traceAll(allTraces)
+        }
+    }
+        
+    Plotly.newPlot(div,allTraces,{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
         yaxis: {
-            title: 'Deaths per week'
+            title: dtrack.ytitle
         },
         legend:{
             bordercolor: 'gray',
@@ -756,14 +770,18 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
 
     //Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
     div.innerHTML='' // clear
-    Plotly.newPlot(div,causeTraces.concat([traceOfCovid,traceMin,traceMax,traceAvg,traceAllCause,traceNaturalCause,traceCovid]),{
+    let allTraces=causeTraces.concat([traceOfCovid,traceMin,traceMax,traceAvg,traceAllCause,traceNaturalCause,traceCovid])
+    if(mortalityRate.checked){
+        allTraces=dtrack.traceAll(allTraces)
+    }
+    Plotly.newPlot(div,allTraces,{
         title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString()}</b>`,
         height:570,
         xaxis: {
             title: 'Date'
         },
         yaxis: {
-            title: 'Deaths per week'
+            title: dtrack.ytitle
         },
         legend:{
             bordercolor: 'gray',
@@ -771,5 +789,23 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         }
     }, {responsive: true})
     //div.innerHTML=Date()
+    mortalityRate.onchange=()=>{
+        if(mortalityRate.checked){
+            dtrack.ytitle='Annualized mortality per 100K'
+        }else{
+            dtrack.ytitle='Deaths per Week'
+        }
+        setTimeout(selectState.onchange,100)
+        setTimeout(selectCause.onchange,100)
+        //debugger
+    }
+    mortalityRate.disabled=false
+}
+
+dtrack.traceAll=(traces)=>{ // annualized mortality rate
+    return traces.map(trc=>{
+        trc.y=trc.y.map(yi=>yi*(365.6/7)/(dtrack.data.covid[selectState.value].Population/100000))
+        return trc
+    })
 }
 
