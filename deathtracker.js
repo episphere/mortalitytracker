@@ -323,7 +323,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         }
             
     Plotly.newPlot(div,allTraces,{
-            title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
+            title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
             xaxis: {
                 title: 'Date of calendar day in 2020'
             },
@@ -384,7 +384,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020.',
+        name: '2020',
         marker: {
             color:'maroon',
             size:8
@@ -492,7 +492,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     }
         
     Plotly.newPlot(div,allTraces,{
-        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
+        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
@@ -778,7 +778,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         allTraces=dtrack.traceAll(allTraces)
     }
     Plotly.newPlot(div,allTraces,{
-        title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString()}</b>`,
+        title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         height:570,
         xaxis: {
             title: 'Date'
