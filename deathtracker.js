@@ -249,7 +249,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         
     }else{ /// PLOT COVID
         location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
-        console.log('plot '+document.getElementById('selectCause').value)
+        //console.log('plot '+document.getElementById('selectCause').value)
         let stateData = dtrack.data.all.filter(x=>(x.jurisdiction_of_occurrence==selectState.value&x.mmwryear==2020))
         // dtrack.data.weekends2020
         let traces = []
@@ -316,9 +316,12 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             fillcolor:'rgba(100,10,10,0.3)',
         }
         let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
-        if(mortalityRate.checked){
-            allTraces=dtrack.traceAll(allTraces)
+        if(document.getElementById('mortalityRate')){
+            if(mortalityRate.checked){
+                allTraces=dtrack.traceAll(allTraces)
+            }
         }
+            
     Plotly.newPlot(div,allTraces,{
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
             xaxis: {
