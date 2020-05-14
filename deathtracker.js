@@ -234,7 +234,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as annual rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -794,7 +794,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     //div.innerHTML=Date()
     mortalityRate.onchange=()=>{
         if(mortalityRate.checked){
-            dtrack.ytitle='Annualized mortality per 100K'
+            dtrack.ytitle='Weekly mortality per 100K'
         }else{
             dtrack.ytitle='Deaths per Week'
         }
@@ -807,7 +807,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
 
 dtrack.traceAll=(traces)=>{ // annualized mortality rate
     return traces.map(trc=>{
-        trc.y=trc.y.map(yi=>yi*(365.6/7)/(dtrack.data.covid[selectState.value].Population/100000))
+        //trc.y=trc.y.map(yi=>yi*(365.6/7)/(dtrack.data.covid[selectState.value].Population/100000))
+        trc.y=trc.y.map(yi=>yi/(dtrack.data.covid[selectState.value].Population/100000))
         return trc
     })
 }
