@@ -103,6 +103,8 @@ dtrack.ui=async(div)=>{
     }
     //dtrack.data.states = (await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$select=distinct%20jurisdiction_of_occurrence')).json()).map(x=>x.jurisdiction_of_occurrence)
     dtrack.data.all=await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$limit=10000')).json()
+    let tic=new Date()
+    dtrack.data.all=dtrack.data.all.filter(d=>(new Date(d.week_ending_date)<tic)) // trim future counts
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000')).json())
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
@@ -113,7 +115,7 @@ dtrack.ui=async(div)=>{
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
-    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locading COVID-19 data ... </span></span></div>'
+    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data ... </span></span></div>'
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
