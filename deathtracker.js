@@ -1,5 +1,6 @@
 console.log('deathtracker.js loaded');
 
+/*
 if('serviceWorker' in navigator){
     try {
         window.addEventListener('load', function() {
@@ -10,6 +11,7 @@ if('serviceWorker' in navigator){
         console.log(error);
     }
 }
+*/
 
 dtrack={
     data:{},
@@ -103,7 +105,7 @@ dtrack.ui=async(div)=>{
     }
     //dtrack.data.states = (await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$select=distinct%20jurisdiction_of_occurrence')).json()).map(x=>x.jurisdiction_of_occurrence)
     dtrack.data.all=await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$limit=10000')).json()
-    let tic=new Date()
+    let tic=new Date()-4*24*60*60*1000
     dtrack.data.all=dtrack.data.all.filter(d=>(new Date(d.week_ending_date)<tic)) // trim future counts
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000')).json())
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
