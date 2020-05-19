@@ -4,6 +4,17 @@ const defaultLimit = 1000
 const excess = {}
 excess.data = {}
 
+const keyMaps = {
+  observed_number: "observed_number",
+  average_expected_count: "average_expected_count",
+  upper_bound_threshold: "upper_bound_threshold",
+  week_ending_date: "week_ending_date",
+  state: "state",
+  type: "type",
+  outcome: "outcome",
+  year: "year"
+}
+
 const fetchDataset = async (url) => {
   url = url ||  `${datasetURL}.${format}`
   let data = []
@@ -38,13 +49,13 @@ const loadHashParams = (selectElementId = "selectState") => {
   }
 }
 
-excess.cleanData = (data = excess.data.raw) => {
+excess.cleanData = (data = {...excess.data.raw}) => {
 
-  const types = [ ...new Set(data.map(row => row.type)) ]
-  const outcomes = [ ...new Set(data.map(row => row.outcome)) ]
-  const states = [ ...new Set(data.map(row => row.state)) ]
+  const types = [ ...new Set(data.map(row => row[keyMaps.type])) ]
+  const outcomes = [ ...new Set(data.map(row => row[keyMaps.outcome])) ]
+  const states = [ ...new Set(data.map(row => row[keyMaps.state])) ]
   // const weeks2018 = [ ...new Set(data.filter(d => d.year == "2018").map(d => d.week_ending_date))] //Used for referencing weekends for all years to conform with how it is in deathtracker.js
-  const years = [ ...new Set(data.map(row => parseInt(new Date(row.week_ending_date).getUTCFullYear())).sort((a,b) => a - b))]
+  const years = [ ...new Set(data.map(row => parseInt(new Date(row[keyMaps.week_ending_date]).getUTCFullYear())).sort((a,b) => a - b))]
 
   // Move United States to top of states so that it is the default option in the select list.
   const unitedStatesIndex = states.indexOf("United States")
@@ -58,15 +69,14 @@ excess.cleanData = (data = excess.data.raw) => {
 
   let dataWithMMWRWeek = []  
   years.forEach(year => {
-    const yearlyData = data.filter(row => row.year == `${year}`)
-    const weeksInYear = [ ...new Set(yearlyData.map(row => row.week_ending_date)) ]
+    const yearlyData = data.filter(row => parseInt(new Date(row[keyMaps.week_ending_date]).getUTCFullYear()) === year)
+    const weeksInYear = [ ...new Set(yearlyData.map(row => row[keyMaps.week_ending_date])) ]
     const yearlyDataTillCurrentWeek = yearlyData.filter(row => {
-      const rowWeekendDate = new Date(row.week_ending_date)
+      const rowWeekendDate = new Date(row[keyMaps.week_ending_date])
       const currentDate = new Date()
       // Only use weeks for all years till ongoing week in current year.
       if (rowWeekendDate.getMonth() < currentDate.getMonth() || (rowWeekendDate.getMonth() === currentDate.getMonth() && rowWeekendDate.getDate() <= currentDate.getDate())) {
-        row.mmwrWeek = year === 2017 ? weeksInYear.indexOf(row.week_ending_date) + 2 : weeksInYear.indexOf(row.week_ending_date) + 1 // Data for 2017 starts from Jan 14, so adding an extra MMWR week to make it consistent.
-        // row.week_ending_date_mapped = weeks2018[row.mmwrWeek - 1]
+        row.mmwrWeek = year === 2017 ? weeksInYear.indexOf(row[keyMaps.week_ending_date]) + 2 : weeksInYear.indexOf(row[keyMaps.week_ending_date]) + 1 // Data for 2017 starts from Jan 14, so starting MMWR week from 2 for that year to make it consistent.
         row.mmwrYear = rowWeekendDate.getUTCFullYear() // First few weeks in 2018 data have the year field set to other years for some reason :/ Rectifying that
         return row
       }
@@ -79,25 +89,64 @@ excess.cleanData = (data = excess.data.raw) => {
 
 excess.ui = async (divId) => {
   excess.data.raw = await fetchDataset()
-  const { dataWithMMWRWeek, ...params } = excess.cleanData(excess.data.raw)
+  const { dataWithMMWRWeek, ...params } = excess.cleanData(excess.data.raw.map(row => ({...row}) )) // Cloning the original object
   excess.data.cleanedData = dataWithMMWRWeek
   excess.params = params
 
+
+  // const selectTypeRadioBtn = (value) => {
+  //   typeSelectDiv.querySelectorAll("input.excessDeathsBarChartType").forEach(el => {
+  //     if (el.value !== value) {
+  //       el.removeAttribute("checked")
+  //     } else if (!el.getAttribute("checked")) {
+  //       el.setAttribute("checked", "true")
+  //       excess.renderPlots(plotsParentDivId)
+  //     }
+  //   })
+  // }
+
+  // const typeSelectWeightedDiv = document.createElement("div")
+  // const typeSelectWeightedBtn = document.createElement("input")
+  // typeSelectWeightedBtn.setAttribute("type", "radio")
+  // typeSelectWeightedBtn.setAttribute("name", "type")
+  // typeSelectWeightedBtn.setAttribute("class", "excessDeathsBarChartType")
+  // typeSelectWeightedBtn.setAttribute("id", "barChartOptionWeighted")
+  // typeSelectWeightedBtn.setAttribute("value", "Predicted (weighted)")
+  // typeSelectWeightedBtn.setAttribute("checked", "true")
+  // typeSelectWeightedBtn.onclick = () => selectTypeRadioBtn(typeSelectWeightedBtn.value)
+  // const typeSelectWeightedLabel = document.createElement("label")
+  // typeSelectWeightedLabel.setAttribute("for", "barChartOptionWeighted")
+  // typeSelectWeightedLabel.innerText = "Predicted (weighted)"
+  // typeSelectWeightedLabel.style.marginLeft = "5px"
+  // typeSelectWeightedDiv.appendChild(typeSelectWeightedBtn)
+  // typeSelectWeightedDiv.appendChild(typeSelectWeightedLabel)
+  
+  // const typeSelectUnweightedDiv = document.createElement("div")
+  // const typeSelectUnweightedBtn = document.createElement("input")
+  // typeSelectUnweightedBtn.setAttribute("type", "radio")
+  // typeSelectUnweightedBtn.setAttribute("name", "type")
+  // typeSelectUnweightedBtn.setAttribute("class", "excessDeathsBarChartType")
+  // typeSelectUnweightedBtn.setAttribute("id", "barChartOptionUnweighted")
+  // typeSelectUnweightedBtn.setAttribute("value", "Unweighted")
+  // typeSelectUnweightedBtn.onclick = () => selectTypeRadioBtn(typeSelectUnweightedBtn.value)
+  // const typeSelectUnweightedLabel = document.createElement("label")
+  // typeSelectUnweightedLabel.setAttribute("for", "barChartOptionUnweighted")
+  // typeSelectUnweightedLabel.innerText = "Unweighted"
+  // typeSelectUnweightedLabel.style.marginLeft = "5px"
+  // typeSelectUnweightedDiv.appendChild(typeSelectUnweightedBtn)
+  // typeSelectUnweightedDiv.appendChild(typeSelectUnweightedLabel)
+  
+  // typeSelectDiv.appendChild(typeSelectWeightedDiv)
+  // typeSelectDiv.appendChild(typeSelectUnweightedDiv)
+
   const parentDiv = document.getElementById(divId)
   const plotDivId = "plotlyCompareDiv"
-  let h = `<hr> Excess deaths Associated With COVID-19 by <select id="selectOutcome" onchange="excess.renderPlots('${plotDivId}')"></select>\
-  in 2017-19 and 2020 for <select id="selectState" onchange="excess.renderPlots('${plotDivId}');"></select><br/>\
+  let h = `<hr> Excess deaths Associated With COVID-19 in 2017-19 and 2020 for \
+  <select id="selectState" onchange="excess.renderPlots('${plotDivId}');"></select>\
+  by type <select id="selectType" onchange="excess.renderPlots('${plotDivId}')"></select><br/>\
   [CDC sources <a href=${datasetURL} target="_blank">Excess Deaths</a>]<br>`
   h += `<div id="${plotDivId}"></div><br>`
   parentDiv.innerHTML = h
-  
-  const selectOutcome = document.getElementById("selectOutcome")
-  excess.params.outcomes.forEach(outcome => {
-    const outcomeOption = document.createElement("option")
-    outcomeOption.setAttribute("value", outcome)
-    outcomeOption.innerText = outcome
-    selectOutcome.appendChild(outcomeOption)
-  })
   
   const selectState = document.getElementById("selectState")
   excess.params.states.forEach(state => {
@@ -106,6 +155,15 @@ excess.ui = async (divId) => {
     stateOption.innerText = state
     selectState.appendChild(stateOption)
   })
+
+  const selectType = document.getElementById("selectType")
+  excess.params.types.forEach(type => {
+    const typeOption = document.createElement("option")
+    typeOption.setAttribute("value", type)
+    typeOption.innerText = type
+    selectType.appendChild(typeOption)
+  })
+
 
   loadHashParams()
   excess.renderPlots(plotDivId)
@@ -124,15 +182,156 @@ excess.ui = async (divId) => {
 // }
 
 excess.renderPlots = (plotsParentDivId="plotlyCompareDiv") => {
-  excess.scatterPlot(plotsParentDivId)
-  excess.barChart(plotsParentDivId)
+  excess.areaPlot(plotsParentDivId)
+  // excess.scatterPlot(plotsParentDivId)
+  // excess.barChart(plotsParentDivId)
+}
+
+excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
+  const plotsParentDiv = document.getElementById(plotsParentDivId)
+  const areaPlotDivId = "excessDeathsareaPlot"
+  let areaPlotDiv = document.getElementById(areaPlotDivId)
+  if (!areaPlotDiv) {
+    areaPlotDiv = document.createElement("div")
+    areaPlotDiv.setAttribute("id", areaPlotDivId)
+    areaPlotDiv.style.width = "100%"
+    plotsParentDiv.appendChild(areaPlotDiv)
+    plotsParentDiv.appendChild(document.createElement("hr"))
+    plotsParentDiv.appendChild(document.createElement("br"))
+  }
+
+  const compareWith = document.getElementById("areaPlotCompareWithSelect") ? document.getElementById("areaPlotCompareWithSelect").value : keyMaps.average_expected_count
+  const { cleanedData: dataToPlot } = excess.data
+  
+  excess.stateSelected = document.getElementById('selectState').value
+  excess.typeSelected = document.getElementById('selectType').value
+  window.location.hash=`type=${encodeURIComponent(excess.typeSelected)}&state=${encodeURIComponent(excess.stateSelected)}`
+
+  excess.data.stateSelected = dataToPlot.filter(row => row[keyMaps.state] === excess.stateSelected && row[keyMaps.type] === excess.typeSelected)
+  excess.params.mmwrWeeks = [ ...new Set(excess.data.stateSelected.map(row => row.mmwrWeek)) ].sort((a, b) => a-b)
+  excess.params.maxMMWRWeek = excess.params.mmwrWeeks[excess.params.mmwrWeeks.length - 1]
+  const weeks2020 = excess.data.stateSelected.filter(row => row.mmwrYear === 2020 && row[keyMaps.outcome] === "All causes").map(row => new Date(row[keyMaps.week_ending_date]))
+
+  const dataFor2020 = excess.data.stateSelected.filter(row => (row.mmwrYear === 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined))
+  const dataForOtherYears = excess.data.stateSelected.filter(row => (row.mmwrYear !== 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined && row[keyMaps.outcome] === "All causes" ))
+  const avgOutcomeSpecificDataPerWeek = excess.params.mmwrWeeks.map(week => {
+    const outcomeDataPerYear = dataForOtherYears.filter(row => row.mmwrWeek === week)
+    return outcomeDataPerYear.reduce((prev, current) =>  prev + (current[keyMaps.observed_number] - current[compareWith]), 0)/outcomeDataPerYear.length
+  })
+  
+  excessDeathsFor2020 = {}
+  excess.params.outcomes.forEach(outcome => {
+    excessDeathsFor2020[outcome] = []
+    const outcomeSpecificData = dataFor2020.filter(row => row[keyMaps.outcome] === outcome)
+    const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
+    const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
+    outcomeSpecificData.forEach(row => {
+      const excessDeaths = row[keyMaps.observed_number] - row[compareWith]
+      if (!isNaN(excessDeaths)) {
+        if (row.mmwrWeek >= excess.params.maxMMWRWeek - 2 && excessDeaths < acceptableDeviation) {
+          // Completely arbitrary condition check to handle when last couple of weeks' data (couple of weeks is also an arbitrarily chosen time period)
+          // is just too weird (varies from the mean too much), for instance when counting has not completed for a week the excess for this observatioin 
+          // is just too less compared to the average excess.
+        } else {
+          excessDeathsFor2020[outcome].push(excessDeaths)
+        }
+      }
+    })
+  })
+  
+  const upperBoundThresholdsFor2020 = dataFor2020.filter(row => row[keyMaps.outcome] === excess.params.outcomes[0]).map(row => row[keyMaps.upper_bound_threshold])
+  // const outcomeNamesMap = {
+  //   "All causes": "Including COVID-19",
+  //   "All causes, excluding COVID-19": "Excluding COVID-19"
+  // }
+  const areaPlotTraces = excess.params.outcomes.map(outcome => {
+    const x = weeks2020
+    const y = excessDeathsFor2020[outcome]
+    const fill = outcome === "All causes" ? "tonexty" : "tozeroy"
+    const fillcolor = outcome === "All causes" ? "#f54242" : undefined
+    const line = {
+      color: outcome === "All causes" ? "#f54242" : undefined
+    }
+    
+    return {
+      x,
+      y,
+      fill,
+      fillcolor,
+      type: "scatter",
+      hovertemplate: "%{y}",
+      name: "Excess Deaths from "+ outcome +" for 2020",
+      line,
+      mode: "markers",
+      marker: {
+        size: 2
+      }
+    }
+  }).reverse()
+  console.log(areaPlotTraces)
+
+  // const thresholdTrace = {
+  //   x: weeks2020,
+  //   y: avgOutcomeSpecificDataPerWeek,
+  //   type: "scatter",
+  //   mode: "lines+markers",
+  //   name: "Average Excess from 2017-2019",
+  //   line: {
+  //     dash: "solid",
+  //     width: 2
+  //   },
+  //   marker: {
+  //     color: "royalblue"
+  //   }
+  // }
+  
+  const averageOverOtherYearsTrace = {
+    x: weeks2020,
+    y: avgOutcomeSpecificDataPerWeek,
+    fill: "tozeroy",
+    fiilcolor: "blueviolet",
+    type: "scatter",
+    hovertemplate: "%{y}",
+    name: "Average Excess from 2017-2019",
+    line: {
+      color: "blueviolet"
+    },
+    mode: "markers",
+    marker: {
+      size: 2
+    }
+  }
+  
+  // areaPlotTraces.push(thresholdTrace)
+  areaPlotTraces.push(averageOverOtherYearsTrace)
+
+  const layout = {
+    title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> as <b>${excess.typeSelected}</b> for <b>${excess.yearSelected || 2020}</b> vs. the <b style="color:maroon">${compareWith}</b>`,
+    legend: { 'orientation': "h" },
+    yaxis: {
+      'range': [-Math.abs(Math.min(...Object.values(excessDeathsFor2020).flat())*2.5), Math.abs(Math.max(...Object.values(excessDeathsFor2020).flat())*1.25)]
+    }
+  }
+  Plotly.newPlot(areaPlotDivId, areaPlotTraces, layout, {responsive: true});
+
+  if (!document.getElementById("areaPlotCompareWithSelect")) {
+    const compareWithSelectDiv = document.createElement("div")
+    compareWithSelectDiv.innerHTML = `Compare With:\
+    <select id="areaPlotCompareWithSelect" onchange="excess.areaPlot('${plotsParentDivId}')">\
+      <option value="${keyMaps.average_expected_count}">Average Expected Count</option>
+      <option value="${keyMaps.upper_bound_threshold}">Upper Bound Threshold</option>
+    </select>
+    `
+    areaPlotDiv.insertBefore(compareWithSelectDiv, areaPlotDiv.firstElementChild)
+  }
+
 }
 
 excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
   const plotsParentDiv = document.getElementById(plotsParentDivId)
   const { cleanedData: dataToPlot } = excess.data
 
-  excess.outcomeSelected = document.getElementById('selectOutcome').value
+  // excess.outcomeSelected = document.getElementById('selectOutcome').value
   excess.stateSelected = document.getElementById('selectState').value
   window.location.hash=`outcome=${encodeURIComponent(excess.outcomeSelected)}&state=${encodeURIComponent(excess.stateSelected)}`
 
@@ -141,7 +340,7 @@ excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
   const weeks2020 = [...new Set(excess.data.stateSelected.filter(row => row.mmwrYear === 2020 && row.type==="Predicted (weighted)").map(row => new Date(row.week_ending_date)))]
 
   const getScatterTrace = (year, type="Predicted (weighted)") => {
-    const dataForYear = excess.data.stateSelected.filter(row => (row.mmwrYear === year && row.mmwrWeek <= excess.params.maxMMWRWeek && row.observed_number && row.threshold && row.type === type))
+    const dataForYear = excess.data.stateSelected.filter(row => (row.mmwrYear === year && row.mmwrWeek <= excess.params.maxMMWRWeek && row.observed_number && row.upper_bound_threshold && row.type === type))
 
     const marker = {}
     marker.size = year === 2020 ? 8 : 4
@@ -153,16 +352,15 @@ excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
     const lineWidth = year === 2020 ? 3 : 1
     
     const x = year === 2017 ? weeks2020.slice(1) : weeks2020
-    const meanDifference =  dataForYear.reduce((prev, current) => prev + (current.observed_number - current.threshold), 0)/dataForYear.length || 0
+    const meanDifference =  dataForYear.reduce((prev, current) => prev + (current.observed_number - current.upper_bound_threshold), 0)/dataForYear.length || 0
     const y = dataForYear.map(row => {
       const acceptableDeviation = meanDifference < 0 ? meanDifference * 2.5 : meanDifference * -2.5
 
-      if (row.mmwrWeek >= excess.params.maxMMWRWeek - 2 && row.observed_number - row.threshold < acceptableDeviation) {
-        // Completely arbitrary condition check to handle when last couple of weeks' data (couple of weeks is also an arbitrarily chosen time period)
-        // is just too weird (varies from the mean too much), for instance when week counting has not completed the threshold is greater than the observed_number by an absurdly large difference.
+      if (row.mmwrWeek >= excess.params.maxMMWRWeek - 2 && row.observed_number - row.upper_bound_threshold < acceptableDeviation) {
+        
         return undefined
-      } else if (!isNaN(row.observed_number - row.threshold)) {
-        return row.observed_number - row.threshold
+      } else if (!isNaN(row.observed_number - row.upper_bound_threshold)) {
+        return row.observed_number - row.upper_bound_threshold
       } else {
         return undefined
       }
@@ -178,7 +376,6 @@ excess.scatterPlot = (plotsParentDivId="plotlyCompareDiv") => {
       },
       marker
     }
-    return trace
   }
   
   const scatterTrace = excess.params.years.map(year => getScatterTrace(year, "Predicted (weighted)"))
@@ -219,6 +416,17 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
     optionsDiv.style.width = "100%"
     optionsDiv.style.textAlign = "center"
 
+    const outcomeSelectDiv = document.createElement("div")
+    const outcomeSelect = document.createElement("select")
+    outcomeSelect.setAttribute("id", "excessDeathsBarChartOutcome") 
+    excess.params.outcomes.forEach(outcome => {
+      const outcomeOption = document.createElement("option")
+      outcomeOption.setAttribute("value", outcome)
+      outcomeOption.innerText = outcome
+      outcomeSelect.appendChild(outcomeOption)
+    })
+    outcomeSelectDiv.appendChild(outcomeSelect)
+
     const typeSelectDiv = document.createElement("div")
     typeSelectDiv.setAttribute("id", "excessDeathsBarChartTypes")
     typeSelectDiv.style.width = "55%"
@@ -240,54 +448,9 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
       } else {
         typeSelectDiv.style.visibility = "visible"
       }
-      excess.barChart(plotsParentDivId)
+      // excess.barChart(plotsParentDivId)
     }
     yearSelect.style.width = "30%"
-
-    const selectTypeRadioBtn = (value) => {
-      typeSelectDiv.querySelectorAll("input.excessDeathsBarChartType").forEach(el => {
-        if (el.value !== value) {
-          el.removeAttribute("checked")
-        } else if (!el.getAttribute("checked")) {
-          el.setAttribute("checked", "true")
-          excess.barChart(plotsParentDivId)
-        }
-      })
-    }
-
-    const typeSelectWeightedDiv = document.createElement("div")
-    const typeSelectWeightedBtn = document.createElement("input")
-    typeSelectWeightedBtn.setAttribute("type", "radio")
-    typeSelectWeightedBtn.setAttribute("name", "type")
-    typeSelectWeightedBtn.setAttribute("class", "excessDeathsBarChartType")
-    typeSelectWeightedBtn.setAttribute("id", "barChartOptionWeighted")
-    typeSelectWeightedBtn.setAttribute("value", "Predicted (weighted)")
-    typeSelectWeightedBtn.setAttribute("checked", "true")
-    typeSelectWeightedBtn.onclick = () => selectTypeRadioBtn(typeSelectWeightedBtn.value)
-    const typeSelectWeightedLabel = document.createElement("label")
-    typeSelectWeightedLabel.setAttribute("for", "barChartOptionWeighted")
-    typeSelectWeightedLabel.innerText = "Predicted (weighted)"
-    typeSelectWeightedLabel.style.marginLeft = "5px"
-    typeSelectWeightedDiv.appendChild(typeSelectWeightedBtn)
-    typeSelectWeightedDiv.appendChild(typeSelectWeightedLabel)
-    
-    const typeSelectUnweightedDiv = document.createElement("div")
-    const typeSelectUnweightedBtn = document.createElement("input")
-    typeSelectUnweightedBtn.setAttribute("type", "radio")
-    typeSelectUnweightedBtn.setAttribute("name", "type")
-    typeSelectUnweightedBtn.setAttribute("class", "excessDeathsBarChartType")
-    typeSelectUnweightedBtn.setAttribute("id", "barChartOptionUnweighted")
-    typeSelectUnweightedBtn.setAttribute("value", "Unweighted")
-    typeSelectUnweightedBtn.onclick = () => selectTypeRadioBtn(typeSelectUnweightedBtn.value)
-    const typeSelectUnweightedLabel = document.createElement("label")
-    typeSelectUnweightedLabel.setAttribute("for", "barChartOptionUnweighted")
-    typeSelectUnweightedLabel.innerText = "Unweighted"
-    typeSelectUnweightedLabel.style.marginLeft = "5px"
-    typeSelectUnweightedDiv.appendChild(typeSelectUnweightedBtn)
-    typeSelectUnweightedDiv.appendChild(typeSelectUnweightedLabel)
-    
-    typeSelectDiv.appendChild(typeSelectWeightedDiv)
-    typeSelectDiv.appendChild(typeSelectUnweightedDiv)
     
     optionsDiv.appendChild(yearSelect)
     optionsDiv.appendChild(document.createElement("br"))
@@ -297,7 +460,6 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
   } 
   
   const yearSelected = parseInt(document.getElementById("excessDeathsBarChartYear").value) || excess.params.years[0]
-  const typeSelected = document.querySelector("input.excessDeathsBarChartType[checked]").value || excess.params.types[0]
 
   const barChartDivId = "excessDeathsBarChart"
   let barChartDiv = document.getElementById(barChartDivId)
@@ -308,11 +470,11 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
   }
 
   const namesMap = {
-    "threshold": "Deaths Threshold",
+    "upper_bound_threshold": "Deaths Threshold",
     "observed_number": "Observed Number of Deaths"
   }
   const getBarChartTrace = (field) => {
-    const dataForYear = excess.data.stateSelected.filter(row => (row.mmwrYear === yearSelected && row.mmwrWeek <= excess.params.maxMMWRWeek && row.type === typeSelected))
+    const dataForYear = excess.data.stateSelected.filter(row => (row.mmwrYear === yearSelected && row.mmwrWeek <= excess.params.maxMMWRWeek && row.type === excess.typeSelected))
     const x = dataForYear.map(row => new Date(row.week_ending_date))
     const y = dataForYear.map(row => {
       if (row[field]) {
@@ -333,11 +495,11 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
     return trace
   }
 
-  const thresholdBarTraces = getBarChartTrace("threshold")
+  const thresholdBarTraces = getBarChartTrace("upper_bound_threshold")
   const observedNumberBarTraces = getBarChartTrace("observed_number")
 
   const dataForBarChart = [thresholdBarTraces, observedNumberBarTraces]
-  const maxYAxisValue = Math.max(...excess.data.stateSelected.map(row => row.threshold), ...excess.data.stateSelected.map(row => row.observed_number))
+  const maxYAxisValue = Math.max(...excess.data.stateSelected.map(row => row.upper_bound_threshold), ...excess.data.stateSelected.map(row => row.observed_number))
   const orderOfMagnitudeOfMaxValue = 10 ** (Math.floor(Math.log10(maxYAxisValue)))
   const maxYAxisRangeValue = orderOfMagnitudeOfMaxValue * Math.floor(maxYAxisValue/orderOfMagnitudeOfMaxValue + 1)
 
