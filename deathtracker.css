@@ -18,7 +18,8 @@ h3 {
     color:#3F51B5
 }
 h4 {
-    color:#009688
+    color:#009688;
+    font-size:large;
 }
 code {
     color:green;

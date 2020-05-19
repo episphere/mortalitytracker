@@ -1,5 +1,6 @@
 console.log('deathtracker.js loaded');
 
+/*
 if('serviceWorker' in navigator){
     try {
         window.addEventListener('load', function() {
@@ -10,8 +11,13 @@ if('serviceWorker' in navigator){
         console.log(error);
     }
 }
+*/
 
-dtrack={data:{}}
+dtrack={
+    data:{},
+    ytitle:'Deaths per week'
+}
+
 dtrack.data.flags={
     flag_allcause: 'allcause',
     flag_alz: 'alzheimer_disease_g30',
@@ -25,7 +31,9 @@ dtrack.data.flags={
     flag_otherresp: 'other_diseases_of_respiratory',
     flag_otherunk: 'symptoms_signs_and_abnormal',
     flag_sept: 'septicemia_a40_a41',
-    flag_stroke: 'cerebrovascular_diseases'
+    flag_stroke: 'cerebrovascular_diseases',
+    flag_cov19mcod:'covid_19_u071_multiple_cause_of_death',
+    flag_cov19ucod:'covid_19_u071_underlying_cause_of_death',
 }
 dtrack.data.causes={
     allcause: 'All Cause',
@@ -45,6 +53,8 @@ dtrack.data.causes={
     septicemia_a40_a41: 'Septicemia (A40-A41)',
     symptoms_signs_and_abnormal: 'Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)',
     //weekendingdate: true
+    covid_19_u071_multiple_cause_of_death:'COVID-19 (U071, Multiple Cause of Death)',
+    covid_19_u071_underlying_cause_of_death:'COVID-19 (U071, Underlying Cause of Death)'
 }
 dtrack.data.shortName={
     allcause: 'All Cause',
@@ -64,6 +74,8 @@ dtrack.data.shortName={
     septicemia_a40_a41: 'Septicemia',
     symptoms_signs_and_abnormal: 'Unclassified',
     //weekendingdate: true
+    covid_19_u071_multiple_cause_of_death:'with covid',
+    covid_19_u071_underlying_cause_of_death:'of covid'
 }
 dtrack.data.form={
     allcause: 0,
@@ -83,6 +95,8 @@ dtrack.data.form={
     septicemia_a40_a41: 0,
     symptoms_signs_and_abnormal: 0,
     //weekendingdate: 0
+    covid_19_u071_multiple_cause_of_death:0,
+    covid_19_u071_underlying_cause_of_death:0
 }
 
 dtrack.ui=async(div)=>{
@@ -91,17 +105,19 @@ dtrack.ui=async(div)=>{
     }
     //dtrack.data.states = (await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$select=distinct%20jurisdiction_of_occurrence')).json()).map(x=>x.jurisdiction_of_occurrence)
     dtrack.data.all=await (await fetch('https://data.cdc.gov/resource/muzy-jte6.json?$limit=10000')).json()
+    let tic=new Date()-4*24*60*60*1000
+    dtrack.data.all=dtrack.data.all.filter(d=>(new Date(d.week_ending_date)<tic)) // trim future counts
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000')).json())
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
     // move All States from end to beginning
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
-    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompare()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompare();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
+    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
-    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locading COVID-19 data ... </span></span></div>'
+    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data ... </span></span></div>'
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
@@ -117,8 +133,13 @@ dtrack.ui=async(div)=>{
         //if(opt.innerText.indexOf('(')>0){
         //    opt.innerText=opt.innerText.slice(0,opt.innerText.indexOf('(')-1)
         //}
-        selectCause.appendChild(opt)
+        if(!c.match('covid_19_u071')){
+            selectCause.appendChild(opt)
+        }
     })
+    let opt=document.createElement('option')
+    opt.innerText=opt.value='COVID-19 (CDC)'
+    selectCause.appendChild(opt)
     if(location.hash.length>2){
         dtrack.ui.parms=dtrack.ui.parms||{}
         location.hash.slice(1).split('&').forEach(av=>{
@@ -128,7 +149,7 @@ dtrack.ui=async(div)=>{
         if(dtrack.ui.parms.cause){selectCause.value=dtrack.ui.parms.cause}
         if(dtrack.ui.parms.state){selectState.value=dtrack.ui.parms.state}
     }
-    dtrack.plotlyCompare()
+    dtrack.plotlyCompareCovid()
     setTimeout(dtrack.plotlyWithCovid,1000)
     setTimeout(dtrack.dataDictionary,600)
 }
@@ -197,28 +218,129 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
             //debugger
         })
     })
+    dtrack.data.vars=[... new Set(dt.map(x=>Object.keys(x)).join().split(','))]
     return dt
 }
 
 dtrack.trim=function(x){ // trims NaNs trails
+    /*
     if(isNaN(x.slice(-1)[0])){
         x.pop()
         return dtrack.trim(x)
     }else{
         return x
     }
+    */
+    return x
 }
 
 dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<h3>Data dictionary</h3><p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
     })
     h+='</p>'
     div.innerHTML=h
+}
+
+dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
+    if(document.getElementById('selectCause').value!=="COVID-19 (CDC)"){
+        dtrack.plotlyCompare(div)
+        
+    }else{ /// PLOT COVID
+        location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
+        //console.log('plot '+document.getElementById('selectCause').value)
+        let stateData = dtrack.data.all.filter(x=>(x.jurisdiction_of_occurrence==selectState.value&x.mmwryear==2020))
+        // dtrack.data.weekends2020
+        let traces = []
+        // covid_19_u071_underlying_cause_of_death
+        let yOfCovid=stateData.map(d=>d.covid_19_u071_underlying_cause_of_death)
+        dtrack.data.weekends2020=dtrack.data.weekends2020.map(d=>new Date(d.setYear(2020))) // making sure its 2020
+        let n = dtrack.data.weekends2020.length
+        let traceOfCovid={
+            x:dtrack.data.weekends2020,
+            y:yOfCovid.slice(0,n-3),
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'of COVID',
+            marker: {
+                color:'black',
+                size:8
+            },
+            line:{
+                width:3
+            }
+        }
+        let yWithCovid=stateData.map(d=>d.covid_19_u071_multiple_cause_of_death)        
+        let traceWithCovid={
+            x:dtrack.data.weekends2020,
+            y:yWithCovid.slice(0,n-3),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'with COVID',
+            line:{
+                width:3,
+                dash:'dot',
+                color:'black'
+            }
+        }
+        let traceOfCovidTemp={
+            x:dtrack.data.weekends2020.slice(-3),
+            y:yOfCovid.slice(-3),
+            type: 'scatter',
+            mode: 'markers',
+            name: 'in progress',
+            marker: {
+                color:'rgba(255, 255, 255,0.5)',
+                size:7,
+                line:{
+                    color:'black',
+                    width:1
+                }
+            }
+        }
+        if(!dtrack.data.covid){
+            await dtrack.getCovid()
+        }
+        let traceCovid={
+            x:dtrack.data.covid[selectState.value].dates.slice(7),
+            y:dtrack.data.covid[selectState.value].deaths.slice(7).map((d,i)=>d-dtrack.data.covid[selectState.value].deaths[i]),
+            name:'<span style="font-size:x-small">Johns Hopkins<br>7 day totals</span>',
+            type: 'scatter',
+            mode: 'lines',
+            line:{
+                width:2,
+                color:'red'
+            },
+            fill:'tozeroy',
+            fillcolor:'rgba(100,10,10,0.3)',
+        }
+        let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+        if(document.getElementById('mortalityRate')){
+            if(mortalityRate.checked){
+                allTraces=dtrack.traceAll(allTraces)
+            }
+        }
+            
+    Plotly.newPlot(div,allTraces,{
+            title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+            xaxis: {
+                title: 'Date of calendar day in 2020'
+            },
+            yaxis: {
+                title:dtrack.ytitle
+            },
+            legend:{
+                bordercolor: 'gray',
+                borderwidth: 2,
+                traceorder:'reversed'
+            }
+        }, {responsive: true})
+    }
 }
 
 dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
@@ -266,7 +388,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020.',
+        name: '2020',
         marker: {
             color:'maroon',
             size:8
@@ -366,14 +488,20 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-
-    Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
-        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString()}</b>`,
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp])
+    if(document.getElementById('mortalityRate')){
+        if(mortalityRate.checked){
+            allTraces=dtrack.traceAll(allTraces)
+        }
+    }
+        
+    Plotly.newPlot(div,allTraces,{
+        title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
         yaxis: {
-            title: 'Deaths per week'
+            title: dtrack.ytitle
         },
         legend:{
             bordercolor: 'gray',
@@ -603,6 +731,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         }
     }
     let causeTraces=[]
+    let traceOfCovid={}
     Object.keys(dtrack.data.causes).reverse().forEach((c,i)=>{
         if(c!='allcause'&c!='naturalcause'){
             let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[c]).length // different states / causes updating at different rates
@@ -619,7 +748,14 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
                 stackgroup: 'causes',
                 //fill:'none'
             }
-            causeTraces.push(trace)  
+            if(trace.name!='with covid'){
+                if(trace.name=='of covid'){
+                    traceOfCovid=trace
+                }else{
+                    causeTraces.push(trace) 
+                }
+            }
+            
         }
     })
 
@@ -627,28 +763,32 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let traceCovid={
         x:dtrack.data.covid[selectState.value].dates.slice(7),
         y:dtrack.data.covid[selectState.value].deaths.slice(7).map((d,i)=>d-dtrack.data.covid[selectState.value].deaths[i]),
-        name:'COVID-19<br><span style="font-size:x-small">7 day totals</span>',
+        name:'COVID-19<br><span style="font-size:x-small">7 day totals<br>(Johns Hopkins)</span>',
         type: 'scatter',
         mode: 'lines',
         line:{
-            width:4,
+            width:2,
             color:'red'
         },
         fill:'tozeroy',
-        fillcolor:'rgba(100,10,10,0.5)',
+        fillcolor:'rgba(100,10,10,0.3)',
     }
 
 
     //Plotly.newPlot(div,traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp]),{
     div.innerHTML='' // clear
-    Plotly.newPlot(div,causeTraces.concat([traceMin,traceMax,traceAvg,traceAllCause,traceNaturalCause,traceCovid]),{
-        title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString()}</b>`,
-        height:550,
+    let allTraces=causeTraces.concat([traceOfCovid,traceMin,traceMax,traceAvg,traceAllCause,traceNaturalCause,traceCovid])
+    if(mortalityRate.checked){
+        allTraces=dtrack.traceAll(allTraces)
+    }
+    Plotly.newPlot(div,allTraces,{
+        title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+        height:570,
         xaxis: {
             title: 'Date'
         },
         yaxis: {
-            title: 'Deaths per week'
+            title: dtrack.ytitle
         },
         legend:{
             bordercolor: 'gray',
@@ -656,5 +796,24 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         }
     }, {responsive: true})
     //div.innerHTML=Date()
+    mortalityRate.onchange=()=>{
+        if(mortalityRate.checked){
+            dtrack.ytitle='Weekly mortality per 100K'
+        }else{
+            dtrack.ytitle='Deaths per Week'
+        }
+        setTimeout(selectState.onchange,100)
+        setTimeout(selectCause.onchange,100)
+        //debugger
+    }
+    mortalityRate.disabled=false
+}
+
+dtrack.traceAll=(traces)=>{ // annualized mortality rate
+    return traces.map(trc=>{
+        //trc.y=trc.y.map(yi=>yi*(365.6/7)/(dtrack.data.covid[selectState.value].Population/100000))
+        trc.y=trc.y.map(yi=>yi/(dtrack.data.covid[selectState.value].Population/100000))
+        return trc
+    })
 }
 
