@@ -109,6 +109,7 @@ dtrack.ui=async(div)=>{
     dtrack.data.all=dtrack.data.all.filter(d=>(new Date(d.week_ending_date)<tic)) // trim future counts
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000')).json())
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
+    dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='United States'))
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
     // move All States from end to beginning
