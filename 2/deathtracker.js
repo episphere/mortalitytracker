@@ -552,6 +552,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         
     Plotly.newPlot(div,allTraces,{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+        hovermode: 'closest',
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
@@ -571,7 +572,8 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             overlaying: 'y',
             side: 'right',
             //type: 'log'
-        }
+        },
+        //hovermode:'closest',
     }, {responsive: true})
     //div.innerHTML=Date()
 }
@@ -849,6 +851,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     Plotly.newPlot(div,allTraces,{
         title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         height:570,
+        hovermode: 'closest',
         xaxis: {
             title: 'Date'
         },
