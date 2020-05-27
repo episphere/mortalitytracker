@@ -396,7 +396,10 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         },
         line:{
             width:3
-        }
+        },
+        fill: 'tonexty',
+        //fillcolor: 'rgba(128,0,0,0.2)'
+        fillcolor: 'rgba(0,100,255,0.2)'
     }
     let tempy=dtrack.trim(data2020.map(x=>x[selectCause.value]))
     let tempx=dtrack.data.weekends2020.slice(0,tempy.length)
@@ -485,11 +488,62 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
       fillcolor: 'rgba(200,200,200,0.75)',
       name:'value range'
     };
+    let dev = trace2020.y.map((v,i)=>v-traceAvg.y[i])
+    let sum = (xx,n)=>xx.slice(0,n+1).reduce((a,b)=>a+b) // incremental sum
+    var traceExcess = {
+        x:trace2020.x,
+        y:dev.map((v,i)=>sum(dev,i)),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'excess',
+        line: {
+            color:'rgba(0,100,255,0.5)',
+            //color:'rgba(128,0,0,0.5)',
+            width:5
+        },
+        marker:{
+            size:5
+        },
+        yaxis: 'y2'
+    }
+
+    var traceSum5yr = {
+        x:traceAvg.x,
+        y:traceAvg.y.map((v,i)=>sum(traceAvg.y,i)),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Avg Sum',
+        line: {
+            //color:'rgba(0,100,255,0.5)',
+            color:'rgba(0,0,0,0.3)',
+            width:3
+        },
+        fill:'tozeroy',
+        fillcolor:'rgba(0,0,0,0.2)',
+        yaxis: 'y2'
+    }
+
+    var traceSum2020 = {
+        x:trace2020.x,
+        y:trace2020.y.map((v,i)=>sum(trace2020.y,i)),
+        type: 'scatter',
+        mode: 'lines',
+        name: '2020 Sum',
+        line: {
+            //color:'rgba(0,100,255,0.5)',
+            color:'rgba(128,0,0,0.3)',
+            width:3
+        },
+        fill:'tozeroy',
+        fillcolor:'rgba(128,0,0,0.2)',
+        yaxis: 'y2'
+    }
+
     let titleCause = dtrack.data.causes[selectCause.value]
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp])
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,traceExcess,trace2020temp])
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
             allTraces=dtrack.traceAll(allTraces)
@@ -506,7 +560,17 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         },
         legend:{
             bordercolor: 'gray',
-            borderwidth: 2
+            borderwidth: 1,
+            x:1.3,
+            y:1
+        },
+        yaxis2: {
+            title: 'Sum',// (<span style="font-size:large">&#9679;</span>)',
+            titlefont: {color: 'rgb(0, 100, 255)'},
+            tickfont: {color: 'rgb(0, 100, 255)'},
+            overlaying: 'y',
+            side: 'right',
+            //type: 'log'
         }
     }, {responsive: true})
     //div.innerHTML=Date()
