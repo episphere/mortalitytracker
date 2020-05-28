@@ -293,7 +293,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             y:dtrack.sum(yOfCovid.slice(0,n-3)),
             type: 'scatter',
             mode: 'lines',
-            name: 'excess',
+            name: '<sub><span style="font-size:12px">excess</span></sub>',
             line:{
                 width:5,
                 color:'rgba(0, 100, 255, 0.5)'
@@ -319,13 +319,14 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             //y:yWithCovid.slice(0,n-3),
             type: 'scatter',
             mode: 'lines',
-            name: 'CDC data',
+            name: '',
             line:{
                 width:5,
                 dash:'dot',
                 color:'rgba(0, 100, 255, 0.5)'
             },
-            yaxis:'y2'
+            yaxis:'y2',
+            //visible:false
         }
         let traceOfCovidTemp={
             x:dtrack.data.weekends2020.slice(-3),
@@ -365,7 +366,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             type: 'scatter',
             mode: 'lines',
             line:{
-                width:5,
+                width:3,
                 color:'rgba(255,0,0,0.5)'
             },
             yaxis:'y2'
