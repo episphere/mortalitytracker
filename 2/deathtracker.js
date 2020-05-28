@@ -293,7 +293,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             y:dtrack.sum(yOfCovid.slice(0,n-3)),
             type: 'scatter',
             mode: 'lines',
-            name: 'Excess Sum',
+            name: 'excess',
             line:{
                 width:5,
                 color:'rgba(0, 100, 255, 0.5)'
@@ -394,7 +394,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 y:1
             },
             yaxis2: {
-                title: 'Sum',// (<span style="font-size:large">&#9679;</span>)',
+                title: 'Total',// (<span style="font-size:large">&#9679;</span>)',
                 titlefont: {color: 'rgb(0, 100, 255)'},
                 tickfont: {color: 'rgb(0, 100, 255)'},
                 overlaying: 'y',
@@ -628,7 +628,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             y:1
         },
         yaxis2: {
-            title: 'Sum',// (<span style="font-size:large">&#9679;</span>)',
+            title: 'Total',// (<span style="font-size:large">&#9679;</span>)',
             titlefont: {color: 'rgb(0, 100, 255)'},
             tickfont: {color: 'rgb(0, 100, 255)'},
             overlaying: 'y',
