@@ -293,7 +293,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             y:dtrack.sum(yOfCovid.slice(0,n-3)),
             type: 'scatter',
             mode: 'lines',
-            name: '<sub><span style="font-size:12px">excess</span></sub>',
+            name: '',
             line:{
                 width:5,
                 color:'rgba(0, 100, 255, 0.5)'
@@ -319,7 +319,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             //y:yWithCovid.slice(0,n-3),
             type: 'scatter',
             mode: 'lines',
-            name: '',
+            name: '<sup><span style="font-size:12px">excess (CDC)</span></sup>',
             line:{
                 width:5,
                 dash:'dot',
@@ -362,7 +362,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         let traceCovidSum={
             x:dtrack.data.covid[selectState.value].dates,
             y:dtrack.data.covid[selectState.value].deaths,
-            name:'<sub>Johns Hopkins</sub><br>_______',
+            name:'<sub><span style="font-size:11px">(Johns Hopkins)</span></sub><br>_______',
             type: 'scatter',
             mode: 'lines',
             line:{
