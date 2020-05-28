@@ -377,6 +377,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             
     Plotly.newPlot(div,allTraces,{
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+            hovermode: 'closest',
             xaxis: {
                 title: 'Date of calendar day in 2020'
             },
