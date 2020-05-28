@@ -284,7 +284,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             },
             line:{
                 width:3
-            }
+            },
+            fill: 'tozeroy',
+            fillcolor: 'rgba(0,100,255,0.2)'
         }
         let traceOfCovidSum={
             x:dtrack.data.weekends2020,
