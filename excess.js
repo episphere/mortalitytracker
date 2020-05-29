@@ -60,6 +60,7 @@ excess.cleanData = (data = {...dtrack.data.all}) => {
   const years = [...dtrack.data.years].sort((a,b) => a - b)
   const mmwrWeeks = [...dtrack.data.weeks].sort((a,b) => a - b)
   const maxMMWRWeek = Math.max(...mmwrWeeks)
+  const weeks2020 = [ ...new Set(dtrack.data.all.filter(row => row[keyMaps.year] === 2020 && row.jurisdiction_of_occurrence === states.find(state => state !== "All States") && row[keyMaps.week_ending_date]).map(row => row[keyMaps.week_ending_date]).sort((a,b) => a-b)) ]
 
   // Move United States to top of states so that it is the default option in the select list.
   // const unitedStatesIndex = states.indexOf("United States")
@@ -91,7 +92,11 @@ excess.cleanData = (data = {...dtrack.data.all}) => {
     // const currentDate = new Date()
     // const currentYear = currentDate.getUTCFullYear()
     // const currentMMWRWeek = Math.round((currentDate - new Date(`${currentYear}-01-01T00:00:00.000Z`))/(1000*86400*7)) + 1
-    statewiseObj[state] = data.filter(row => row.jurisdiction_of_occurrence === state && row.mmwrweek <= maxMMWRWeek).sort((a,b) => (a.mmwryear * 365 + a.mmwrweek * 7) - (b.mmwryear * 365 + b.mmwrweek * 7))
+    statewiseObj[state] = data.filter(row => row.jurisdiction_of_occurrence === state && row[keyMaps.week] <= maxMMWRWeek).sort((a,b) => (a.mmwryear * 365 + a.mmwrweek * 7) - (b.mmwryear * 365 + b.mmwrweek * 7))
+    if (state === "All States") {
+      statewiseObj[state].forEach(row => row[keyMaps.week_ending_date] = weeks2020[row[keyMaps.week] - 1])
+    }
+
     return statewiseObj
   }, {})
   return { sortedStateWiseData, causes, states, years, mmwrWeeks, maxMMWRWeek }
@@ -278,17 +283,33 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   // }
   console.log(excessDeathsFor2020)
 
-  const areaPlotTraces = Object.keys(excessDeathsFor2020).reduce((causesObj, cause, idx) => {
-    console.log(cause)
+  // const areaPlotTraces = Object.keys(excessDeathsFor2020).reduce((causesObj, cause, idx) => {
+  const areaPlotTraces = Object.keys(excessDeathsFor2020).map((cause, idx) => {
     const x = weeks2020.slice(8, -1)
     const y = excessDeathsFor2020[cause].slice(8, -1)
     const fill = "tonexty"
-    const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8" : "rgba(255,66,66,0.8)"
+    const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.8)" : "rgba(255,66,66,0.8)"
     const line = {
       color: cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8": "#f54242"
     }
     
-    causesObj[cause] = {
+    // causesObj[cause] = {
+    //   x,
+    //   y,
+    //   fill,
+    //   fillcolor,
+    //   type: "scatter",
+    //   stackgroup: `excess_${idx}`,
+    //   hovertemplate: "%{y}",
+    //   name: cause.includes("covid") ? `Deaths from ${cause} for 2020` : "Excess Deaths from "+ cause +" for 2020",
+    //   line,
+    //   mode: "markers",
+    //   marker: {
+    //     size: 2
+    //   }
+    // }
+    // return causesObj
+    return {
       x,
       y,
       fill,
@@ -303,8 +324,8 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
         size: 2
       }
     }
-    return causesObj
-  }, {})
+  })
+  // }, {})
 
   // const thresholdTrace = {
   //   x: weeks2020,
@@ -354,12 +375,13 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
       width: 0
     }
   }
-  
   // areaPlotTraces.push(thresholdTrace)
   // areaPlotTraces.push(averageOverOtherYearsTrace)
   // areaPlotTraces.push(averageOverOtherYearsTrace2)
+  // areaPlotTraces.reverse()
   
-  const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, Object.values(areaPlotTraces)[0], Object.values(areaPlotTraces)[1]]
+  const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, ...areaPlotTraces]
+  console.log(tracesToPlot)
   const layout = {
     title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> compared to the Average Deaths from 2014-2019`,
     legend: { 'orientation': "h" },
