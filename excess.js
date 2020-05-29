@@ -251,8 +251,8 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
     
     excessDeathsFor2020[key] = []
     if (cause === relevantCauses[0]) {
-      // excessDeathsFor2020[key] = excess.params.mmwrWeeks.map(week => dataFor2020ForCause[week] - averageForOtherYearsPerWeek[week])
-      excessDeathsFor2020[key] = excess.params.mmwrWeeks.map(week => dataFor2020ForCause[week])
+      excessDeathsFor2020[key] = excess.params.mmwrWeeks.map(week => dataFor2020ForCause[week] - averageForOtherYearsPerWeek[week])
+      // excessDeathsFor2020[key] = excess.params.mmwrWeeks.map(week => dataFor2020ForCause[week])
     } else {
       excessDeathsFor2020[key] = Object.values(dataFor2020ForCause)
     }
@@ -293,7 +293,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
       fillcolor,
       type: "scatter",
       hovertemplate: "%{y}",
-      name: cause === "COVID-19" ? `Deaths from ${cause} for 2020` : "Deaths from "+ cause +" for 2020",
+      name: cause.includes("covid") ? `Deaths from ${cause} for 2020` : "Excess Deaths from "+ cause +" for 2020",
       line,
       mode: "markers",
       marker: {
