@@ -5,15 +5,17 @@ const excess = {}
 excess.data = {}
 
 const keyMaps = {
-  observed_number: "observed_number",
-  average_expected_count: "average_expected_count",
-  upper_bound_threshold: "upper_bound_threshold",
-  week_ending_date: "week_ending_date",
+  // observed_number: "observed_number",
+  // average_expected_count: "average_expected_count",
+  // upper_bound_threshold: "upper_bound_threshold",
+  week_ending_date: "weekendingdate",
+  week: "mmwrweek",
   state: "state",
-  type: "type",
-  outcome: "outcome",
-  year: "year"
+  year: "mmwryear"
 }
+
+const relevantCauses = ["allcause","covid_19_u071_underlying_cause_of_death"]
+// const relevantCauses = ["allcause"]
 
 const fetchDataset = async (url) => {
   url = url ||  `${datasetURL}.${format}`
@@ -49,48 +51,60 @@ const loadHashParams = (selectElementId = "selectState") => {
   }
 }
 
-excess.cleanData = (data = {...excess.data.raw}) => {
+excess.cleanData = (data = {...dtrack.data.all}) => {
 
-  const types = [ ...new Set(data.map(row => row[keyMaps.type])) ]
-  const outcomes = [ ...new Set(data.map(row => row[keyMaps.outcome])) ]
-  const states = [ ...new Set(data.map(row => row[keyMaps.state])) ]
+  
+  const causes = Object.assign({}, dtrack.data.causes)
+  const states = [...dtrack.data.states]
   // const weeks2018 = [ ...new Set(data.filter(d => d.year == "2018").map(d => d.week_ending_date))] //Used for referencing weekends for all years to conform with how it is in deathtracker.js
-  const years = [ ...new Set(data.map(row => parseInt(new Date(row[keyMaps.week_ending_date]).getUTCFullYear())).sort((a,b) => a - b))]
+  const years = [...dtrack.data.years].sort((a,b) => a - b)
+  const mmwrWeeks = [...dtrack.data.weeks].sort((a,b) => a - b)
+  const maxMMWRWeek = Math.max(...mmwrWeeks)
 
   // Move United States to top of states so that it is the default option in the select list.
-  const unitedStatesIndex = states.indexOf("United States")
-  states.splice(unitedStatesIndex, 1)
-  states.unshift("United States")
+  // const unitedStatesIndex = states.indexOf("United States")
+  // states.splice(unitedStatesIndex, 1)
+  // states.unshift("United States")
 
   // Use the array indices as the concept IDs for now.
   // outcomes.forEach((outcome, ind) => excess.concepts.outcomes[outcome] = ind )
   // states.forEach((state, ind) => excess.concepts.states[state] = ind )
   // types.forEach((type, ind) => excess.concepts.types[type] = ind )
 
-  let dataWithMMWRWeek = []  
-  years.forEach(year => {
-    const yearlyData = data.filter(row => parseInt(new Date(row[keyMaps.week_ending_date]).getUTCFullYear()) === year)
-    const weeksInYear = [ ...new Set(yearlyData.map(row => row[keyMaps.week_ending_date])) ]
-    const yearlyDataTillCurrentWeek = yearlyData.filter(row => {
-      const rowWeekendDate = new Date(row[keyMaps.week_ending_date])
-      const currentDate = new Date()
-      // Only use weeks for all years till ongoing week in current year.
-      if (rowWeekendDate.getMonth() < currentDate.getMonth() || (rowWeekendDate.getMonth() === currentDate.getMonth() && rowWeekendDate.getDate() <= currentDate.getDate())) {
-        row.mmwrWeek = year === 2017 ? weeksInYear.indexOf(row[keyMaps.week_ending_date]) + 2 : weeksInYear.indexOf(row[keyMaps.week_ending_date]) + 1 // Data for 2017 starts from Jan 14, so starting MMWR week from 2 for that year to make it consistent.
-        row.mmwrYear = rowWeekendDate.getUTCFullYear() // First few weeks in 2018 data have the year field set to other years for some reason :/ Rectifying that
-        return row
-      }
-    })
-    dataWithMMWRWeek = dataWithMMWRWeek.concat(yearlyDataTillCurrentWeek)
-  })
-  
-  return { dataWithMMWRWeek, states, years, types, outcomes }
+  // let dataWithMMWRWeek = []
+  // years.forEach(year => {
+  //   const yearlyData = data.filter(row => parseInt(new Date(row[keyMaps.week_ending_date]).getUTCFullYear()) === year)
+  //   const weeksInYear = [ ...new Set(yearlyData.map(row => row[keyMaps.week_ending_date])) ]
+  //   const yearlyDataTillCurrentWeek = yearlyData.filter(row => {
+  //     const rowWeekendDate = new Date(row[keyMaps.week_ending_date])
+  //     const currentDate = new Date()
+  //     // Only use weeks for all years till ongoing week in current year.
+  //     if (rowWeekendDate.getMonth() < currentDate.getMonth() || (rowWeekendDate.getMonth() === currentDate.getMonth() && rowWeekendDate.getDate() <= currentDate.getDate())) {
+  //       row.mmwrWeek = year === 2017 ? weeksInYear.indexOf(row[keyMaps.week_ending_date]) + 2 : weeksInYear.indexOf(row[keyMaps.week_ending_date]) + 1 // Data for 2017 starts from Jan 14, so starting MMWR week from 2 for that year to make it consistent.
+  //       row.mmwrYear = rowWeekendDate.getUTCFullYear() // First few weeks in 2018 data have the year field set to other years for some reason :/ Rectifying that
+  //       return row
+  //     }
+  //   })
+  //   dataWithMMWRWeek = dataWithMMWRWeek.concat(yearlyDataTillCurrentWeek)
+  // })
+  const sortedStateWiseData = states.reduce((statewiseObj, state) => {
+    // const currentDate = new Date()
+    // const currentYear = currentDate.getUTCFullYear()
+    // const currentMMWRWeek = Math.round((currentDate - new Date(`${currentYear}-01-01T00:00:00.000Z`))/(1000*86400*7)) + 1
+    statewiseObj[state] = data.filter(row => row.jurisdiction_of_occurrence === state && row.mmwrweek <= maxMMWRWeek).sort((a,b) => (a.mmwryear * 365 + a.mmwrweek * 7) - (b.mmwryear * 365 + b.mmwrweek * 7))
+    return statewiseObj
+  }, {})
+  return { sortedStateWiseData, causes, states, years, mmwrWeeks, maxMMWRWeek }
 }
 
 excess.ui = async (divId) => {
-  excess.data.raw = await fetchDataset()
-  const { dataWithMMWRWeek, ...params } = excess.cleanData(excess.data.raw.map(row => ({...row}) )) // Cloning the original object
-  excess.data.cleanedData = dataWithMMWRWeek
+  if (!dtrack.data.all) {
+    try {
+      await dtrack.ui()
+    } catch (e) {}
+  }
+  const { sortedStateWiseData: cleanedData, ...params } = excess.cleanData(dtrack.data.all) // Cloning the original object
+  excess.data.cleanedData = cleanedData
   excess.params = params
 
 
@@ -143,10 +157,10 @@ excess.ui = async (divId) => {
   const plotDivId = "plotlyCompareDiv"
   let h = `<hr> Excess deaths Associated With COVID-19 in 2017-19 and 2020 for \
   <select id="selectState" onchange="excess.renderPlots('${plotDivId}');"></select>\
-  by type <select id="selectType" onchange="excess.renderPlots('${plotDivId}')"></select><br/>\
   [CDC sources <a href=${datasetURL} target="_blank">Excess Deaths</a>]<br>`
   h += `<div id="${plotDivId}"></div><br>`
   parentDiv.innerHTML = h
+  // by type <select id="selectType" onchange="excess.renderPlots('${plotDivId}')"></select><br/>\
   
   const selectState = document.getElementById("selectState")
   excess.params.states.forEach(state => {
@@ -156,13 +170,13 @@ excess.ui = async (divId) => {
     selectState.appendChild(stateOption)
   })
 
-  const selectType = document.getElementById("selectType")
-  excess.params.types.forEach(type => {
-    const typeOption = document.createElement("option")
-    typeOption.setAttribute("value", type)
-    typeOption.innerText = type
-    selectType.appendChild(typeOption)
-  })
+  // const selectType = document.getElementById("selectType")
+  // excess.params.types.forEach(type => {
+  //   const typeOption = document.createElement("option")
+  //   typeOption.setAttribute("value", type)
+  //   typeOption.innerText = type
+  //   selectType.appendChild(typeOption)
+  // })
 
 
   loadHashParams()
@@ -201,58 +215,75 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
     plotsParentDiv.appendChild(document.createElement("br"))
   }
 
-  const compareWith = document.getElementById("areaPlotCompareWithSelect") ? document.getElementById("areaPlotCompareWithSelect").value : keyMaps.average_expected_count
+  
   const { cleanedData: dataToPlot } = excess.data
   
   excess.stateSelected = document.getElementById('selectState').value
-  excess.typeSelected = document.getElementById('selectType').value
-  window.location.hash=`type=${encodeURIComponent(excess.typeSelected)}&state=${encodeURIComponent(excess.stateSelected)}`
-
-  excess.data.stateSelected = dataToPlot.filter(row => row[keyMaps.state] === excess.stateSelected && row[keyMaps.type] === excess.typeSelected)
-  excess.params.mmwrWeeks = [ ...new Set(excess.data.stateSelected.map(row => row.mmwrWeek)) ].sort((a, b) => a-b)
-  excess.params.maxMMWRWeek = excess.params.mmwrWeeks[excess.params.mmwrWeeks.length - 1]
-  const weeks2020 = excess.data.stateSelected.filter(row => row.mmwrYear === 2020 && row[keyMaps.outcome] === "All causes").map(row => new Date(row[keyMaps.week_ending_date]))
-
-  const dataFor2020 = excess.data.stateSelected.filter(row => (row.mmwrYear === 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined))
-  const dataForOtherYears = excess.data.stateSelected.filter(row => (row.mmwrYear !== 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined && row[keyMaps.outcome] === "All causes" ))
-  const avgOutcomeSpecificDataPerWeek = excess.params.mmwrWeeks.map(week => {
-    const outcomeDataPerYear = dataForOtherYears.filter(row => row.mmwrWeek === week)
-    return outcomeDataPerYear.reduce((prev, current) =>  prev + (current[keyMaps.observed_number] - current[compareWith]), 0)/outcomeDataPerYear.length
-  })
+  window.location.hash=`state=${encodeURIComponent(excess.stateSelected)}`
   
+  excess.data.stateSelected = dataToPlot[excess.stateSelected]
+  // excess.params.mmwrWeeks = [ ...new Set(excess.data.stateSelected.map(row => row.mmwrWeek)) ].sort((a, b) => a-b)
+  // excess.params.maxMMWRWeek = excess.params.mmwrWeeks[excess.params.mmwrWeeks.length - 1]
+  const dataFor2020 = excess.data.stateSelected.filter(row => (row[keyMaps.year] === 2020))
+  const weeks2020 = dataFor2020.map(row => new Date(row[keyMaps.week_ending_date]))
+  const dataForOtherYears = excess.data.stateSelected.filter(row => row[keyMaps.year] !== 2020)
+  const averageForOtherYearsPerWeek = excess.params.mmwrWeeks.reduce((weeksObj, week) => {
+    const dataForOtherYearsForWeek = dataForOtherYears.filter(row => row[keyMaps.week] === week)
+    const averagePerWeek = Math.round(dataForOtherYearsForWeek.reduce((sum, current) => sum + current[relevantCauses[0]], 0) / dataForOtherYearsForWeek.length)
+    weeksObj[week] = averagePerWeek
+    return weeksObj
+  }, {})
+  // const avgOutcomeSpecificDataPerWeek = excess.params.mmwrWeeks.map(week => {
+  //   const outcomeDataPerYear = dataForOtherYears.filter(row => row.mmwrWeek === week)
+  //   return Math.round(outcomeDataPerYear.reduce((prev, current) =>  prev + (current[keyMaps.observed_number] - current[compareWith]), 0)/outcomeDataPerYear.length)
+  // })
   excessDeathsFor2020 = {}
-  excess.params.outcomes.forEach(outcome => {
-    excessDeathsFor2020[outcome] = []
-    const outcomeSpecificData = dataFor2020.filter(row => row[keyMaps.outcome] === outcome)
-    const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
-    const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
+  relevantCauses.forEach(cause => {
+    const key = dtrack.data.shortName[cause]
+    const dataFor2020ForCause = excess.params.mmwrWeeks.reduce((weeksObj, week) => {
+      const dataFor2020ForWeek = dataFor2020.find(row => row[keyMaps.week] === week)
+      weeksObj[week] = dataFor2020ForWeek[cause]
+      // if (isNaN(weeksObj[week])) {
+      //   console.log(dataFor2020ForWeek, week, cause)
+      // }
+      return weeksObj
+    }, {})
     
-    outcomeSpecificData.forEach(row => {
-      const excessDeaths = row[keyMaps.observed_number] - row[compareWith]
-      if (!isNaN(excessDeaths)) {
-        if (row.mmwrWeek >= excess.params.maxMMWRWeek - 2 && excessDeaths < acceptableDeviation) {
-          // Completely arbitrary condition check to handle when last couple of weeks' data (couple of weeks is also an arbitrarily chosen time period)
-          // is just too weird (varies from the mean too much), for instance when counting has not completed for a week the excess for this observatioin 
-          // is just too less compared to the average excess.
-        } else {
-          excessDeathsFor2020[outcome].push(excessDeaths)
-        }
-      }
-    })
+    excessDeathsFor2020[key] = []
+    if (cause === relevantCauses[0]) {
+      // excessDeathsFor2020[key] = excess.params.mmwrWeeks.map(week => dataFor2020ForCause[week] - averageForOtherYearsPerWeek[week])
+      excessDeathsFor2020[key] = excess.params.mmwrWeeks.map(week => dataFor2020ForCause[week])
+    } else {
+      excessDeathsFor2020[key] = Object.values(dataFor2020ForCause)
+    }
+    // const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
   })
-  
-  const upperBoundThresholdsFor2020 = dataFor2020.filter(row => row[keyMaps.outcome] === excess.params.outcomes[0]).map(row => row[keyMaps.upper_bound_threshold])
+  // console.log(excessDeathsFor2020)
+  // excessDeathsFor2020["COVID-19"] = Object.keys(excessDeathsFor2020).reduce((sum, key) => {
+  //   if (key !== dtrack.data.shortName[excess.params.causes.allcause]) {
+  //     if (sum.length > 0) {
+  //       sum = sum.map((val, idx) => val + excessDeathsFor2020[key][idx])
+  //     } else {
+  //       sum = excessDeathsFor2020[key]
+  //     }
+  //   }
+  //   return sum
+  // }, [])
+  // delete excessDeathsFor2020[dtrack.data.shortName[relevantCauses[relevantCauses.length - 2]]]
+  // delete excessDeathsFor2020[dtrack.data.shortName[relevantCauses[relevantCauses.length - 1]]]
+  // const upperBoundThresholdsFor2020 = dataFor2020.filter(row => row[keyMaps.outcome] === excess.params.outcomes[0]).map(row => row[keyMaps.upper_bound_threshold])
   // const outcomeNamesMap = {
   //   "All causes": "Including COVID-19",
   //   "All causes, excluding COVID-19": "Excluding COVID-19"
   // }
-  const areaPlotTraces = excess.params.outcomes.map(outcome => {
-    const x = weeks2020
-    const y = excessDeathsFor2020[outcome]
-    const fill = outcome === "All causes" ? "tonexty" : "tozeroy"
-    const fillcolor = outcome === "All causes" ? "#f54242" : undefined
+  console.log(excessDeathsFor2020)
+  const areaPlotTraces = Object.keys(excessDeathsFor2020).map(cause => {
+    const x = weeks2020.slice(8, -1)
+    const y = excessDeathsFor2020[cause].slice(8, -1)
+    const fill = "tozeroy"
+    const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8" : "rgba(255,66,66,0.8)"
     const line = {
-      color: outcome === "All causes" ? "#f54242" : undefined
+      color: cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8": "#f54242"
     }
     
     return {
@@ -262,15 +293,14 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
       fillcolor,
       type: "scatter",
       hovertemplate: "%{y}",
-      name: "Excess Deaths from "+ outcome +" for 2020",
+      name: cause === "COVID-19" ? `Deaths from ${cause} for 2020` : "Deaths from "+ cause +" for 2020",
       line,
       mode: "markers",
       marker: {
         size: 2
       }
     }
-  }).reverse()
-  // console.log(areaPlotTraces)
+  })
 
   // const thresholdTrace = {
   //   x: weeks2020,
@@ -288,13 +318,13 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   // }
   
   const averageOverOtherYearsTrace = {
-    x: weeks2020,
-    y: avgOutcomeSpecificDataPerWeek,
+    x: weeks2020.slice(8, -1),
+    y: Object.values(averageForOtherYearsPerWeek).slice(8, -1),
     fill: "tozeroy",
     fiilcolor: "blueviolet",
     type: "scatter",
     hovertemplate: "%{y}",
-    name: "Average Excess Deaths from 2017-2019",
+    name: "Average Deaths from All Cause for 2014-2019",
     line: {
       color: "blueviolet"
     },
@@ -306,26 +336,15 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   
   // areaPlotTraces.push(thresholdTrace)
   areaPlotTraces.push(averageOverOtherYearsTrace)
-
+  // areaPlotTraces.reverse()
   const layout = {
-    title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> as <b>${excess.typeSelected}</b> vs. the <b style="color:maroon">${compareWith}</b>`,
+    title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> compared to the Average Deaths from 2014-2019`,
     legend: { 'orientation': "h" },
-    yaxis: {
-      'range': [-Math.abs(Math.min(...Object.values(excessDeathsFor2020).flat())*2.5), Math.abs(Math.max(...Object.values(excessDeathsFor2020).flat())*1.25)]
-    }
+    // yaxis: {
+    //   'range': [-Math.abs(Math.min(...Object.values(excessDeathsFor2020).flat())*2.5), Math.abs(Math.max(...Object.values(excessDeathsFor2020).flat())*1.25)]
+    // }
   }
   Plotly.newPlot(areaPlotDivId, areaPlotTraces, layout, {responsive: true});
-
-  if (!document.getElementById("areaPlotCompareWithSelect")) {
-    const compareWithSelectDiv = document.createElement("div")
-    compareWithSelectDiv.innerHTML = `Compare With:\
-    <select id="areaPlotCompareWithSelect" onchange="excess.areaPlot('${plotsParentDivId}')">\
-      <option value="${keyMaps.average_expected_count}">Average Expected Count</option>
-      <option value="${keyMaps.upper_bound_threshold}">Upper Bound Threshold</option>
-    </select>
-    `
-    areaPlotDiv.insertBefore(compareWithSelectDiv, areaPlotDiv.firstElementChild)
-  }
 
 }
 
@@ -349,12 +368,14 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   excess.typeSelected = document.getElementById('selectType').value || excess.extParams.type
 
   excess.data.stateSelected = dataToPlot.filter(row => row[keyMaps.state] === excess.stateSelected && row[keyMaps.type] === excess.typeSelected)
-  excess.params.mmwrWeeks = [ ...new Set(excess.data.stateSelected.map(row => row.mmwrWeek)) ].sort((a, b) => a-b)
-  excess.params.maxMMWRWeek = excess.params.mmwrWeeks[excess.params.mmwrWeeks.length - 1]
+  
+  const dataFor2020 = excess.data.stateSelected.filter(row => (row.mmwrYear === 2020 && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined))
   const weeks2020 = excess.data.stateSelected.filter(row => row.mmwrYear === 2020 && row[keyMaps.outcome] === "All causes").map(row => new Date(row[keyMaps.week_ending_date]))
-
-  const dataFor2020 = excess.data.stateSelected.filter(row => (row.mmwrYear === 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined))
+  excess.params.mmwrWeeks = [ ...new Set(dataFor2020.map(row => row.mmwrWeek)) ].sort((a, b) => a-b)
+  excess.params.maxMMWRWeek = excess.params.mmwrWeeks[excess.params.mmwrWeeks.length - 1]
+  
   const dataForOtherYears = excess.data.stateSelected.filter(row => (row.mmwrYear !== 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined && row[keyMaps.outcome] === "All causes" ))
+
   let cumulativeSumForOtherYears = 0
   const cumulativeDeathsForOtherYears = excess.params.mmwrWeeks.map(week => {
     const deathsPerWeek = dataForOtherYears.filter(row => row.mmwrWeek === week)
@@ -364,17 +385,37 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   
   cumulativeDeathsFor2020 = {}
   excess.params.outcomes.forEach(outcome => {
-    cumulativeDeathsFor2020[outcome] = []
-    const outcomeSpecificData = dataFor2020.filter(row => row[keyMaps.outcome] === outcome)
-    // const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
-    // const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
-    let cumulativeSum = 0
-    outcomeSpecificData.forEach(row => {
-      cumulativeSum += parseInt(row[keyMaps.observed_number])
-      if (!isNaN(cumulativeSum)) {
-        cumulativeDeathsFor2020[outcome].push(cumulativeSum)
-      }
-    })
+    if (outcome === "All causes") {
+      let key = outcome
+      let dataToProcess = []
+      //   key = "COVID-19"
+      //   excess.params.mmwrWeeks.forEach(week => {
+      //     const allDataForWeek = dataFor2020.filter(row => row.mmwrWeek === week )
+      //     if (allDataForWeek.length > 0) {
+      //       const diffBetweenOutcomes = allDataForWeek.find(row => row.outcome === outcome)[keyMaps.observed_number] - allDataForWeek.find(row => row.outcome !== outcome)[keyMaps.observed_number]
+      //       if (!isNaN(diffBetweenOutcomes)) {
+      //         dataToProcess.push(diffBetweenOutcomes)
+      //       }
+      //     }
+      //   })
+      // } else {
+        dataToProcess = dataFor2020.filter(row => row[keyMaps.outcome] === outcome).map(row => row[keyMaps.observed_number])
+      // }
+      cumulativeDeathsFor2020[key] = []
+      // const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
+      // const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
+      let cumulativeSum = 0
+      dataToProcess.forEach(row => {
+        if (outcome === "All causes") {
+          cumulativeSum += parseInt(row)
+        } else {
+          cumulativeSum += parseInt(row)
+        }
+        if (!isNaN(cumulativeSum)) {
+          cumulativeDeathsFor2020[key].push(cumulativeSum)
+        }
+      })
+    }
   })
   
   // const upperBoundThresholdsFor2020 = dataFor2020.filter(row => row[keyMaps.outcome] === excess.params.outcomes[0]).map(row => row[keyMaps.upper_bound_threshold])
@@ -382,14 +423,14 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   //   "All causes": "Including COVID-19",
   //   "All causes, excluding COVID-19": "Excluding COVID-19"
   // }
-  const areaPlotTraces = excess.params.outcomes.map(outcome => {
-    console.log(cumulativeDeathsFor2020[outcome])
+
+  const areaPlotTraces = Object.entries(cumulativeDeathsFor2020).map(([key, value]) => {
     const x = weeks2020.slice(8)
-    const y = cumulativeDeathsFor2020[outcome].slice(8)
-    const fill = outcome === "All causes" ? "tonexty" : "tozeroy"
-    const fillcolor = outcome === "All causes" ? "#f54242" : undefined
+    const y = value.slice(8)
+    const fill =  "tonexty"
+    const fillcolor = key === "All causes" ? "#80c6e8" : "#f54242"
     const line = {
-      color: outcome === "All causes" ? "#f54242" : undefined
+      color: key === "All causes" ? "#80c6e8" : "#f54242"
     }
     
     return {
@@ -399,15 +440,14 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
       fillcolor,
       type: "scatter",
       hovertemplate: "%{y}",
-      name: "Cumulative Deaths from "+ outcome +" for 2020",
+      name: "Cumulative Deaths from "+ key +" for 2020",
       line,
       mode: "markers",
       marker: {
         size: 2
       }
     }
-  }).reverse()
-
+  })
   // const thresholdTrace = {
   //   x: weeks2020,
   //   y: avgOutcomeSpecificDataPerWeek,
@@ -441,10 +481,12 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   }
   
   // areaPlotTraces.push(thresholdTrace)
+  
   areaPlotTraces.push(averageOverOtherYearsTrace)
-
+  areaPlotTraces.sort((trace1, trace2) => Math.max(...trace1.y) - Math.max(...trace2.y))
+  // console.log(areaPlotTraces)
   const layout = {
-    title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> as <b>${excess.typeSelected}</b> for 2020 vs. 2017-2019`,
+    title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2017-2019`,
     legend: { 'orientation': "h" }
   }
   Plotly.newPlot(areaPlotCumulativeDivId, areaPlotTraces, layout, {responsive: true});
