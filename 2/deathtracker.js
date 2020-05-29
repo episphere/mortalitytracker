@@ -377,6 +377,10 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 allTraces=dtrack.traceAll(allTraces)
             }
         }
+    let titleRight='Total mortality'
+    if(mortalityRate.checked){
+        titleRight='Total mortality per 100K'
+    }
             
     Plotly.newPlot(div,allTraces,{
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
@@ -395,7 +399,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 y:1
             },
             yaxis2: {
-                title: 'Total',// (<span style="font-size:large">&#9679;</span>)',
+                title: titleRight, //'Total',// (<span style="font-size:large">&#9679;</span>)',
                 titlefont: {color: 'rgb(0, 100, 255)'},
                 tickfont: {color: 'rgb(0, 100, 255)'},
                 overlaying: 'y',
@@ -612,10 +616,15 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             allTraces=dtrack.traceAll(allTraces)
         }
     }
+    let titleRight='Total mortality'
+    if(mortalityRate.checked){
+        titleRight='Total mortality per 100K'
+    }
         
     Plotly.newPlot(div,allTraces,{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         hovermode: 'closest',
+        height:500,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
@@ -629,7 +638,7 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             y:1
         },
         yaxis2: {
-            title: 'Total',// (<span style="font-size:large">&#9679;</span>)',
+            title: titleRight,//'Total',// (<span style="font-size:large">&#9679;</span>)',
             titlefont: {color: 'rgb(0, 100, 255)'},
             tickfont: {color: 'rgb(0, 100, 255)'},
             overlaying: 'y',
