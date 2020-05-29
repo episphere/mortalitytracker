@@ -278,22 +278,23 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   // }
   console.log(excessDeathsFor2020)
 
-  const areaPlotTraces = Object.keys(excessDeathsFor2020).map(cause => {
+  const areaPlotTraces = Object.keys(excessDeathsFor2020).reduce((causesObj, cause, idx) => {
+    console.log(cause)
     const x = weeks2020.slice(8, -1)
     const y = excessDeathsFor2020[cause].slice(8, -1)
-    const fill = "tozeroy"
+    const fill = "tonexty"
     const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8" : "rgba(255,66,66,0.8)"
     const line = {
       color: cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8": "#f54242"
     }
     
-    return {
+    causesObj[cause] = {
       x,
       y,
-      // fill,
-      // fillcolor,
+      fill,
+      fillcolor,
       type: "scatter",
-      stackgroup: "excess",
+      stackgroup: `excess_${idx}`,
       hovertemplate: "%{y}",
       name: cause.includes("covid") ? `Deaths from ${cause} for 2020` : "Excess Deaths from "+ cause +" for 2020",
       line,
@@ -302,7 +303,8 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
         size: 2
       }
     }
-  })
+    return causesObj
+  }, {})
 
   // const thresholdTrace = {
   //   x: weeks2020,
@@ -322,10 +324,10 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   const averageOverOtherYearsTrace = {
     x: weeks2020.slice(8, -1),
     y: Object.values(averageForOtherYearsPerWeek).slice(8, -1),
-    // fill: "tozeroy",
+    fill: "tozeroy",
     // fiilcolor: "blueviolet",
     type: "scatter",
-    stackgroup: "excess",
+    stackgroup: "excess_0",
     hovertemplate: "%{y}",
     name: "Average Deaths from All Cause for 2014-2019",
     line: {
@@ -336,10 +338,28 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
       size: 2
     }
   }
+
+  const averageOverOtherYearsTrace2 = {
+    x: weeks2020.slice(8, -1),
+    y: Object.values(averageForOtherYearsPerWeek).slice(8, -1),
+    fill: "tozeroy",
+    fillcolor: "rgba(255,255,255,0)",
+    mode: "none",
+    type: "scatter",
+    stackgroup: "excess_1",
+    hoverinfo: 'skip',
+    showlegend: false,
+    line: {
+      color: "rgba(255,255,255,0)",
+      width: 0
+    }
+  }
   
   // areaPlotTraces.push(thresholdTrace)
-  areaPlotTraces.push(averageOverOtherYearsTrace)
-  areaPlotTraces.reverse()
+  // areaPlotTraces.push(averageOverOtherYearsTrace)
+  // areaPlotTraces.push(averageOverOtherYearsTrace2)
+  
+  const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, Object.values(areaPlotTraces)[0], Object.values(areaPlotTraces)[1]]
   const layout = {
     title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> compared to the Average Deaths from 2014-2019`,
     legend: { 'orientation': "h" },
@@ -347,7 +367,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
     //   'range': [-Math.abs(Math.min(...Object.values(excessDeathsFor2020).flat())*2.5), Math.abs(Math.max(...Object.values(excessDeathsFor2020).flat())*1.25)]
     // }
   }
-  Plotly.newPlot(areaPlotDivId, areaPlotTraces, layout, {responsive: true});
+  Plotly.newPlot(areaPlotDivId, tracesToPlot, layout, {responsive: true});
 
 }
 
