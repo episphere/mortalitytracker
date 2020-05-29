@@ -115,7 +115,8 @@ dtrack.ui=async(div)=>{
     // move All States from end to beginning
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     //let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
-    let h='<hr>Comparing mortality by All Causes in 2020 with previous 5 years for <select id="selectState" onchange="dtrack.plotlyCompareCovid()"></select><br>Sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">CDC 2019-20</a>; <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">CDC 2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">Johns Hopkins COVID</a>'
+    //let h='<hr>Comparing causes of death by <span id="selectCause" value="AllCause"></span> onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
+    let h='<hr>Comparing mortality by All Causes <span id="selectCause" value="AllCause"></span> in 2020 with previous 5 years for <select id="selectState" onchange="dtrack.plotlyCompareCovid()"></select><br>Sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">CDC 2019-20</a>; <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">CDC 2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">Johns Hopkins COVID</a>'
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
@@ -128,6 +129,7 @@ dtrack.ui=async(div)=>{
         opt.value=opt.innerText=s
         selectState.appendChild(opt)
     })
+    /*
     Object.keys(dtrack.data.causes).forEach(c=>{
         let opt=document.createElement('option')
         opt.value=c
@@ -142,6 +144,7 @@ dtrack.ui=async(div)=>{
     let opt=document.createElement('option')
     opt.innerText=opt.value='COVID-19 (CDC)'
     selectCause.appendChild(opt)
+    */
     if(location.hash.length>2){
         dtrack.ui.parms=dtrack.ui.parms||{}
         location.hash.slice(1).split('&').forEach(av=>{
