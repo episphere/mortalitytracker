@@ -617,9 +617,12 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         }
     }
     let titleRight='Total mortality'
-    if(mortalityRate.checked){
-        titleRight='Total mortality per 100K'
+    if(document.getElementById('mortalityRate')){
+        if(mortalityRate.checked){
+            titleRight='Total mortality per 100K'
+        }
     }
+    
         
     Plotly.newPlot(div,allTraces,{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
