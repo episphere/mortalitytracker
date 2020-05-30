@@ -56,7 +56,9 @@ excess.cleanData = (data = {...dtrack.data.all}) => {
   
   const causes = Object.assign({}, dtrack.data.causes)
   const states = [...dtrack.data.states]
-  // const weeks2018 = [ ...new Set(data.filter(d => d.year == "2018").map(d => d.week_ending_date))] //Used for referencing weekends for all years to conform with how it is in deathtracker.js
+  const shortNames = Object.assign({}, dtrack.data.shortName)
+  shortNames[relevantCauses[0]] = "All Causes"
+  shortNames[relevantCauses[1]] = "COVID-19"
   const years = [...dtrack.data.years].sort((a,b) => a - b)
   const mmwrWeeks = [...dtrack.data.weeks].sort((a,b) => a - b)
   const maxMMWRWeek = Math.max(...mmwrWeeks)
@@ -99,7 +101,7 @@ excess.cleanData = (data = {...dtrack.data.all}) => {
 
     return statewiseObj
   }, {})
-  return { sortedStateWiseData, causes, states, years, mmwrWeeks, maxMMWRWeek }
+  return { sortedStateWiseData, causes, states, shortNames, years, mmwrWeeks, maxMMWRWeek }
 }
 
 excess.ui = async (divId) => {
@@ -247,7 +249,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   // })
   excessDeathsFor2020 = {}
   relevantCauses.forEach(cause => {
-    const key = dtrack.data.shortName[cause]
+    const key = excess.params.shortNames[cause]
     const dataFor2020ForCause = excess.params.mmwrWeeks.reduce((weeksObj, week) => {
       const dataFor2020ForWeek = dataFor2020.find(row => row[keyMaps.week] === week)
       weeksObj[week] = dataFor2020ForWeek ? dataFor2020ForWeek[cause] : NaN
@@ -268,7 +270,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   })
   // console.log(excessDeathsFor2020)
   // excessDeathsFor2020["COVID-19"] = Object.keys(excessDeathsFor2020).reduce((sum, key) => {
-  //   if (key !== dtrack.data.shortName[excess.params.causes.allcause]) {
+  //   if (key !== excess.params.shortNames[excess.params.causes.allcause]) {
   //     if (sum.length > 0) {
   //       sum = sum.map((val, idx) => val + excessDeathsFor2020[key][idx])
   //     } else {
@@ -291,9 +293,9 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
     const x = weeks2020.slice(8, -1)
     const y = excessDeathsFor2020[cause].slice(8, -1)
     const fill = "tonexty"
-    const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.8)" : "rgba(255,66,66,0.5)"
+    const fillcolor = cause === excess.params.shortNames[relevantCauses[0]] ? "rgba(128,198,232,0.8)" : "rgba(255,66,66,0.5)"
     const line = {
-      color: cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8": "#f54242"
+      color: cause === excess.params.shortNames[relevantCauses[0]] ? "#80c6e8": "#f54242"
     }
     
     // causesObj[cause] = {
@@ -353,7 +355,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
     type: "scatter",
     stackgroup: "excess_0",
     hovertemplate: "%{y}",
-    name: "Average Deaths from All Cause for 2014-2019",
+    name: "Average Deaths from All Causes for 2014-2019",
     line: {
       color: "blueviolet"
     },
@@ -430,7 +432,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   cumulativeDeathsFor2020 = {}
   relevantCauses.forEach(cause => {
     // if (cause === relevantCauses[0]) {
-      const key = dtrack.data.shortName[cause]
+      const key = excess.params.shortNames[cause]
       const cumulativeSum = (sum => value => sum += value)(0)
       const cumulativeSumPerWeek = dataFor2020.map(row => isNaN(row[cause]) ? 0 : row[cause]).map(cumulativeSum)
       cumulativeDeathsFor2020[key] = cumulativeSumPerWeek
@@ -461,9 +463,9 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     const x = weeks2020.slice(8)
     const y = value.slice(8)
     const fill =  "tonexty"
-    const fillcolor = key === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.6)" : "rgba(255,66,66,0.6)"
+    const fillcolor = key === excess.params.shortNames[relevantCauses[0]] ? "rgba(128,198,232,0.6)" : "rgba(255,66,66,0.6)"
     const line = {
-      color: key === dtrack.data.shortName[relevantCauses[0]] ? "rgb(108,168,255)" : "#f54242",
+      color: key === excess.params.shortNames[relevantCauses[0]] ? "rgb(108,168,255)" : "#f54242",
       width: 2
     }
 
@@ -474,11 +476,11 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
       fill,
       fillcolor,
       type: "scatter",
-      stackgroup: key ===  dtrack.data.shortName[relevantCauses[1]] ? "cumulative" : undefined,
+      stackgroup: key ===  excess.params.shortNames[relevantCauses[1]] ? "cumulative" : undefined,
       hovertemplate: "%{y}",
       name: "Cumulative Deaths from "+ key +" for 2020",
       line,
-      mode: key ===  dtrack.data.shortName[relevantCauses[1]] ? "markers" : "lines+markers",
+      mode: key ===  excess.params.shortNames[relevantCauses[1]] ? "markers" : "lines+markers",
       marker: {
         size: 2
       }
@@ -507,7 +509,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     type: "scatter",
     stackgroup: "cumulative",
     hovertemplate: "%{y}",
-    name: "Average Cumulative Deaths from 2014-2019",
+    name: "Average Cumulative Deaths from All Causes for 2014-2019",
     line: {
       color: "blueviolet",
       width: 2
