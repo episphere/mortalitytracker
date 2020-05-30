@@ -204,7 +204,7 @@ excess.renderPlots = (plotsParentDivId="plotlyCompareDiv") => {
   excess.areaPlot(plotsParentDivId)
   excess.areaPlotCumulative(plotsParentDivId)
   // excess.scatterPlot(plotsParentDivId)
-  excess.barChart(plotsParentDivId)
+  // excess.barChart(plotsParentDivId)
 }
 
 excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
@@ -281,14 +281,14 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   //   "All causes": "Including COVID-19",
   //   "All causes, excluding COVID-19": "Excluding COVID-19"
   // }
-  console.log(excessDeathsFor2020)
+  
 
   // const areaPlotTraces = Object.keys(excessDeathsFor2020).reduce((causesObj, cause, idx) => {
   const areaPlotTraces = Object.keys(excessDeathsFor2020).map((cause, idx) => {
     const x = weeks2020.slice(8, -1)
     const y = excessDeathsFor2020[cause].slice(8, -1)
     const fill = "tonexty"
-    const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.8)" : "rgba(255,66,66,0.8)"
+    const fillcolor = cause === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.8)" : "rgba(255,66,66,0.5)"
     const line = {
       color: cause === dtrack.data.shortName[relevantCauses[0]] ? "#80c6e8": "#f54242"
     }
@@ -381,13 +381,13 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   // areaPlotTraces.reverse()
   
   const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, ...areaPlotTraces]
-  console.log(tracesToPlot)
+  // console.log(tracesToPlot)
   const layout = {
     title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> compared to the Average Deaths from 2014-2019`,
     legend: { 'orientation': "h" },
-    // yaxis: {
-    //   'range': [-Math.abs(Math.min(...Object.values(excessDeathsFor2020).flat())*2.5), Math.abs(Math.max(...Object.values(excessDeathsFor2020).flat())*1.25)]
-    // }
+    yaxis: {
+      title: "Number of Deaths"
+    }
   }
   Plotly.newPlot(areaPlotDivId, tracesToPlot, layout, {responsive: true});
 
@@ -406,61 +406,46 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     plotsParentDiv.appendChild(document.createElement("br"))
   }
 
-  const compareWith = keyMaps.average_expected_count
   const { cleanedData: dataToPlot } = excess.data
   
   excess.stateSelected = document.getElementById('selectState').value || excess.extParams.state
-  excess.typeSelected = document.getElementById('selectType').value || excess.extParams.type
 
-  excess.data.stateSelected = dataToPlot.filter(row => row[keyMaps.state] === excess.stateSelected && row[keyMaps.type] === excess.typeSelected)
+  excess.data.stateSelected = dataToPlot[excess.stateSelected]
   
-  const dataFor2020 = excess.data.stateSelected.filter(row => (row.mmwrYear === 2020 && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined))
-  const weeks2020 = excess.data.stateSelected.filter(row => row.mmwrYear === 2020 && row[keyMaps.outcome] === "All causes").map(row => new Date(row[keyMaps.week_ending_date]))
-  excess.params.mmwrWeeks = [ ...new Set(dataFor2020.map(row => row.mmwrWeek)) ].sort((a, b) => a-b)
-  excess.params.maxMMWRWeek = excess.params.mmwrWeeks[excess.params.mmwrWeeks.length - 1]
-  
-  const dataForOtherYears = excess.data.stateSelected.filter(row => (row.mmwrYear !== 2020 && row.mmwrWeek <= excess.params.maxMMWRWeek && row[keyMaps.observed_number] !== undefined && row[keyMaps.upper_bound_threshold] !== undefined && row[keyMaps.outcome] === "All causes" ))
+  const dataFor2020 = excess.data.stateSelected.filter(row => (row[keyMaps.year] === 2020))
+  const weeks2020 = dataFor2020.map(row => new Date(row[keyMaps.week_ending_date]))
+  const dataForOtherYears = excess.data.stateSelected.filter(row => row[keyMaps.year] !== 2020)
 
-  let cumulativeSumForOtherYears = 0
-  const cumulativeDeathsForOtherYears = excess.params.mmwrWeeks.map(week => {
-    const deathsPerWeek = dataForOtherYears.filter(row => row.mmwrWeek === week)
-    cumulativeSumForOtherYears += deathsPerWeek.reduce((prev, current) =>  prev + parseInt(current[keyMaps.observed_number]), 0)/deathsPerWeek.length
-    return cumulativeSumForOtherYears
-  })
+  const cumulativeAvgDeathsForOtherYears = excess.params.mmwrWeeks.reduce((cumulativeAvgSum, week) => {
+    const deathsThisWeek = dataForOtherYears.filter(row => row[keyMaps.week] === week)
+    const avgThisWeek = deathsThisWeek.reduce((prev, current) =>  prev + (current[relevantCauses[0]] || 0), 0) / deathsThisWeek.length
+    const cumulativeAvgdSumTillThisWeek = cumulativeAvgSum.length === 0 ? avgThisWeek : cumulativeAvgSum[cumulativeAvgSum.length - 1] + avgThisWeek
+    cumulativeAvgSum.push(Math.round(cumulativeAvgdSumTillThisWeek))
+    return cumulativeAvgSum
+  }, [])
   
   cumulativeDeathsFor2020 = {}
-  excess.params.outcomes.forEach(outcome => {
-    if (outcome === "All causes") {
-      let key = outcome
-      let dataToProcess = []
-      //   key = "COVID-19"
-      //   excess.params.mmwrWeeks.forEach(week => {
-      //     const allDataForWeek = dataFor2020.filter(row => row.mmwrWeek === week )
-      //     if (allDataForWeek.length > 0) {
-      //       const diffBetweenOutcomes = allDataForWeek.find(row => row.outcome === outcome)[keyMaps.observed_number] - allDataForWeek.find(row => row.outcome !== outcome)[keyMaps.observed_number]
-      //       if (!isNaN(diffBetweenOutcomes)) {
-      //         dataToProcess.push(diffBetweenOutcomes)
-      //       }
-      //     }
-      //   })
-      // } else {
-        dataToProcess = dataFor2020.filter(row => row[keyMaps.outcome] === outcome).map(row => row[keyMaps.observed_number])
-      // }
-      cumulativeDeathsFor2020[key] = []
-      // const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
-      // const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
-      let cumulativeSum = 0
-      dataToProcess.forEach(row => {
-        if (outcome === "All causes") {
-          cumulativeSum += parseInt(row)
-        } else {
-          cumulativeSum += parseInt(row)
-        }
-        if (!isNaN(cumulativeSum)) {
-          cumulativeDeathsFor2020[key].push(cumulativeSum)
-        }
-      })
+  relevantCauses.forEach(cause => {
+    if (cause === relevantCauses[0]) {
+      const key = dtrack.data.shortName[cause]
+      const cumulativeSum = (sum => value => sum += value)(0)
+      const cumulativeSumPerWeek = dataFor2020.map(row => isNaN(row[cause]) ? 0 : row[cause]).map(cumulativeSum)
+      cumulativeDeathsFor2020[key] = cumulativeSumPerWeek
     }
+    //   key = "COVID-19"
+    //   excess.params.mmwrWeeks.forEach(week => {
+    //     const allDataForWeek = dataFor2020.filter(row => row.mmwrWeek === week )
+    //     if (allDataForWeek.length > 0) {
+    //       const diffBetweenOutcomes = allDataForWeek.find(row => row.outcome === outcome)[keyMaps.observed_number] - allDataForWeek.find(row => row.outcome !== outcome)[keyMaps.observed_number]
+    //       if (!isNaN(diffBetweenOutcomes)) {
+    //         dataToProcess.push(diffBetweenOutcomes)
+    //       }
+    //     }
+    //   })
+    // } else {
+    // }
+    // const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
+    // const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
   })
   
   // const upperBoundThresholdsFor2020 = dataFor2020.filter(row => row[keyMaps.outcome] === excess.params.outcomes[0]).map(row => row[keyMaps.upper_bound_threshold])
@@ -473,9 +458,10 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     const x = weeks2020.slice(8)
     const y = value.slice(8)
     const fill =  "tonexty"
-    const fillcolor = key === "All causes" ? "#80c6e8" : "#f54242"
+    const fillcolor = key === dtrack.data.shortName[relevantCauses[0]] ? "rgba(255,66,66,0.5)" : "#f54242"
     const line = {
-      color: key === "All causes" ? "#80c6e8" : "#f54242"
+      color: "rgb(255,66,66)",
+      width: 2
     }
     
     return {
@@ -487,7 +473,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
       hovertemplate: "%{y}",
       name: "Cumulative Deaths from "+ key +" for 2020",
       line,
-      mode: "markers",
+      mode: "lines+markers",
       marker: {
         size: 2
       }
@@ -510,16 +496,17 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   
   const averageOverOtherYearsTrace = {
     x: weeks2020.slice(8),
-    y: cumulativeDeathsForOtherYears.slice(8),
+    y: cumulativeAvgDeathsForOtherYears.slice(8),
     fill: "tozeroy",
     fiilcolor: "blueviolet",
     type: "scatter",
     hovertemplate: "%{y}",
-    name: "Average Cumulative Deaths from 2017-2019",
+    name: "Average Cumulative Deaths from 2014-2019",
     line: {
-      color: "blueviolet"
+      color: "blueviolet",
+      width: 2
     },
-    mode: "markers",
+    mode: "lines+markers",
     marker: {
       size: 2
     }
@@ -528,24 +515,17 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   // areaPlotTraces.push(thresholdTrace)
   
   areaPlotTraces.push(averageOverOtherYearsTrace)
-  areaPlotTraces.sort((trace1, trace2) => Math.max(...trace1.y) - Math.max(...trace2.y))
+  // areaPlotTraces.sort((trace1, trace2) => Math.max(...trace2.y) - Math.max(...trace1.y))
   // console.log(areaPlotTraces)
+  areaPlotTraces.reverse()
   const layout = {
-    title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2017-2019`,
-    legend: { 'orientation': "h" }
+    title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2014-2019 averaged`,
+    legend: { 'orientation': "h" },
+    yaxis: {
+      title: 'Cumulative Count of Deaths'
+    }
   }
   Plotly.newPlot(areaPlotCumulativeDivId, areaPlotTraces, layout, {responsive: true});
-
-  if (!document.getElementById("areaPlotCompareWithSelect")) {
-    const compareWithSelectDiv = document.createElement("div")
-    compareWithSelectDiv.innerHTML = `Compare With:\
-    <select id="areaPlotCompareWithSelect" onchange="excess.areaPlot('${plotsParentDivId}')">\
-      <option value="${keyMaps.average_expected_count}">Average Expected Count</option>
-      <option value="${keyMaps.upper_bound_threshold}">Upper Bound Threshold</option>
-    </select>
-    `
-    areaPlotDiv.insertBefore(compareWithSelectDiv, areaPlotDiv.firstElementChild)
-  }
 
 }
 
