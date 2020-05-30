@@ -162,7 +162,7 @@ excess.ui = async (divId) => {
   const plotDivId = "plotlyCompareDiv"
   let h = `<hr> Excess deaths Associated With COVID-19 in 2017-19 and 2020 for \
   <select id="selectState" onchange="excess.renderPlots('${plotDivId}');"></select>\
-  [CDC sources <a href=${datasetURL} target="_blank">Excess Deaths</a>]<br>`
+  [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]`
   h += `<div id="${plotDivId}"></div><br>`
   parentDiv.innerHTML = h
   // by type <select id="selectType" onchange="excess.renderPlots('${plotDivId}')"></select><br/>\
