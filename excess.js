@@ -36,8 +36,8 @@ const fetchDataset = async (url) => {
 }
 
 const loadHashParams = (selectElementId = "selectState") => {
+  excess.extParams = excess.extParams || {}
   if (window.location.hash.length > 2) {
-    excess.extParams = excess.extParams || {}
     window.location.hash.slice(1).split('&').forEach(hashParam => {
       const [param, value] = hashParam.split("=")
       excess.extParams[param] = decodeURIComponent(value)
@@ -185,6 +185,9 @@ excess.ui = async (divId) => {
 
 
   loadHashParams()
+  if (!excess.extParams.state) {
+    selectState.value = "Maryland"
+  }
   excess.renderPlots(plotDivId)
 }
 
