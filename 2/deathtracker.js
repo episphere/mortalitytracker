@@ -239,7 +239,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -377,9 +377,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 allTraces=dtrack.traceAll(allTraces)
             }
         }
-    let titleRight='Total mortality'
+    let titleRight='Total excess mortality'
     if(mortalityRate.checked){
-        titleRight='Total mortality per 100K'
+        titleRight='Total excess mortality per 100K'
     }
             
     Plotly.newPlot(div,allTraces,{
@@ -616,10 +616,10 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             allTraces=dtrack.traceAll(allTraces)
         }
     }
-    let titleRight='Total mortality'
+    let titleRight='Total excess mortality'
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
-            titleRight='Total mortality per 100K'
+            titleRight='Total excess mortality per 100K'
         }
     }
     

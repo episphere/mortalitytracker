@@ -120,7 +120,7 @@ dtrack.ui=async(div)=>{
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
-    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data ... </span></span></div>'
+    //h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data ... </span></span></div>'
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
@@ -155,7 +155,7 @@ dtrack.ui=async(div)=>{
         if(dtrack.ui.parms.state){selectState.value=dtrack.ui.parms.state}
     }
     dtrack.plotlyCompareCovid()
-    setTimeout(dtrack.plotlyWithCovid,1000)
+    //setTimeout(dtrack.plotlyWithCovid,1000)
     setTimeout(dtrack.dataDictionary,600)
 }
 
@@ -243,7 +243,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -955,7 +955,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         setTimeout(selectCause.onchange,100)
         //debugger
     }
-    mortalityRate.disabled=false
+    //mortalityRate.disabled=false
 }
 
 dtrack.traceAll=(traces)=>{ // annualized mortality rate
