@@ -461,7 +461,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     const x = weeks2020.slice(8)
     const y = value.slice(8)
     const fill =  "tonexty"
-    const fillcolor = key === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.6)" : "#f54242"
+    const fillcolor = key === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.6)" : "rgba(255,66,66,0.6)"
     const line = {
       color: key === dtrack.data.shortName[relevantCauses[0]] ? "rgb(108,168,255)" : "#f54242",
       width: 2
