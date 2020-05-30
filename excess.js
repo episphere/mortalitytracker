@@ -429,12 +429,12 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   
   cumulativeDeathsFor2020 = {}
   relevantCauses.forEach(cause => {
-    if (cause === relevantCauses[0]) {
+    // if (cause === relevantCauses[0]) {
       const key = dtrack.data.shortName[cause]
       const cumulativeSum = (sum => value => sum += value)(0)
       const cumulativeSumPerWeek = dataFor2020.map(row => isNaN(row[cause]) ? 0 : row[cause]).map(cumulativeSum)
       cumulativeDeathsFor2020[key] = cumulativeSumPerWeek
-    }
+    // }
     //   key = "COVID-19"
     //   excess.params.mmwrWeeks.forEach(week => {
     //     const allDataForWeek = dataFor2020.filter(row => row.mmwrWeek === week )
@@ -463,9 +463,10 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     const fill =  "tonexty"
     const fillcolor = key === dtrack.data.shortName[relevantCauses[0]] ? "rgba(128,198,232,0.6)" : "#f54242"
     const line = {
-      color: "rgb(108,168,255)",
+      color: key === dtrack.data.shortName[relevantCauses[0]] ? "rgb(108,168,255)" : "#f54242",
       width: 2
     }
+
     
     return {
       x,
@@ -473,12 +474,13 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
       fill,
       fillcolor,
       type: "scatter",
+      stackgroup: key ===  dtrack.data.shortName[relevantCauses[1]] ? "cumulative" : undefined,
       hovertemplate: "%{y}",
       name: "Cumulative Deaths from "+ key +" for 2020",
       line,
-      mode: "lines+markers",
+      mode: key ===  dtrack.data.shortName[relevantCauses[1]] ? "markers" : "lines+markers",
       marker: {
-        size: 3
+        size: 2
       }
     }
   })
@@ -503,6 +505,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     fill: "tozeroy",
     fiilcolor: "blueviolet",
     type: "scatter",
+    stackgroup: "cumulative",
     hovertemplate: "%{y}",
     name: "Average Cumulative Deaths from 2014-2019",
     line: {
@@ -514,13 +517,15 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
       size: 2
     }
   }
+
+
   
   // areaPlotTraces.push(thresholdTrace)
   
   areaPlotTraces.push(averageOverOtherYearsTrace)
   // areaPlotTraces.sort((trace1, trace2) => Math.max(...trace2.y) - Math.max(...trace1.y))
-  // console.log(areaPlotTraces)
-  areaPlotTraces.reverse()
+  console.log(areaPlotTraces)
+  const tracesToPlot = [areaPlotTraces[0], areaPlotTraces[2], areaPlotTraces[1]]
   const layout = {
     title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2014-2019 averaged`,
     legend: { 'orientation': "h" },
@@ -528,7 +533,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
       title: 'Cumulative Count of Deaths'
     }
   }
-  Plotly.newPlot(areaPlotCumulativeDivId, areaPlotTraces, layout, {responsive: true});
+  Plotly.newPlot(areaPlotCumulativeDivId, tracesToPlot, layout, {responsive: true});
 
 }
 
