@@ -323,9 +323,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             mode: 'lines',
             name: 'with COVID',
             line:{
-                width:1,
+                width:2,
                 //dash:'dot',
-                color:'gray'
+                color:'rgba(0,255,0,0.5)'
             }
         }
         let traceWithCovidSum={
@@ -393,9 +393,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 allTraces=dtrack.traceAll(allTraces)
             }
         }
-    let titleRight='Total excess mortality (...)'
+    let titleRight='Total excess mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(mortalityRate.checked){
-        titleRight='Total excess mortality per 100K (...)'
+        titleRight='Total excess mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
     }
             
     Plotly.newPlot(div,allTraces,{
@@ -580,7 +580,6 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         mode: 'lines',
         name: 'excess total',
         line: {
-            //color:'blue',
             color:'rgba(0,100,255,0.5)',
             //color:'rgba(128,0,0,0.5)',
             width:3,
@@ -628,7 +627,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-    let allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,traceExcess,trace2020temp])
     if(selectCause.value=='allcause'){ // add covid
         if(!dtrack.data.covid){
             await dtrack.getCovid()
@@ -659,7 +658,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             name: 'COVID CDC',
             line:{
                 width:1,
-                color:'rgba(255,0,0,0.2)'
+                color:'rgba(255,0,0,1)'
             },
             fill: 'tonexty',
             //fillcolor: 'rgba(128,0,0,0.2)'
@@ -667,7 +666,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         }
         //debugger
 
-        allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,traceAvgBlank,trace2020ofCovid,trace2020,trace2020temp])
+        allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
     }
     
     
@@ -676,10 +675,10 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             allTraces=dtrack.traceAll(allTraces)
         }
     }
-    let titleRight='Total excess mortality (...)'
+    let titleRight='Total excess mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
-            titleRight='Total excess mortality per 100K (...)'
+            titleRight='Total excess mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
         }
     }
     
