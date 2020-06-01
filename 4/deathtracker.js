@@ -658,7 +658,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             name: 'COVID CDC',
             line:{
                 width:1,
-                color:'rgba(255,0,0,1)'
+                color:'rgba(255,0,0,0.75)'
             },
             fill: 'tonexty',
             //fillcolor: 'rgba(128,0,0,0.2)'
