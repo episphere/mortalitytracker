@@ -388,7 +388,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, ...areaPlotTraces]
   // console.log(tracesToPlot)
   const layout = {
-    title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> compared to the Average Deaths from 2014-2019`,
+    title: `Additional Deaths in <b style="color:green">${excess.stateSelected}</b> in 2020 compared to the Average Deaths from 2014-2019`,
     legend: { 'orientation': "h" },
     yaxis: {
       title: "Number of Deaths"
