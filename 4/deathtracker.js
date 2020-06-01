@@ -334,7 +334,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             //y:yWithCovid.slice(0,n-3),
             type: 'scatter',
             mode: 'lines',
-            name: '<sup><span style="font-size:12px">excess (CDC)</span></sup>',
+            name: '<sup><span style="font-size:12px">additional (CDC)</span></sup>',
             line:{
                 width:5,
                 dash:'dot',
@@ -377,7 +377,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         let traceCovidSum={
             x:dtrack.data.covid[selectState.value].dates,
             y:dtrack.data.covid[selectState.value].deaths,
-            name:'<span style="font-size:11px">(Johns Hopkins)</span>',
+            name:'<span style="font-size:11px">Johns Hopkins</span>',
             type: 'scatter',
             mode: 'lines',
             line:{
@@ -393,9 +393,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 allTraces=dtrack.traceAll(allTraces)
             }
         }
-    let titleRight='Total excess mortality (<span style="font-size:x-large"> &#8285; </span>)'
+    let titleRight='Total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(mortalityRate.checked){
-        titleRight='Total excess mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+        titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
     }
             
     Plotly.newPlot(div,allTraces,{
@@ -578,7 +578,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         y:dtrack.sum(dev),
         type: 'scatter',
         mode: 'lines',
-        name: 'excess total',
+        name: '<span style="font-size:12">Additional<br>total</span>',
         line: {
             color:'rgba(0,100,255,0.5)',
             //color:'rgba(128,0,0,0.5)',
@@ -675,10 +675,10 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             allTraces=dtrack.traceAll(allTraces)
         }
     }
-    let titleRight='Total excess mortality (<span style="font-size:x-large"> &#8285; </span>)'
+    let titleRight='Total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
-            titleRight='Total excess mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+            titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
         }
     }
     
