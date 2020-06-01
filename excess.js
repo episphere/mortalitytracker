@@ -322,7 +322,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
       type: "scatter",
       stackgroup: `excess_${idx}`,
       hovertemplate: "%{y}",
-      name: cause.includes("covid") ? `Deaths from ${cause} for 2020` : "Excess Deaths from "+ cause +" for 2020",
+      name: cause === excess.params.shortNames[relevantCauses[1]] ? `Deaths from ${cause} for 2020` : "Additional Deaths from "+ cause +" for 2020",
       line,
       mode: "markers",
       marker: {
@@ -388,7 +388,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, ...areaPlotTraces]
   // console.log(tracesToPlot)
   const layout = {
-    title: `Excess Mortality in <b style="color:green">${excess.stateSelected}</b> compared to the Average Deaths from 2014-2019`,
+    title: `Additional Deaths in <b style="color:green">${excess.stateSelected}</b> in 2020 compared to the Average Deaths from 2014-2019`,
     legend: { 'orientation': "h" },
     yaxis: {
       title: "Number of Deaths"
@@ -460,8 +460,8 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   // }
 
   const areaPlotTraces = Object.entries(cumulativeDeathsFor2020).map(([key, value]) => {
-    const x = weeks2020.slice(8)
-    const y = value.slice(8)
+    const x = weeks2020.slice(8, -1)
+    const y = value.slice(8, -1)
     const fill =  "tonexty"
     const fillcolor = key === excess.params.shortNames[relevantCauses[0]] ? "rgba(128,198,232,0.6)" : "rgba(255,66,66,0.6)"
     const line = {
@@ -502,8 +502,8 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   // }
   
   const averageOverOtherYearsTrace = {
-    x: weeks2020.slice(8),
-    y: cumulativeAvgDeathsForOtherYears.slice(8),
+    x: weeks2020.slice(8, -1),
+    y: cumulativeAvgDeathsForOtherYears.slice(8, -1),
     fill: "tozeroy",
     fiilcolor: "blueviolet",
     type: "scatter",
