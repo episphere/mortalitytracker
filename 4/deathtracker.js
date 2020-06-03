@@ -471,7 +471,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020',
+        name: '2020 CDC',
         marker: {
             color:'maroon',
             size:8
@@ -686,7 +686,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     Plotly.newPlot(div,allTraces,{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         hovermode: 'closest',
-        height:520,
+        height:530,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
