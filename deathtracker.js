@@ -239,13 +239,37 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=true> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people.<br><span style="color:gray">Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
     })
     h+='</p>'
     div.innerHTML=h
+}
+
+//dtrack.sum = (xx,n)=>xx.slice(0,n+1).reduce((a,b)=>a+b)
+dtrack.sum = (xx,n=xx.length)=>{
+    let y=[xx[0]||0]
+    for(var i=1;i<n;i++){
+        xx[i]=xx[i]||0
+        y.push(y[i-1]+xx[i])
+    }
+    return y
+}
+dtrack.memb=function(x,dst){ // builds membership function
+	var n = x.length-1;
+	if(!dst){
+		dst = this.sort(x);
+		Ind=dst[1];
+		dst[1]=dst[1].map(function(z,i){return i/(n)});
+		var y = x.map(function(z,i){return dst[1][Ind[i]]});
+		return dst;
+	}
+	else{ // interpolate y from distributions, dst
+		var y = this.interp1(dst[0],dst[1],x);
+		return y;
+	}
 }
 
 dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
@@ -269,12 +293,27 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             mode: 'lines+markers',
             name: 'of COVID',
             marker: {
-                color:'black',
+                color:'maroon',
                 size:8
             },
             line:{
                 width:3
-            }
+            },
+            fill: 'tozeroy',
+            fillcolor: 'rgba(0,100,255,0.2)'
+        }
+        let traceOfCovidSum={
+            x:dtrack.data.weekends2020,
+            y:dtrack.sum(yOfCovid.slice(0,n-3)),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'CDC',
+            line:{
+                width:4,
+                color:'rgba(0, 100, 255, 1)',
+                dash:'dot'
+            },
+            yaxis:'y2'
         }
         let yWithCovid=stateData.map(d=>d.covid_19_u071_multiple_cause_of_death)        
         let traceWithCovid={
@@ -284,10 +323,25 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             mode: 'lines',
             name: 'with COVID',
             line:{
-                width:3,
-                dash:'dot',
-                color:'black'
+                width:2,
+                //dash:'dot',
+                color:'rgba(0,255,0,0.5)'
             }
+        }
+        let traceWithCovidSum={
+            x:dtrack.data.weekends2020,
+            y:dtrack.sum(yWithCovid.slice(0,n-3)),
+            //y:yWithCovid.slice(0,n-3),
+            type: 'scatter',
+            mode: 'lines',
+            name: '<sup><span style="font-size:12px">additional (CDC)</span></sup>',
+            line:{
+                width:5,
+                dash:'dot',
+                color:'rgba(128, 0, 0, 0.5)'
+            },
+            yaxis:'y2',
+            //visible:false
         }
         let traceOfCovidTemp={
             x:dtrack.data.weekends2020.slice(-3),
@@ -318,17 +372,35 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 color:'red'
             },
             fill:'tozeroy',
-            fillcolor:'rgba(100,10,10,0.3)',
+            fillcolor:'rgba(100,10,10,0.2)',
         }
-        let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+        let traceCovidSum={
+            x:dtrack.data.covid[selectState.value].dates,
+            y:dtrack.data.covid[selectState.value].deaths,
+            name:'<span style="font-size:11px">Johns Hopkins</span>',
+            type: 'scatter',
+            mode: 'lines',
+            line:{
+                width:3,
+                color:'rgba(255,0,0,1)',
+                dash:'dot'
+            },
+            yaxis:'y2'
+        }
+        let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
         if(document.getElementById('mortalityRate')){
             if(mortalityRate.checked){
                 allTraces=dtrack.traceAll(allTraces)
             }
         }
+    let titleRight='Total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
+    if(mortalityRate.checked){
+        titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+    }
             
     Plotly.newPlot(div,allTraces,{
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+            hovermode: 'closest',
             xaxis: {
                 title: 'Date of calendar day in 2020'
             },
@@ -338,13 +410,23 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             legend:{
                 bordercolor: 'gray',
                 borderwidth: 2,
-                traceorder:'reversed'
+                traceorder:'reversed',
+                x:1.2,
+                y:1
+            },
+            yaxis2: {
+                title: titleRight, //'Total',// (<span style="font-size:large">&#9679;</span>)',
+                titlefont: {color: 'rgb(0, 100, 255)'},
+                tickfont: {color: 'rgb(0, 100, 255)'},
+                overlaying: 'y',
+                side: 'right',
+                //type: 'log'
             }
         }, {responsive: true})
     }
 }
 
-dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
+dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
     if(typeof(div)=='string'){
         div=document.getElementById(div)
@@ -389,14 +471,17 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         y:data2020.map(x=>x[selectCause.value]).slice(0,-3+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020',
+        name: '2020 CDC',
         marker: {
             color:'maroon',
             size:8
         },
         line:{
             width:3
-        }
+        },
+        fill: 'tonexty',
+        //fillcolor: 'rgba(128,0,0,0.2)'
+        fillcolor: 'rgba(0,100,255,0.2)'
     }
     let tempy=dtrack.trim(data2020.map(x=>x[selectCause.value]))
     let tempx=dtrack.data.weekends2020.slice(0,tempy.length)
@@ -460,13 +545,14 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
             size:5
         }
     }
-    /*var traceBase = {
-      x: dtrack.data.weekends2020,
-      y: dtrack.data.weekends2020.map,
-      type: 'scatter',
-      name:'base'
-    }
-    */
+    
+    //let traceAvgBlank = Object. assign({}, traceAvg)
+    let traceAvgBlank=JSON.parse(JSON.stringify(traceAvg)) 
+    traceAvgBlank.mode='lines'
+    traceAvgBlank.line.width=0
+    traceAvgBlank.x=trace2020.x
+    traceAvgBlank.name='________'
+
     var traceMin = {
       x: dtrack.data.weekends2020,
       y: valueRange.min,
@@ -485,19 +571,122 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
       fillcolor: 'rgba(200,200,200,0.75)',
       name:'value range'
     };
+    let dev = trace2020.y.map((v,i)=>v-traceAvg.y[i])
+    //let sum = (xx,n)=>xx.slice(0,n+1).reduce((a,b)=>a+b) // incremental sum
+    var traceExcess = {
+        x:trace2020.x,
+        y:dtrack.sum(dev),
+        type: 'scatter',
+        mode: 'lines',
+        name: '<span style="font-size:12">Additional<br>total</span>',
+        line: {
+            color:'rgba(0,100,255,0.5)',
+            //color:'rgba(128,0,0,0.5)',
+            width:3,
+            dash: 'dot'
+        },
+        marker:{
+            size:5
+        },
+        yaxis: 'y2'
+    }
+
+    var traceSum5yr = {
+        x:traceAvg.x,
+        y:dtrack.sum(traceAvg.y),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Avg Sum',
+        line: {
+            //color:'rgba(0,100,255,0.5)',
+            color:'rgba(0,0,0,0.3)',
+            width:3
+        },
+        fill:'tozeroy',
+        fillcolor:'rgba(0,0,0,0.2)',
+        yaxis: 'y2'
+    }
+
+    var traceSum2020 = {
+        x:trace2020.x,
+        y:dtrack.sum(trace2020.y),
+        type: 'scatter',
+        mode: 'lines',
+        name: '2020 Sum',
+        line: {
+            //color:'rgba(0,100,255,0.5)',
+            color:'rgba(128,0,0,0.3)',
+            width:3
+        },
+        fill:'tozeroy',
+        fillcolor:'rgba(128,0,0,0.2)',
+        yaxis: 'y2'
+    }
+
     let titleCause = dtrack.data.causes[selectCause.value]
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,trace2020,trace2020temp])
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,traceExcess,trace2020temp])
+    if(selectCause.value=='allcause'){ // add covid
+        if(!dtrack.data.covid){
+            await dtrack.getCovid()
+        }
+        // add JH covid
+        let cvData = dtrack.data.covid[selectState.value]
+        let cvTrace={
+            x:cvData.dates,
+            y:cvData.deaths,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'COVID JH',
+            line: {
+                //color:'rgba(0,100,255,0.5)',
+                //color:'rgba(128,0,0,0.5)',
+                color:'red',
+                width:2,
+                dash: 'dot'
+            },
+            yaxis: 'y2'
+
+        }
+        let trace2020ofCovid = {
+            x:dtrack.data.weekends2020.slice(0,-3+delay),  //weeks,
+            y:data2020.map((x,i)=>x.covid_19_u071_underlying_cause_of_death+traceAvg.y[i]).slice(0,-3+delay),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'COVID CDC',
+            line:{
+                width:1,
+                color:'rgba(255,0,0,0.75)'
+            },
+            fill: 'tonexty',
+            //fillcolor: 'rgba(128,0,0,0.2)'
+            fillcolor: 'rgba(100,0,255,0.1)'
+        }
+        //debugger
+
+        allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+    }
+    
+    
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
             allTraces=dtrack.traceAll(allTraces)
         }
     }
+    let titleRight='Total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
+    if(document.getElementById('mortalityRate')){
+        if(mortalityRate.checked){
+            titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+        }
+    }
+    
         
     Plotly.newPlot(div,allTraces,{
         title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+        hovermode: 'closest',
+        height:530,
         xaxis: {
             title: 'Date of calendar day in 2020'
         },
@@ -506,8 +695,19 @@ dtrack.plotlyCompare=(div='plotlyCompareDiv')=>{
         },
         legend:{
             bordercolor: 'gray',
-            borderwidth: 2
-        }
+            borderwidth: 1,
+            x:1.2,
+            y:1
+        },
+        yaxis2: {
+            title: titleRight,//'Total',// (<span style="font-size:large">&#9679;</span>)',
+            titlefont: {color: 'rgb(0, 100, 255)'},
+            tickfont: {color: 'rgb(0, 100, 255)'},
+            overlaying: 'y',
+            side: 'right',
+            //type: 'log'
+        },
+        //hovermode:'closest',
     }, {responsive: true})
     //div.innerHTML=Date()
 }
@@ -785,6 +985,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     Plotly.newPlot(div,allTraces,{
         title:`COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br> latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         height:570,
+        hovermode: 'closest',
         xaxis: {
             title: 'Date'
         },
@@ -793,7 +994,9 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         },
         legend:{
             bordercolor: 'gray',
-            borderwidth: 2
+            borderwidth: 2,
+            x:1.2,
+            y:1
         }
     }, {responsive: true})
     //div.innerHTML=Date()
@@ -817,4 +1020,3 @@ dtrack.traceAll=(traces)=>{ // annualized mortality rate
         return trc
     })
 }
-
