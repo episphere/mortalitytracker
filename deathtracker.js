@@ -419,7 +419,8 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 bordercolor: 'gray',
                 borderwidth: 2,
                 traceorder:'reversed',
-                x:1.2,
+                //x:1.2,
+                x:1.02,
                 y:1
             },
             yaxis2: {
@@ -674,7 +675,8 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         }
         //debugger
 
-        allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+        //allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+        allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
     }
     
     
@@ -704,7 +706,8 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         legend:{
             bordercolor: 'gray',
             borderwidth: 1,
-            x:1.2,
+            //x:1.2,
+            x:1.02,
             y:1
         },
         yaxis2: {
@@ -1003,7 +1006,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         legend:{
             bordercolor: 'gray',
             borderwidth: 2,
-            x:1.2,
+            //x:1.2,
+            x:1.02,
             y:1
         }
     }, {responsive: true})
