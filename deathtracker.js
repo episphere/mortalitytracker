@@ -15,7 +15,8 @@ if('serviceWorker' in navigator){
 
 dtrack={
     data:{},
-    ytitle:'Deaths per week'
+    ytitle:'Deaths per week',
+    legendX:1.02
 }
 
 dtrack.data.flags={
@@ -247,7 +248,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*;<br><input id="mortalityAddition" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality;<br><span style="color:gray">* Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*;<br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Show additional mortality;<br><span style="color:gray">* Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -395,8 +396,12 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             },
             yaxis:'y2'
         }
-        //let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
-        let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+        if(mortalityAdditional.checked){
+            let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+        }else{
+            let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+        }
+        
         if(document.getElementById('mortalityRate')){
             if(mortalityRate.checked){
                 allTraces=dtrack.traceAll(allTraces)
@@ -405,6 +410,11 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     let titleRight='Total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(mortalityRate.checked){
         titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+    }
+    if(mortalityAdditional.checked){
+        dtrack.legendX=1.2
+    }else{
+        dtrack.legendX=1.02
     }
             
     Plotly.newPlot(div,allTraces,{
@@ -421,7 +431,8 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 borderwidth: 2,
                 traceorder:'reversed',
                 //x:1.2,
-                x:1.02,
+                //x:1.02,
+                x:dtrack.legendX,
                 y:1
             },
             yaxis2: {
@@ -637,7 +648,13 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,traceExcess,trace2020temp])
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
+    if(document.getElementById('mortalityAdditional')){
+        if(mortalityAdditional.checked){
+            let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,traceExcess,trace2020temp])
+        }
+    }   
+    
     if(selectCause.value=='allcause'){ // add covid
         if(!dtrack.data.covid){
             await dtrack.getCovid()
@@ -675,11 +692,12 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             fillcolor: 'rgba(100,0,255,0.1)'
         }
         //debugger
-
-        //allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
-        allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+        if(mortalityAdditional.checked){
+            allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+        }else{
+            allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+        }   
     }
-    
     
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
@@ -708,7 +726,8 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             bordercolor: 'gray',
             borderwidth: 1,
             //x:1.2,
-            x:1.02,
+            //x:1.02,
+            x:dtrack.legendX,
             y:1
         },
         yaxis2: {
@@ -1008,7 +1027,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
             bordercolor: 'gray',
             borderwidth: 2,
             //x:1.2,
-            x:1.02,
+            //x:1.02,
+            x:dtrack.legendX,
             y:1
         }
     }, {responsive: true})
@@ -1023,7 +1043,18 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         setTimeout(selectCause.onchange,100)
         //debugger
     }
+     mortalityAdditional.onchange=()=>{
+        if(mortalityAdditional.checked){
+            dtrack.legendX=1.2
+        }else{
+            dtrack.legendX=1.02
+        }
+        setTimeout(selectState.onchange,100)
+        setTimeout(selectCause.onchange,100)
+        //debugger
+    }
     mortalityRate.disabled=false
+    mortalityAdditional.disabled=true
 }
 
 dtrack.traceAll=(traces)=>{ // annualized mortality rate
