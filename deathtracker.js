@@ -652,7 +652,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
     if(document.getElementById('mortalityAdditional')){
         if(mortalityAdditional.checked){
-            let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,traceExcess,trace2020temp])
+            allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,traceExcess,trace2020temp])
         }
     }   
     
@@ -693,13 +693,13 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             fillcolor: 'rgba(100,0,255,0.1)'
         }
         //debugger
+        let allTraces=[]
         if(mortalityAdditional.checked){
             allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
         }else{
             allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
         }   
     }
-    
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
             allTraces=dtrack.traceAll(allTraces)
@@ -1055,7 +1055,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         //debugger
     }
     mortalityRate.disabled=false
-    mortalityAdditional.disabled=true
+    mortalityAdditional.disabled=false
 }
 
 dtrack.traceAll=(traces)=>{ // annualized mortality rate
