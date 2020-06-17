@@ -100,7 +100,7 @@ dtrack.data.form={
     covid_19_u071_underlying_cause_of_death:0
 }
 
-dtrack.ui=async(div)=>{
+dtrack.ui=async(div='deathtrackerDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
@@ -112,12 +112,16 @@ dtrack.ui=async(div)=>{
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
     dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='United States'))
     // remove problematic states
-    if(true){
+    let removeIncompleteStates=true
+    if(dtrack.ui.parms){
+        removeIncompleteStates=!dtrack.ui.parms.incompleteRecords
+    }
+    if(removeIncompleteStates){
         dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Carolina'));
         dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Dakota'));
         dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Connecticut'));
         dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Pennsylvania'));
-    };
+    }
     //
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
@@ -127,7 +131,7 @@ dtrack.ui=async(div)=>{
     h+='<div id="plotlyCompareDiv"></div>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
-    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data ... </span></span></div>'
+    h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data, please wait ... </span></span></div>'
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
@@ -248,13 +252,15 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h='<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*;<br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Show additional mortality;<br><span style="color:gray">* Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>'
+    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Show additional mortality; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include states with incomplete records; <span id="incompleteRecordsReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><span style="color:gray">* Important: this functionality is provided for convinience. Direct comparison of mortality between states is disadvised given the significant demographic differences.</span></p>`
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
     })
     h+='</p>'
     div.innerHTML=h
+    if(typeof(dtrack.ui.parms.incompleteRecords)=='undefined'){dtrack.ui.parms.incompleteRecords=false}
+    incompleteRecords.checked=dtrack.ui.parms.incompleteRecords
 }
 
 //dtrack.sum = (xx,n)=>xx.slice(0,n+1).reduce((a,b)=>a+b)
@@ -1035,6 +1041,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     }, {responsive: true})
     //div.innerHTML=Date()
     mortalityRate.onchange=()=>{
+        mortalityRateReplot.hidden=false
         if(mortalityRate.checked){
             dtrack.ytitle='Weekly mortality per 100K'
         }else{
@@ -1045,6 +1052,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         //debugger
     }
      mortalityAdditional.onchange=()=>{
+         mortalityAdditionalReplot.hidden=false
         if(mortalityAdditional.checked){
             dtrack.legendX=1.2
         }else{
@@ -1054,8 +1062,15 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         setTimeout(selectCause.onchange,100)
         //debugger
     }
+    incompleteRecords.onchange=()=>{
+        incompleteRecordsReplot.hidden=false
+        dtrack.ui.parms.incompleteRecords=incompleteRecords.checked
+        dtrack.ui()
+    }
     mortalityRate.disabled=false
     mortalityAdditional.disabled=false
+    incompleteRecords.disabled=false
+    mortalityAdditionalReplot.hidden=mortalityRateReplot.hidden=incompleteRecordsReplot.hidden=true
 }
 
 dtrack.traceAll=(traces)=>{ // annualized mortality rate
