@@ -396,10 +396,11 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             },
             yaxis:'y2'
         }
+        let allTraces = []
         if(mortalityAdditional.checked){
-            let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+            allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
         }else{
-            let allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+            allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
         }
         
         if(document.getElementById('mortalityRate')){
