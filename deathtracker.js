@@ -376,6 +376,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         if(!dtrack.data.covid){
             await dtrack.getCovid()
         }
+        selectState.value=selectState.value||'All States'
         let traceCovid={
             x:dtrack.data.covid[selectState.value].dates.slice(7),
             y:dtrack.data.covid[selectState.value].deaths.slice(7).map((d,i)=>d-dtrack.data.covid[selectState.value].deaths[i]),
