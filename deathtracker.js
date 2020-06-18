@@ -259,6 +259,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     })
     h+='</p>'
     div.innerHTML=h
+    dtrack.ui.parms=dtrack.ui.parms||{}
     if(typeof(dtrack.ui.parms.incompleteRecords)=='undefined'){dtrack.ui.parms.incompleteRecords=false}
     incompleteRecords.checked=dtrack.ui.parms.incompleteRecords
 }
