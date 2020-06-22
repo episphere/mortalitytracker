@@ -129,6 +129,7 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
+    h+='<a id="csvDataLink" href=""></a>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
     h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data, please wait ... </span></span></div>'
@@ -425,8 +426,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     }else{
         dtrack.legendX=1.02
     }
-            
-    Plotly.newPlot(div,allTraces,{
+    let layout={
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
             hovermode: 'closest',
             xaxis: {
@@ -452,7 +452,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 side: 'right',
                 //type: 'log'
             }
-        }, {responsive: true})
+        }
+    Plotly.newPlot(div,allTraces,layout, {responsive: true})    
+    dtrack.csvData(allTraces,layout)
     }
 }
 
@@ -720,8 +722,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         }
     }
     
-        
-    Plotly.newPlot(div,allTraces,{
+    let layout = {
         title:`<span style="font-size:small">Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b></span>`,
         hovermode: 'closest',
         height:530,
@@ -748,8 +749,10 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             //type: 'log'
         },
         //hovermode:'closest',
-    }, {responsive: true})
+    }   
+    Plotly.newPlot(div,allTraces,layout, {responsive: true})
     //div.innerHTML=Date()
+    dtrack.csvData(allTraces,layout)
 }
 
 dtrack.getCovid=async()=>{
@@ -1081,4 +1084,49 @@ dtrack.traceAll=(traces)=>{ // annualized mortality rate
         trc.y=trc.y.map(yi=>yi/(dtrack.data.covid[selectState.value].Population/100000))
         return trc
     })
+}
+
+dtrack.csvData=(traces)=>{
+    let shortVarName = dtrack.data.shortName[selectCause.value]
+    let fname = selectState.value+' - '+shortVarName+'.csv'
+    if(typeof(shortVarName)=='undefined'){ // covid
+        fname = selectState.value+' - '+selectCause.value+'.csv'
+    }
+    csvDataLink.innerText=fname
+    csvDataLink.href=location.hash
+    csvDataLink.onclick=function(){
+        let txt=`Date,Average 2015-2019,${shortVarName}`
+        let trc1 = traces.filter(x=>x.name=="2020 CDC")
+        if(trc1.length==1){ // this is not covid
+            trc1=trc1[0]
+            let trc2 = traces.filter(x=>x.name=="2015-19<br>average")[0]
+            trc1.x.forEach((xi,i)=>{
+                txt+=`\n${xi.toISOString()},${trc2.y[i]},${trc1.y[i]}`
+            })
+            
+        }else{ // covid
+            txt=`Date,Average 2015-2019,of COVID, with CIVID`
+            trc1 = traces.filter(x=>x.name=="of COVID")[0]
+            trc2 = traces.filter(x=>x.name=="with COVID")[0]
+            trc1.x.slice(0,-3).forEach((xi,i)=>{
+                txt+=`\n${xi.toISOString()},0,${trc1.y[i]},${trc2.y[i]}`
+            })
+            debugger
+        }
+        dtrack.saveFile(txt,fname)
+    }
+}
+
+dtrack.saveFile=function(x,fileName) { // x is the content of the file
+	var bb = new Blob([x]);
+   	var url = URL.createObjectURL(bb);
+	var a = document.createElement('a');
+   	a.href=url;
+	if (fileName){
+		if(typeof(fileName)=="string"){ // otherwise this is just a boolean toggle or something of the sort
+			a.download=fileName;
+		}
+		a.click() // then download it automatically 
+	} 
+	return a
 }
