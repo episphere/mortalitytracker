@@ -1088,10 +1088,11 @@ dtrack.traceAll=(traces)=>{ // annualized mortality rate
 
 dtrack.csvData=(traces)=>{
     let shortVarName = dtrack.data.shortName[selectCause.value]
-    let fname = selectState.value+' - '+shortVarName+'.csv'
+    let fname = selectState.value+' - '+shortVarName//+'.csv'
     if(typeof(shortVarName)=='undefined'){ // covid
-        fname = selectState.value+' - '+selectCause.value+'.csv'
+        fname = selectState.value+' - '+selectCause.value//+'.csv'
     }
+    fname= mortalityRate.checked? fname+' per 100k.csv' : fname+'.csv'
     csvDataLink.innerText=fname
     csvDataLink.href=location.hash
     csvDataLink.onclick=function(){
