@@ -1111,7 +1111,6 @@ dtrack.csvData=(traces)=>{
             trc1.x.slice(0,-3).forEach((xi,i)=>{
                 txt+=`\n${xi.toISOString()},0,${trc1.y[i]},${trc2.y[i]}`
             })
-            debugger
         }
         dtrack.saveFile(txt,fname)
     }
