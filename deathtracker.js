@@ -1130,3 +1130,7 @@ dtrack.saveFile=function(x,fileName) { // x is the content of the file
 	} 
 	return a
 }
+
+if(typeof(define)!=='undefined'){
+    define(dtrack)
+}
