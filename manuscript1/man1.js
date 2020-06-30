@@ -18,4 +18,3 @@ man1.ini=async _=>{
 if(typeof(define)!=='undefined'){
     define(man1)
 }
-
