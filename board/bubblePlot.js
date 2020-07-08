@@ -173,6 +173,15 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
 
             }
         }
+        traces.push({
+            x: [0, 6000],
+            y: [0, 6000],
+            mode: 'lines',
+            line: {
+                color: 'gray'
+            },
+            name: 'Reference line'
+        })
 
         //////////////////////////////////////////////////////////////////////////////////
 
