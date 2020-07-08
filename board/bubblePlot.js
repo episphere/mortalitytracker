@@ -134,23 +134,44 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
         let traces = [];
         for (let i = 0; i < state_s.length; i++) {
             let data = firstWeek[state_s[i]];
-            traces.push({
-                name: state_s[i], // appears as the legend item and on hover
-                x: data.x.slice(),
-                y: data.y.slice(),
-                hovertemplate: '<b>State:</b>\t' + state_s[i] +
-                            '<br><br> Expected deaths:\t %{x}' +
-                            '<br> Observed deaths:\t %{y}' + 
-                            '<br> Population:\t' + mappedPops[i],
-                mode: 'markers', // want markers in legend
-                marker: {
-                    size:  (Math.log(scaledPops[i])) * 10, // data.marker.size.slice()  controls size of first week              
-                    sizemode: 'area',
-                    sizeref: 0, // !!!!!!!!!!!!!!!!!!!
-                    opacity: 0.8,
-                    visible: true // whether or not the trace is visible
-                }
-            });
+            if(state_s[i] != "United States"){
+                traces.push({
+                    name: state_s[i], // appears as the legend item and on hover
+                    x: data.x.slice(),
+                    y: data.y.slice(),
+                    hovertemplate: '<b>State:</b>\t' + state_s[i] +
+                                '<br><br> Expected deaths:\t %{x}' +
+                                '<br> Observed deaths:\t %{y}' + 
+                                '<br> Population:\t' + mappedPops[i],
+                    mode: 'markers', // want markers in legend
+                    marker: {
+                        size:  (Math.log(scaledPops[i])) * 10, // data.marker.size.slice()  controls size of first week              
+                        sizemode: 'area',
+                        sizeref: 0, // !!!!!!!!!!!!!!!!!!!
+                        opacity: 0.8,
+                        visible: true // whether or not the trace is visible
+                    }
+                });
+            } else {
+                traces.push({
+                    name: state_s[i], // appears as the legend item and on hover
+                    x: data.x.slice(),
+                    y: data.y.slice(),
+                    hovertemplate: '<b>State:</b>\t' + state_s[i] +
+                                '<br><br> Expected deaths:\t %{x}' +
+                                '<br> Observed deaths:\t %{y}' + 
+                                '<br> Population:\t' + mappedPops[i],
+                    mode: 'markers', // want markers in legend
+                    marker: {
+                        size:  (Math.log(scaledPops[i])) * 10, // data.marker.size.slice()  controls size of first week              
+                        sizemode: 'area',
+                        sizeref: 0, // !!!!!!!!!!!!!!!!!!!
+                        opacity: 0.8,
+                    },
+                    visible: 'legendonly'
+                });
+
+            }
         }
 
         //////////////////////////////////////////////////////////////////////////////////
