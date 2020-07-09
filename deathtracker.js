@@ -129,10 +129,11 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
-    h+='<a id="csvDataLink" href=""></a>'
+    h+='Data: [<a id="csvDataLink" href=""></a>]  [<a id="plotDataLink" href=""></a>]'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
     h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data, please wait ... </span></span></div>'
+    h+='Data: [<a id="layersDataLink" href=""></a>]'
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
@@ -253,7 +254,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Show additional mortality**; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include states with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:small">* Important: this functionality is provided for convinience, direct comparison of mortality between states is disadvised given the significant demographic differences; ** In excess of the last 5 year's average, see also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; *** For QAQC of states with incomplete reccords, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
+    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Show additional mortality**; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:small">* Important: this functionality is provided for convinience, direct comparison of mortality between states is disadvised given the significant demographic differences; ** In excess of the last 5 year's average, see also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; *** For QAQC of states with incomplete reccords, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -1100,6 +1101,11 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     mortalityAdditional.disabled=false
     incompleteRecords.disabled=false
     mortalityAdditionalReplot.hidden=mortalityRateReplot.hidden=incompleteRecordsReplot.hidden=true
+    layersDataLink.innerText=selectState.value+' dataLayers.json'
+    layersDataLink.href='#'
+    layersDataLink.onclick=()=>{
+        dtrack.saveFile(JSON.stringify({traces:allTraces,layout:layout}),layersDataLink.innerText)
+    }
 }
 
 dtrack.traceAll=(traces)=>{ // annualized mortality rate
@@ -1110,7 +1116,7 @@ dtrack.traceAll=(traces)=>{ // annualized mortality rate
     })
 }
 
-dtrack.csvData=(traces)=>{
+dtrack.csvData=(traces,layout)=>{
     let shortVarName = dtrack.data.shortName[selectCause.value]
     let fname = selectState.value+' - '+shortVarName//+'.csv'
     if(typeof(shortVarName)=='undefined'){ // covid
@@ -1144,6 +1150,9 @@ dtrack.csvData=(traces)=>{
         }
         dtrack.saveFile(txt,fname)
     }
+    plotDataLink.innerText=fname.slice(0,-4)+' - plot.json'
+    plotDataLink.href=location.hash
+    plotDataLink.onclick=()=>{dtrack.saveFile(JSON.stringify({traces:traces,layout:layout}),plotDataLink.innerText)}
 }
 
 dtrack.saveFile=function(x,fileName) { // x is the content of the file
