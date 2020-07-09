@@ -429,11 +429,13 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     let layout={
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
             hovermode: 'closest',
+            autosize:true,
             xaxis: {
                 title: 'Date of calendar day in 2020'
             },
             yaxis: {
-                title:dtrack.ytitle
+                title:dtrack.ytitle,
+                range:[0,allTraces.map(T=>T.y.reduce((a,b)=>Math.max(a,b)||0)).reduce((a,b)=>Math.max(a,b)||0)]
             },
             legend:{
                 bordercolor: 'gray',
@@ -449,11 +451,32 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 titlefont: {color: 'rgb(0, 100, 255)'},
                 tickfont: {color: 'rgb(0, 100, 255)'},
                 overlaying: 'y',
-                side: 'right',
+                side: 'right'
                 //type: 'log'
             }
         }
-    Plotly.newPlot(div,allTraces,layout, {responsive: true})    
+        /* animation
+        if(document.getElementById(div).className=='js-plotly-plot'){
+            Plotly.animate(div,{
+                data:allTraces,
+                layout:layout
+            },
+            {
+                transition: {
+                  duration: 500,
+                  easing: 'cubic-in-out'
+                },
+                frame: {
+                  duration: 500
+                }
+            })
+        }else{
+            Plotly.newPlot(div,allTraces,layout, {responsive: true})
+        }
+        */
+        Plotly.newPlot(div,allTraces,layout, {responsive: true})
+        //debugger
+        
     dtrack.csvData(allTraces,layout)
     }
 }
@@ -1025,7 +1048,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     if(mortalityRate.checked){
         allTraces=dtrack.traceAll(allTraces)
     }
-    Plotly.newPlot(div,allTraces,{
+    let layout={
         title:`<span style="font-size:small">COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br>latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</span>`, // latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         height:570,
         hovermode: 'closest',
@@ -1043,7 +1066,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
             x:dtrack.legendX,
             y:1
         }
-    }, {responsive: true})
+    }
+    Plotly.newPlot(div,allTraces,layout, {responsive: true})
     //div.innerHTML=Date()
     mortalityRate.onchange=()=>{
         mortalityRateReplot.hidden=false
@@ -1092,7 +1116,12 @@ dtrack.csvData=(traces)=>{
     if(typeof(shortVarName)=='undefined'){ // covid
         fname = selectState.value+' - '+selectCause.value//+'.csv'
     }
-    fname= mortalityRate.checked? fname+' per 100k.csv' : fname+'.csv'
+    if(document.getElementById('mortalityRate')){
+        fname= mortalityRate.checked? fname+' per 100k.csv' : fname+'.csv'
+    }else{
+        fname=fname+'.csv'
+    }
+    
     csvDataLink.innerText=fname
     csvDataLink.href=location.hash
     csvDataLink.onclick=function(){
