@@ -254,7 +254,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Show additional mortality**; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:small">* Important: this functionality is provided for convinience, direct comparison of mortality between states is disadvised given the significant demographic differences; ** In excess of the last 5 year's average, see also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; *** For QAQC of states with incomplete reccords, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
+    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality**; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:small">* Important: this functionality is provided for convinience, direct comparison of mortality between states is disadvised given the significant demographic differences; ** In excess of the last 5 year's average, see also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; *** For QAQC of states with incomplete reccords, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -436,7 +436,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             },
             yaxis: {
                 title:dtrack.ytitle,
-                range:[0,allTraces.map(T=>T.y.reduce((a,b)=>Math.max(a,b)||0)).reduce((a,b)=>Math.max(a,b)||0)]
+                //range:[0,allTraces.map(T=>T.y.reduce((a,b)=>Math.max(a,b)||0)).reduce((a,b)=>Math.max(a,b)||0)]
             },
             legend:{
                 bordercolor: 'gray',
@@ -452,7 +452,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 titlefont: {color: 'rgb(0, 100, 255)'},
                 tickfont: {color: 'rgb(0, 100, 255)'},
                 overlaying: 'y',
-                side: 'right'
+                side: 'right',
                 //type: 'log'
             }
         }
