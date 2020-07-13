@@ -221,8 +221,8 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
             },
             yaxis: {
                 title: {
-                text: 'Observed Number of Deaths',
-                standoff: 10
+                    text: 'Observed Number of Deaths',
+                    standoff: 10
                 }
             },
             height: 600,
@@ -230,12 +230,13 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
             sliders: [{
                 pad: {l: 130, t: 100},
                 currentvalue: {
-                visible: true,
-                prefix: 'Week Ending Date: ',
-                xanchor: 'left',
-                font: {
-                    size: 15, 
-                    color: '#666'}
+                    visible: true,
+                    prefix: 'Week Ending Date: ',
+                    xanchor: 'left',
+                    font: {
+                        size: 15, 
+                        color: '#666'
+                    }
                 },
                 steps: sliderSteps,
                 legend: {
@@ -243,7 +244,35 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
                     borderwidth: 2,
                     traceorder:'reversed'
                 }
-            }]
+            }],
+            updatemenus: [{
+                x: 0,
+                y: 0,
+                yanchor: 'top',
+                xanchor: 'left',
+                showactive: false,
+                direction: 'left',
+                type: 'buttons',
+                pad: {t: 87, r: 10},
+                buttons: [{
+                  method: 'animate',
+                  args: [null, {
+                    mode: 'immediate',
+                    fromcurrent: true,
+                    transition: {duration: 300},
+                    frame: {duration: 500, redraw: false}
+                  }],
+                  label: 'Play'
+                }, {
+                  method: 'animate',
+                  args: [[null], {
+                    mode: 'immediate',
+                    transition: {duration: 0},
+                    frame: {duration: 0, redraw: false}
+                  }],
+                  label: 'Pause'
+                }]
+              }]
         };
 
         //////////////////////////////////////////////////////////////////////////////////
