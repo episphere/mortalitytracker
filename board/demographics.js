@@ -68,16 +68,19 @@ function getNumberOfDeaths(raceArray) {
         }
         var groupedData = groupBy(noUndefineds, 'age_group'); 
 
-        // (2.3.4) Get all unique ages
+        // (2.3.4) Get all unique ages (except for "All Ages")
         let uniqueAges = Object.getOwnPropertyNames(groupedData)
+        let finalUniqueAges = [];
+        for(let i = 1; i < uniqueAges.length; i++)
+            finalUniqueAges.push(uniqueAges[i])    
 
         // (2.3.5) Get number of deaths 
         let numDeathsArray = []
-        numDeathsArray.length = uniqueAges.length;
+        numDeathsArray.length = finalUniqueAges.length;
         numDeathsArray.fill(0)
-        for(let i = 0; i < uniqueAges.length; i++) 
+        for(let i = 0; i < finalUniqueAges.length; i++) 
             for(let j = 0; j < noUndefineds.length; j++) 
-                if(noUndefineds[j].age_group == uniqueAges[i]) 
+                if(noUndefineds[j].age_group == finalUniqueAges[i]) 
                     numDeathsArray[i] += parseInt(noUndefineds[j].covid_19_deaths);
         allNumDeathsArray.push(numDeathsArray)
     }
@@ -104,7 +107,7 @@ d3.csv('cdcWONDER_population.csv').then(function(data) {
 
     let finalUniqueRaces = ["Non-Hispanic White", "Non-Hispanic Black", "Non-Hispanic American Indian or Alaska Native", "Non-Hispanic Asian or Pacific Islander", "Hispanic or Latino"]
 
-    let populationsArr = new Array(5).fill(0).map(() => new Array(12).fill(0));
+    let populationsArr = new Array(5).fill(0).map(() => new Array(11).fill(0));
 
     // Group data by age group
     function groupBy(arr, property) {
@@ -117,21 +120,24 @@ d3.csv('cdcWONDER_population.csv').then(function(data) {
     }
     var groupedData = groupBy(noUndefineds, 'age_group'); 
 
-    // Get all unique ages
+    // Get all unique ages (except for "All Ages")
     let uniqueAges = Object.getOwnPropertyNames(groupedData)
+    let finalUniqueAges = [];
+    for(let i = 1; i < uniqueAges.length; i++)
+        finalUniqueAges.push(uniqueAges[i])
     
     for(let i = 0; i < finalUniqueRaces.length; i++) 
-        for(let j = 0; j < uniqueAges.length; j++) 
+        for(let j = 0; j < finalUniqueAges.length; j++) 
             for(let k = 0; k < data.length; k++) 
-                if(data[k].race_and_hispanic_origin == finalUniqueRaces[i] && data[k].age_group == uniqueAges[j]) 
+                if(data[k].race_and_hispanic_origin == finalUniqueRaces[i] && data[k].age_group == finalUniqueAges[j]) 
                     populationsArr[i][j] = parseInt(data[k].population);
-                
+
 
 // --------------------------------------------------------------------------------------------------------
 
     // (2.5) Create array (mortalityRateArray) of mortality rates for each group
 
-    let mortalityRateArray = new Array(5).fill(0).map(() => new Array(12).fill(0));
+    let mortalityRateArray = new Array(5).fill(0).map(() => new Array(11).fill(0));
 
     for(let i = 0; i < mortalityRateArray.length; i++) 
         for(let j = 0; j < mortalityRateArray[i].length; j++) 
@@ -147,7 +153,7 @@ d3.csv('cdcWONDER_population.csv').then(function(data) {
         let thisObj = {};
         thisObj.name = finalUniqueRaces[i];
         thisObj.type = 'bar';
-        thisObj.x = uniqueAges;
+        thisObj.x = finalUniqueAges;
         thisObj.y = mortalityRateArray[i];
         arrayForPlot.push(thisObj);
     }
