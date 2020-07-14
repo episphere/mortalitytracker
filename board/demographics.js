@@ -141,7 +141,7 @@ d3.csv('cdcWONDER_population.csv').then(function(data) {
 
     for(let i = 0; i < mortalityRateArray.length; i++) 
         for(let j = 0; j < mortalityRateArray[i].length; j++) 
-            mortalityRateArray[i][j] = (finalTotalDeaths[i][j] / populationsArr[i][j]) * 100000
+            mortalityRateArray[i][j] = ((finalTotalDeaths[i][j] / populationsArr[i][j]) * 100000).toFixed(2)
 
 // --------------------------------------------------------------------------------------------------------
 
