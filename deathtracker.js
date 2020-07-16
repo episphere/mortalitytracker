@@ -191,8 +191,8 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
             d.naturalcause=parseInt(d.natural_cause)
         }
         d.weekendingdate=new Date(d.weekendingdate)
-        if(d.influenza_and_pneumonia_j10_j18){
-            d.influenza_and_pneumonia_j10=parseInt(d.influenza_and_pneumonia_j10_j18)
+        if(d.influenza_and_pneumonia_j09_j18){
+            d.influenza_and_pneumonia_j10=parseInt(d.influenza_and_pneumonia_j09_j18)
         }
         return d
     })
