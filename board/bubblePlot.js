@@ -17,8 +17,10 @@ let data = JSON.parse(url)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // FILTER CDC DATA
-let unweightedData = data.filter(data => data.type == "Unweighted");
-let finalFilteredData = unweightedData.filter(data => data.outcome == "All causes")
+let prelimFinalFilteredData = data.filter(data => data.outcome == "All causes")
+let finalFilteredData = prelimFinalFilteredData.filter(data => data.type == "Unweighted");
+
+let markerData = data.filter(data => data.outcome == "All causes, excluding COVID-19") // Predicted (weighted)
 
 const cdcStateData = []
 for (let i = 0; i < finalFilteredData.length; i++) {
@@ -137,8 +139,8 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
             if(state_s[i] != "United States"){
                 traces.push({
                     name: state_s[i], // appears as the legend item and on hover
-                    x: data.x.slice(),
-                    y: data.y.slice(),
+                    x: data.x,
+                    y: data.y,
                     hovertemplate: '<b>State:</b>\t' + state_s[i] +
                                 '<br><br> Expected deaths:\t %{x}' +
                                 '<br> Observed deaths:\t %{y}' + 
@@ -223,7 +225,8 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
                 title: {
                     text: 'Observed Number of Deaths',
                     standoff: 10
-                }
+                },
+                range: [0, 8500]
             },
             height: 600,
             hovermode: 'closest',
@@ -245,6 +248,7 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
                     traceorder:'reversed'
                 }
             }],
+            // for play/pause button
             updatemenus: [{
                 x: 0,
                 y: 0,
