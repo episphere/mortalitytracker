@@ -221,11 +221,10 @@ function coffee(data) {
     }
 
     //////////////////////////////////////////////////////////////////////////////////
-
     let layout = {
         title: 'Observed Deaths vs. Expected Deaths for All Causes of Death',
         xaxis: {
-            title: 'Expected Number of Deaths',
+            title: 'Expected Number of Deaths'
         },
         yaxis: {
             title: {
@@ -300,7 +299,7 @@ function coffee(data) {
 };
 
 let selectedState = [];
-let stateInitials = [];
+let selectedPointNumbers = [];
 
 const renderMap = (cdcData) => {
     Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', function(err, rows) {
@@ -348,15 +347,15 @@ const renderMap = (cdcData) => {
     Plotly.newPlot("plotlyMap", data, layout, {showLink: false})
         .then(gd => {
             gd.on('plotly_click', d => {
-                const location = d.points[0].location;
+                const pn = d.points[0].pointNumber;
                 const state = d.points[0].text;
                 if(selectedState.indexOf(state) === -1) {
                     selectedState.push(state);
-                    stateInitials.push(location);
+                    selectedPointNumbers.push(pn)
                 }
                 else {
-                    selectedState.splice(selectedState.indexOf(state), 1)
-                    stateInitials.splice(stateInitials.indexOf(location), 1);
+                    selectedState.splice(selectedState.indexOf(state), 1);
+                    selectedPointNumbers.splice(selectedPointNumbers.indexOf(pn), 1);
                 }
                 selectedState.sort();
                 let template = '';
@@ -383,17 +382,10 @@ const renderMap = (cdcData) => {
                         btn.parentNode.removeChild(btn);
                         coffee(filterData(cdcData, selectedState));
                     })
-                })
-                // const newMapData = rows.filter(dt => stateInitials.indexOf(dt.Postal) !== -1);
-                // let mapData = [{
-                //     type: 'choropleth',
-                //     locationmode: 'USA-states',
-                //     locations: newMapData.map(dt => dt.Postal),
-                //     z: newMapData.map(dt => dt.Population),
-                //     text: newMapData.map(dt => dt.State)
-                // }];
-                
-                // Plotly.restyle('choroplethDiv', newMapData, 0);
+                });
+
+                d.points[0].data.selectedpoints = selectedPointNumbers
+                Plotly.redraw('plotlyMap');
                 coffee(filterData(cdcData, selectedState));
             })
         });
