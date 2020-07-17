@@ -335,7 +335,7 @@ const renderMap = (cdcData) => {
     const labelDiv = document.createElement('div');
     labelDiv.innerHTML = '';
     labelDiv.id = 'mapLabel';
-    labelDiv.style.minHeight = '70px'
+    labelDiv.style.minHeight = '100px'
 
     const mapDiv = document.createElement('div');
     mapDiv.id = 'plotlyMap';
