@@ -360,7 +360,8 @@ const renderMap = (cdcData) => {
                 }
                 selectedState.sort();
                 let template = '';
-                selectedState.forEach((s) => {
+                selectedState.forEach((s, index) => {
+                    if(index === 0) template += 'Selected state(s): '
                     template += `<button class="remove-state" title="Remove this selection" data-state="${s}" style="border-radius: 0.5rem;border: 0px;margin: 2px;">${s} &times;</button>`
                 })
                 if(selectedState.length !== 0 ) template += ` </br></br><button title="Remove all selection" style="border-radius: 0.5rem;border: 0px;margin: 2px;color:#ff0000" id="clearStateSelection">Clear all selection</button>`;
