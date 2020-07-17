@@ -370,6 +370,9 @@ const renderMap = (cdcData) => {
                     clearAll.addEventListener('click', () => {
                         document.getElementById('mapLabel').innerHTML = '';
                         selectedState = [];
+                        selectedPointNumbers = [];
+                        d.points[0].data.selectedpoints = undefined;
+                        Plotly.redraw('plotlyMap');
                         coffee(filterData(cdcData, selectedState));
                     })
                 }
@@ -384,7 +387,8 @@ const renderMap = (cdcData) => {
                     })
                 });
 
-                d.points[0].data.selectedpoints = selectedPointNumbers
+                if(selectedPointNumbers.length !== 0) d.points[0].data.selectedpoints = selectedPointNumbers
+                else  d.points[0].data.selectedpoints = undefined;
                 Plotly.redraw('plotlyMap');
                 coffee(filterData(cdcData, selectedState));
             })
