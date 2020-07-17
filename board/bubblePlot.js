@@ -361,7 +361,7 @@ const renderMap = (cdcData) => {
                 let template = '';
                 selectedState.forEach((s, index) => {
                     if(index === 0) template += 'Selected state(s): '
-                    template += `<button class="remove-state" title="Remove this selection" data-state="${s}" style="border-radius: 0.5rem;border: 0px;margin: 2px;">${s} &times;</button>`
+                    template += `<button class="remove-state" title="Remove this selection" data-point-number=${pn} data-state="${s}" style="border-radius: 0.5rem;border: 0px;margin: 2px;">${s} &times;</button>`
                 })
                 if(selectedState.length !== 0 ) template += ` </br></br><button title="Remove all selection" style="border-radius: 0.5rem;border: 0px;margin: 2px;color:#ff0000" id="clearStateSelection">Clear all selection</button>`;
                 document.getElementById('mapLabel').innerHTML = template;
@@ -381,8 +381,13 @@ const renderMap = (cdcData) => {
                 Array.from(removeStates).forEach(btn => {
                     btn.addEventListener('click', () => {
                         const s = btn.dataset.state;
+                        const p = btn.dataset.pointNumber;
                         selectedState.splice(selectedState.indexOf(s), 1);
+                        selectedPointNumbers.splice(selectedPointNumbers.indexOf(p), 1);
                         btn.parentNode.removeChild(btn);
+                        if(selectedPointNumbers.length !== 0) d.points[0].data.selectedpoints = selectedPointNumbers
+                        else d.points[0].data.selectedpoints = undefined;
+                        Plotly.redraw('plotlyMap');
                         coffee(filterData(cdcData, selectedState));
                     })
                 });
