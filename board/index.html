@@ -12,6 +12,7 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <link href="../deathtracker.css" rel="stylesheet">
+    <link href="board.css" rel="stylesheet">
 
     <script src="js/d3.js"></script>
 
@@ -27,12 +28,22 @@
     <hr>
     <p><b>Observed Deaths vs. Expected Deaths by State: </b>Study of <a href="https://episphere.github.io/mortalitytracker" target="_blank">mortality dynamics</a> with multivariate bubble plots, two examples to inform discussion, <a href="https://www.gapminder.org/tools" target="_blank">server</a> and <a href="https://bit.ly/pqiSuffolk" target="_blank">client</a> side. This study will inform development of a <a href="https://github.com/episphere/mortalitytracker/issues/3" target="_blank">real-time stock display</a>.</p>
     <hr>
-    
-    <div id="bubblePlotDiv">
-        <script type="text/javascript" src = "bubblePlot.js"></script>
+
+    <div class="flex-container">
+
+        <div id="choroplethDiv" class="flex-child">
+            <div>
+                <script type="text/javascript" src = "choropleth.js"></script>
+
+            </div>
+        </div>
+
+        <div id="bubblePlotDiv" class="flex-child">
+            <script type="text/javascript" src = "bubblePlot.js"></script>
+        </div>
+
     </div>
 
-    <br>
     <br>
     <br>
 
@@ -42,18 +53,6 @@
 
     <div id="demographicsDiv">
         <script type="text/javascript" src = "demographics.js"></script>
-    </div>
-
-    <br>
-    <br>
-    <br>
-
-    <hr>
-    <p><b>Choropleth</b></p>
-    <hr>
-
-    <div id="choroplethDiv">
-        <script type="text/javascript" src = "choropleth.js"></script>
     </div>
 
 </body>

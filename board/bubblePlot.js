@@ -17,16 +17,14 @@ let data = JSON.parse(url)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // FILTER CDC DATA
-let prelimFinalFilteredData = data.filter(data => data.outcome == "All causes")
-let finalFilteredData = prelimFinalFilteredData.filter(data => data.type == "Unweighted");
+let data_allCauses_prelim = data.filter(data => data.outcome == "All causes")
+let data_allCauses = data_allCauses_prelim.filter(data => data.type == "Unweighted");
 
-let markerData = data.filter(data => data.outcome == "All causes, excluding COVID-19") // Predicted (weighted)
+let data_exceptCOVID = data.filter(data => data.outcome == "All causes, excluding COVID-19") // Predicted (weighted)
 
+// Get Unique States (cdcUniqueStates)
 const cdcStateData = []
-for (let i = 0; i < finalFilteredData.length; i++) {
-    cdcStateData.push(finalFilteredData[i].state)
-}
-
+for (let i = 0; i < data_allCauses.length; i++) cdcStateData.push(data_allCauses[i].state)
 function getUniqueValues(value, index, self) { 
     return self.indexOf(value) === index;
 }
@@ -101,8 +99,8 @@ d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_co
     scaledPops = mappedPops.map(x => Math.round(x/100000))
 
 
-    coffee(finalFilteredData);
-    renderMap(finalFilteredData);
+    coffee(data_allCauses);
+    renderMap(data_allCauses);
 })
 
 
@@ -222,7 +220,7 @@ function coffee(data) {
 
     //////////////////////////////////////////////////////////////////////////////////
     let layout = {
-        title: 'Observed Deaths vs. Expected Deaths for All Causes of Death',
+        // title: 'Observed Deaths vs. Expected Deaths for All Causes of Death',
         xaxis: {
             title: 'Expected Number of Deaths'
         },
@@ -303,6 +301,8 @@ let selectedPointNumbers = [];
 
 const renderMap = (cdcData) => {
     Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', function(err, rows) {
+
+    let d3colors = Plotly.d3.scale.category10();
   
     function unpack(rows, key) {
         return rows.map(function(row) { return row[key]; });
@@ -311,25 +311,33 @@ const renderMap = (cdcData) => {
         type: 'choropleth',
         locationmode: 'USA-states',
         locations: unpack(rows, 'Postal'),
-        z: unpack(rows, 'Population'),
-        text: unpack(rows, 'State')
+        // z: unpack(rows, 'Population'),
+        z: [5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
+            5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
+            5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
+            5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
+            5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
+            5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
+            5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0],
+        text: unpack(rows, 'State'),
+        autocolorscale: true
     }];
 
     let layout = {
-        title: '2014 US Population by State',
-        
+
         geo: {
             scope: 'usa',
-            countrycolor: 'rgb(255, 255, 255)',
-            showland: true,
-            landcolor: 'rgb(217, 217, 217)',
-            showlakes: true,
-            lakecolor: 'rgb(255, 255, 255)',
-            subunitcolor: 'rgb(255, 255, 255)',
-            lonaxis: {},
-            lataxis: {}
+            // countrycolor: 'rgb(255, 255, 255)',
+            // showland: true,
+            // landcolor: 'rgb(217, 217, 217)',
+            // showlakes: true,
+            // lakecolor: 'rgb(255, 255, 255)',
+            // subunitcolor: 'rgb(255, 255, 255)',
+            // lonaxis: {},
+            // lataxis: {}
+            autocolorscale: true,
         },	       
-        dragmode: false
+        dragmode: false,
     };
 
     const labelDiv = document.createElement('div');
@@ -341,8 +349,9 @@ const renderMap = (cdcData) => {
     mapDiv.id = 'plotlyMap';
 
     document.getElementById('choroplethDiv').innerHTML = '';
-    document.getElementById('choroplethDiv').appendChild(labelDiv)
     document.getElementById('choroplethDiv').appendChild(mapDiv)
+    document.getElementById('choroplethDiv').appendChild(labelDiv)
+
 
     Plotly.newPlot("plotlyMap", data, layout, {showLink: false})
         .then(gd => {
@@ -361,9 +370,9 @@ const renderMap = (cdcData) => {
                 let template = '';
                 selectedState.forEach((s, index) => {
                     if(index === 0) template += 'Selected state(s): '
-                    template += `<button class="remove-state" title="Remove this selection" data-state="${s}" style="border-radius: 0.5rem;border: 0px;margin: 2px;">${s} &times;</button>`
+                    template += `<button class="remove-state"; title="Remove this selection"; data-state="${s}"; style="border-radius: 0.5rem; border: 0px; margin: 2px; ">${s} &times;</button>`
                 })
-                if(selectedState.length !== 0 ) template += ` </br></br><button title="Remove all selection" style="border-radius: 0.5rem;border: 0px;margin: 2px;color:#ff0000" id="clearStateSelection">Clear all selection</button>`;
+                if(selectedState.length !== 0 ) template += ` </br></br><button title="Remove all selection" style="border-radius: 0.5rem; border: 0px; margin: 2px; color:#ff0000" id="clearStateSelection">Clear all selection</button>`;
                 document.getElementById('mapLabel').innerHTML = template;
                 const clearAll = document.getElementById('clearStateSelection');
                 if(clearAll){
