@@ -39,8 +39,6 @@ const cdcUniqueStates = cdcStateData.filter(getUniqueValues);
 // Declare global variables
 let mappedPops = [];
 let scaledPops = [];
-let selectedState = [];
-let selectedPointNumbers = [];
 
 (function insertPopulationsIntoPlots() {
 
@@ -148,7 +146,7 @@ function renderBubblePlot(data) {
                                '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
-                    size:  (Math.log(scaledPops[i])) * 8, // data.marker.size.slice()  controls size of first week              
+                    size:  (Math.log(scaledPops[i])) * 8, // controls size of first week              
                     sizemode: 'area',
                     sizeref: 0, // !!!!!!!!!!!!!!!!!!!
                     opacity: 0.8,
@@ -166,7 +164,7 @@ function renderBubblePlot(data) {
                                '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
-                    size:  (Math.log(scaledPops[i])) * 8, // data.marker.size.slice()  controls size of first week              
+                    size:  (Math.log(scaledPops[i])) * 8, // controls size of first week              
                     sizemode: 'area',
                     sizeref: 0, // !!!!!!!!!!!!!!!!!!!
                     opacity: 0.8,
@@ -273,8 +271,14 @@ function renderBubblePlot(data) {
 // CREATE CHOROPLETH MAP
 
 function renderMap(cdcData) {
+
+    let selectedState = [];
+    let selectedPointNumbers = [];    
+
     Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', function(err, rows) {
+
         function unpack(rows, key) { return rows.map(function(row) { return row[key]; }); }
+
         let data = [{
             type: 'choropleth',
             locationmode: 'USA-states',
@@ -290,6 +294,7 @@ function renderMap(cdcData) {
             text: unpack(rows, 'State'),
             showscale: false   
         }];
+
         let layout = {
             geo: { scope: 'usa' },         
             dragmode: true,
@@ -299,30 +304,32 @@ function renderMap(cdcData) {
                 b: 100,
                 t: 100,
                 pad: 4
-              },
+            }
         };
 
+        // divs
         const selectStateDiv = document.createElement('div');
             selectStateDiv.innerHTML = 'Select State(s) of Interest';
             selectStateDiv.id = 'selectStateLabel';
         const mapDiv = document.createElement('div');
             mapDiv.id = 'plotlyMap';
-        const labelDiv = document.createElement('div');
-            labelDiv.innerHTML = '';
-            labelDiv.id = 'mapLabel';
-            labelDiv.style.minHeight = '100px'
+        // const labelDiv = document.createElement('div');
+        //     labelDiv.innerHTML = '';
+        //     labelDiv.id = 'mapLabel';
+        //     labelDiv.style.minHeight = '100px'
         document.getElementById('choroplethDiv').innerHTML = '';
         document.getElementById('choroplethDiv').appendChild(selectStateDiv)
             document.getElementById('selectStateLabel').style.textAlign = 'center';
             document.getElementById('selectStateLabel').style.color = 'green';
             document.getElementById('selectStateLabel').style.fontWeight = 'bold';
         document.getElementById('choroplethDiv').appendChild(mapDiv)
-        document.getElementById('choroplethDiv').appendChild(labelDiv)
+        // document.getElementById('choroplethDiv').appendChild(labelDiv)
+
         Plotly.newPlot("plotlyMap", data, layout, {showLink: false})
             .then(gd => {
                 gd.on('plotly_click', d => {
-                    const pn = d.points[0].pointNumber;
-                    const state = d.points[0].text;
+                    const pn = d.points[0].pointNumber; // index of the selected point
+                    const state = d.points[0].text; // state selected
                     if(selectedState.indexOf(state) === -1) {
                         selectedState.push(state);
                         selectedPointNumbers.push(pn)
@@ -332,42 +339,48 @@ function renderMap(cdcData) {
                         selectedPointNumbers.splice(selectedPointNumbers.indexOf(pn), 1);
                     }
                     selectedState.sort();
-                    let template = '';
-                    selectedState.forEach((s, index) => {
-                        if(index === 0) template += 'Selected state(s): '
-                        template += `<button class="remove-state"; title="Remove this selection"; data-state="${s}"; style="border-radius: 0.5rem; border: 0px; margin: 2px; ">${s} &times;</button>`
-                    })
-                    if(selectedState.length !== 0 ) template += ` </br></br><button title="Remove all selection" style="border-radius: 0.5rem; border: 0px; margin: 2px; color:#ff0000" id="clearStateSelection">Clear all selection</button>`;
-                    document.getElementById('mapLabel').innerHTML = template;
-                    const clearAll = document.getElementById('clearStateSelection');
-                    if(clearAll){
-                        clearAll.addEventListener('click', () => {
-                            document.getElementById('mapLabel').innerHTML = '';
-                            selectedState = [];
-                            selectedPointNumbers = [];
-                            d.points[0].data.selectedpoints = undefined;
-                            Plotly.redraw('plotlyMap');
-                            renderBubblePlot(filterData(cdcData, selectedState));
-                        })
-                    }
-                    const removeStates = document.getElementsByClassName('remove-state');
-                    Array.from(removeStates).forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const s = btn.dataset.state;
-                            const p = d.points[0].data.text.indexOf(s);
-                            selectedState.splice(selectedState.indexOf(s), 1);
-                            selectedPointNumbers.splice(selectedPointNumbers.indexOf(p), 1);
-                            btn.parentNode.removeChild(btn);
-                            if(selectedPointNumbers.length !== 0) d.points[0].data.selectedpoints = selectedPointNumbers
-                            else d.points[0].data.selectedpoints = undefined;
-                            Plotly.redraw('plotlyMap');
-                            renderBubblePlot(filterData(cdcData, selectedState));
-                        })
-                    });
-                    if(selectedPointNumbers.length !== 0) d.points[0].data.selectedpoints = selectedPointNumbers
-                    else  d.points[0].data.selectedpoints = undefined;
+
+                    if(selectedPointNumbers.length !== 0) 
+                        d.points[0].data.selectedpoints = selectedPointNumbers
+                    else  
+                        d.points[0].data.selectedpoints = undefined;
                     Plotly.redraw('plotlyMap');
                     renderBubblePlot(filterData(cdcData, selectedState));
+
+                    // // Functionality for labelDiv
+                    // let template = '';
+                    // selectedState.forEach((s, index) => {
+                    //     if(index === 0) template += 'Selected state(s): '
+                    //     template += `<button class="remove-state"; title="Remove this selection"; data-state="${s}"; style="border-radius: 0.5rem; border: 0px; margin: 2px; ">${s} &times;</button>`
+                    // })
+                    // if(selectedState.length !== 0 ) template += ` </br></br><button title="Remove all selection" style="border-radius: 0.5rem; border: 0px; margin: 2px; color:#ff0000" id="clearStateSelection">Clear all selection</button>`;
+                    // document.getElementById('mapLabel').innerHTML = template;
+                    // const clearAll = document.getElementById('clearStateSelection');
+                    // if(clearAll){
+                    //     clearAll.addEventListener('click', () => {
+                    //         document.getElementById('mapLabel').innerHTML = '';
+                    //         selectedState = [];
+                    //         selectedPointNumbers = [];
+                    //         d.points[0].data.selectedpoints = undefined;
+                    //         Plotly.redraw('plotlyMap');
+                    //         renderBubblePlot(filterData(cdcData, selectedState));
+                    //     })
+                    // }
+                    // const removeStates = document.getElementsByClassName('remove-state');
+                    // Array.from(removeStates).forEach(btn => {
+                    //     btn.addEventListener('click', () => {
+                    //         const s = btn.dataset.state;
+                    //         const p = d.points[0].data.text.indexOf(s);
+                    //         selectedState.splice(selectedState.indexOf(s), 1);
+                    //         selectedPointNumbers.splice(selectedPointNumbers.indexOf(p), 1);
+                    //         btn.parentNode.removeChild(btn);
+                    //         if(selectedPointNumbers.length !== 0) d.points[0].data.selectedpoints = selectedPointNumbers
+                    //         else d.points[0].data.selectedpoints = undefined;
+                    //         Plotly.redraw('plotlyMap');
+                    //         renderBubblePlot(filterData(cdcData, selectedState));
+                    //     })
+                    // });
+                    
                 })
             });
         
@@ -380,3 +393,5 @@ function filterData(cdcData, selectedState) {
     else newData = cdcData.filter(dt => selectedState.indexOf(dt.state) !== -1);
     return newData;
 }
+
+
