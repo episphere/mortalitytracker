@@ -288,6 +288,7 @@ function renderMap(cdcData) {
                 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0,
                 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0],
             text: unpack(rows, 'State'),
+            showscale: false   
         }];
         let layout = {
             geo: { scope: 'usa' },         
