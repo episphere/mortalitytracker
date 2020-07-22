@@ -143,12 +143,12 @@ function renderBubblePlot(data) {
                 x: data.x,
                 y: data.y,
                 hovertemplate: '<b>State:</b>\t' + state_s[i] +
-                            '<br><br> Expected deaths:\t %{x}' +
-                            '<br> Observed deaths:\t %{y}' + 
-                            '<br> Population:\t' + mappedPops[i],
+                               '<br><br> Expected deaths:\t %{x}' +
+                               '<br> Observed deaths:\t %{y}' + 
+                               '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
-                    size:  (Math.log(scaledPops[i])) * 10, // data.marker.size.slice()  controls size of first week              
+                    size:  (Math.log(scaledPops[i])) * 8, // data.marker.size.slice()  controls size of first week              
                     sizemode: 'area',
                     sizeref: 0, // !!!!!!!!!!!!!!!!!!!
                     opacity: 0.8,
@@ -161,12 +161,12 @@ function renderBubblePlot(data) {
                 x: data.x,
                 y: data.y,
                 hovertemplate: '<b>State:</b>\t' + state_s[i] +
-                            '<br><br> Expected deaths:\t %{x}' +
-                            '<br> Observed deaths:\t %{y}' + 
-                            '<br> Population:\t' + mappedPops[i],
+                               '<br><br> Expected deaths:\t %{x}' +
+                               '<br> Observed deaths:\t %{y}' + 
+                               '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
-                    size:  (Math.log(scaledPops[i])) * 10, // data.marker.size.slice()  controls size of first week              
+                    size:  (Math.log(scaledPops[i])) * 8, // data.marker.size.slice()  controls size of first week              
                     sizemode: 'area',
                     sizeref: 0, // !!!!!!!!!!!!!!!!!!!
                     opacity: 0.8,
@@ -292,9 +292,19 @@ function renderMap(cdcData) {
         }];
         let layout = {
             geo: { scope: 'usa' },         
-            dragmode: true
+            dragmode: true,
+            margin: {
+                l: 30,
+                r: 30,
+                b: 100,
+                t: 100,
+                pad: 4
+              },
         };
 
+        const selectStateDiv = document.createElement('div');
+            selectStateDiv.innerHTML = 'Select State(s) of Interest';
+            selectStateDiv.id = 'selectStateLabel';
         const mapDiv = document.createElement('div');
             mapDiv.id = 'plotlyMap';
         const labelDiv = document.createElement('div');
@@ -302,6 +312,10 @@ function renderMap(cdcData) {
             labelDiv.id = 'mapLabel';
             labelDiv.style.minHeight = '100px'
         document.getElementById('choroplethDiv').innerHTML = '';
+        document.getElementById('choroplethDiv').appendChild(selectStateDiv)
+            document.getElementById('selectStateLabel').style.textAlign = 'center';
+            document.getElementById('selectStateLabel').style.color = 'green';
+            document.getElementById('selectStateLabel').style.fontWeight = 'bold';
         document.getElementById('choroplethDiv').appendChild(mapDiv)
         document.getElementById('choroplethDiv').appendChild(labelDiv)
         Plotly.newPlot("plotlyMap", data, layout, {showLink: false})
