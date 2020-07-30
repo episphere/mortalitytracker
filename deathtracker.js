@@ -728,11 +728,16 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         }
         //debugger
         let allTraces=[]
-        if(mortalityAdditional.checked){
-            allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+        if(document.getElementById('mortalityAdditional')){
+            if(mortalityAdditional.checked){
+                allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+            }else{
+                allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+            }  
         }else{
             allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
-        }   
+        }
+             
     }
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
