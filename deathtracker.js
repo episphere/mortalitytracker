@@ -407,11 +407,16 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             yaxis:'y2'
         }
         let allTraces = []
-        if(mortalityAdditional.checked){
-            allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+        if(document.getElementById('mortalityAdditional')){
+            if(mortalityAdditional.checked){
+                allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+            }else{
+                allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+            }
         }else{
             allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
         }
+            
         
         if(document.getElementById('mortalityRate')){
             if(mortalityRate.checked){
@@ -419,14 +424,21 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             }
         }
     let titleRight='Total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
-    if(mortalityRate.checked){
-        titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+    if(document.getElementById('mortalityRate')){
+        if(mortalityRate.checked){
+            titleRight='Total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+        }
     }
-    if(mortalityAdditional.checked){
-        dtrack.legendX=1.2
+    if(document.getElementById('mortalityAdditional')){
+        if(mortalityAdditional.checked){
+            dtrack.legendX=1.2
+        }else{
+            dtrack.legendX=1.02
+        }
     }else{
         dtrack.legendX=1.02
     }
+        
     let layout={
             title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
             hovermode: 'closest',
