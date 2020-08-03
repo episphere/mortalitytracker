@@ -1,0 +1,59 @@
+"Notes"	"Gender"	"Gender Code"	"Ten-Year Age Groups"	"Ten-Year Age Groups Code"	Deaths	Population	Crude Rate
+	"Female"	"F"	"< 1 year"	"1"	21	Not Applicable	Not Applicable
+	"Female"	"F"	"1-4 years"	"1-4"	36	Not Applicable	Not Applicable
+	"Female"	"F"	"5-14 years"	"5-14"	131	Not Applicable	Not Applicable
+	"Female"	"F"	"15-24 years"	"15-24"	142	Not Applicable	Not Applicable
+	"Female"	"F"	"25-34 years"	"25-34"	280	Not Applicable	Not Applicable
+	"Female"	"F"	"35-44 years"	"35-44"	736	Not Applicable	Not Applicable
+	"Female"	"F"	"45-54 years"	"45-54"	4823	Not Applicable	Not Applicable
+	"Female"	"F"	"55-64 years"	"55-64"	19033	Not Applicable	Not Applicable
+	"Female"	"F"	"65-74 years"	"65-74"	41344	Not Applicable	Not Applicable
+	"Female"	"F"	"75-84 years"	"75-84"	57916	Not Applicable	Not Applicable
+	"Female"	"F"	"85+ years"	"85+"	57340	Not Applicable	Not Applicable
+	"Female"	"F"	"Not Stated"	"NS"	3	Not Applicable	Not Applicable
+"Total"	"Female"	"F"			181805	Not Applicable	Not Applicable
+	"Male"	"M"	"< 1 year"	"1"	34	Not Applicable	Not Applicable
+	"Male"	"M"	"1-4 years"	"1-4"	61	Not Applicable	Not Applicable
+	"Male"	"M"	"5-14 years"	"5-14"	171	Not Applicable	Not Applicable
+	"Male"	"M"	"15-24 years"	"15-24"	219	Not Applicable	Not Applicable
+	"Male"	"M"	"25-34 years"	"25-34"	346	Not Applicable	Not Applicable
+	"Male"	"M"	"35-44 years"	"35-44"	678	Not Applicable	Not Applicable
+	"Male"	"M"	"45-54 years"	"45-54"	4040	Not Applicable	Not Applicable
+	"Male"	"M"	"55-64 years"	"55-64"	19925	Not Applicable	Not Applicable
+	"Male"	"M"	"65-74 years"	"65-74"	42933	Not Applicable	Not Applicable
+	"Male"	"M"	"75-84 years"	"75-84"	51617	Not Applicable	Not Applicable
+	"Male"	"M"	"85+ years"	"85+"	39448	Not Applicable	Not Applicable
+	"Male"	"M"	"Not Stated"	"NS"	10	Not Applicable	Not Applicable
+"Total"	"Male"	"M"			159482	Not Applicable	Not Applicable
+"Total"					341287	Not Applicable	Not Applicable
+"---"
+"Dataset: Underlying Cause of Death, 1999-2018"
+"Query Parameters:"
+"ICD-10 Codes: J40-J47 (Chronic lower respiratory diseases)"
+"Year/Month: Jan., 2015; Feb., 2015; Mar., 2015; Apr., 2015; May, 2015; Jun., 2015; Jan., 2016; Feb., 2016; Mar., 2016; Apr.,"
+"2016; May, 2016; Jun., 2016; Jan., 2017; Feb., 2017; Mar., 2017; Apr., 2017; May, 2017; Jun., 2017; Jan., 2018; Feb., 2018;"
+"Mar., 2018; Apr., 2018; May, 2018; Jun., 2018"
+"Group By: Gender; Ten-Year Age Groups"
+"Show Totals: True"
+"Show Zero Values: False"
+"Show Suppressed: False"
+"Calculate Rates Per: 100,000"
+"Rate Options: Default intercensal populations for years 2001-2009 (except Infant Age Groups)"
+"---"
+"Help: See http://wonder.cdc.gov/wonder/help/ucd.html for more information."
+"---"
+"Query Date: Jul 31, 2020 5:15:59 PM"
+"---"
+"Suggested Citation: Centers for Disease Control and Prevention, National Center for Health Statistics. Underlying Cause of Death"
+"1999-2018 on CDC WONDER Online Database, released in 2020. Data are from the Multiple Cause of Death Files, 1999-2018, as"
+"compiled from data provided by the 57 vital statistics jurisdictions through the Vital Statistics Cooperative Program. Accessed"
+"at http://wonder.cdc.gov/ucd-icd10.html on Jul 31, 2020 5:15:59 PM"
+"---"
+Caveats:
+"1. Population and rates are labeled 'Not Applicable' when Autopsy, Place of Death, Weekday or Month are grouped by or limited,"
+"due to lack of a valid population. More information: http://wonder.cdc.gov/wonder/help/ucd.html#NotApplicableRates."
+"2. Death rates are flagged as Unreliable when the rate is calculated with a numerator of 20 or less. More information:"
+"http://wonder.cdc.gov/wonder/help/ucd.html#Unreliable."
+"3. Deaths of persons with Age ""Not Stated"" are included in ""All"" counts and rates, but are not distributed among age groups,"
+"so are not included in age-specific counts, age-specific rates or in any age-adjusted rates. More information:"
+"http://wonder.cdc.gov/wonder/help/ucd.html#Not Stated."
