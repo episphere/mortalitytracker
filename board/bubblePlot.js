@@ -1,6 +1,8 @@
-// GET ALL CDC EXCESS DEATHS DATA
-
-function getData(url) {
+// getAllData(url)
+    // Retrieves CDC mortality data for "All Causes of Death"
+    // Parameter:
+        // url = Request API url
+function getAllCDCdata(url) {
     let response = '';
     let xhr = new XMLHttpRequest(); // creating an XMLHTTPRequest
     if(xhr != null) {
@@ -8,39 +10,45 @@ function getData(url) {
         xhr.send(null); // sending the request to the server
         response = xhr.responseText;
     }
-    return response;
+    let data = JSON.parse(response)
+    const data_allCauses_prelim = data.filter(data => data.outcome == "All causes")
+    const data_allCauses = data_allCauses_prelim.filter(data => data.type == "Unweighted");
+    // let data_exceptCOVID = data.filter(data => data.outcome == "All causes, excluding COVID-19") // Predicted (weighted)
+    getCDCuniqueStates(data_allCauses);
 }
-let url = getData('https://data.cdc.gov/resource/xkkf-xrst?$limit=1000000')
-const data = JSON.parse(url)
+        
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+getAllCDCdata('https://data.cdc.gov/resource/xkkf-xrst?$limit=1000000')
 
-// FILTER CDC DATA
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const data_allCauses_prelim = data.filter(data => data.outcome == "All causes")
-const data_allCauses = data_allCauses_prelim.filter(data => data.type == "Unweighted");
-// let data_exceptCOVID = data.filter(data => data.outcome == "All causes, excluding COVID-19") // Predicted (weighted)
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// GET UNIQUE STATES
-
-const cdcStateData = []
-for (let i = 0; i < data_allCauses.length; i++) cdcStateData.push(data_allCauses[i].state)
-function getUniqueValues(value, index, self) { 
-    return self.indexOf(value) === index;
+// getCDCuniqueStates(CDCdata)
+    // Retrieves all unique states from CDCdata
+    // Parameter:
+        // CDCdata = CDC data in JSON format
+function getCDCuniqueStates(CDCdata) {
+    const cdcStateData = []
+    for (let i = 0; i < CDCdata.length; i++) cdcStateData.push(CDCdata[i].state)
+    function getUniqueValues(value, index, self) { 
+        return self.indexOf(value) === index;
+    }
+    const cdcUniqueStates = cdcStateData.filter(getUniqueValues);
+    getScaledPops(CDCdata, cdcUniqueStates);
 }
-const cdcUniqueStates = cdcStateData.filter(getUniqueValues);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// PREPROCESS JHU POPULATION DATA & INTEGRATE BUBBLE PLOT AND CHOROPLETH
+// getScaledPops(CDCdata, CDCuniqueStates)
+    // Retrieves all scaled population values for all unique states from CDC data
+    // Parameters:
+        // CDCdata
+        // CDCuniqueStates
 
-// Declare global variables
-let mappedPops = [];
-let scaledPops = [];
+function getScaledPops(CDCdata, cdcUniqueStates) {
 
-(function insertPopulationsIntoPlots() {
+    let mappedPops = [];
+    let scaledPops = [];
 
     d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv').then(function(data) {
         
@@ -56,6 +64,7 @@ let scaledPops = [];
             if(JHUstates[i - 1] !== JHUstates[i]) 
                 JHUuniqueStates.push(JHUstates[i])
 
+        // Get 1-D array of populations for each JHU unique state
         let summedPops = [];
         summedPops.length = JHUuniqueStates.length;
         summedPops.fill(0);
@@ -64,6 +73,7 @@ let scaledPops = [];
                 if(allJHUdata[j].Province_State == JHUuniqueStates[i]) 
                         summedPops[i] += parseInt(allJHUdata[j].Population);
 
+        // Get 2-D array (length = # of unique states) with each element being an array of unique state and its corresponding population
         let JHUuniqueStates_and_summedPops_asArray = [];
         for(let i = 0; i < JHUuniqueStates.length; i++) {
             JHUuniqueStates_and_summedPops_asArray.push([]);
@@ -73,6 +83,7 @@ let scaledPops = [];
 
         // let JHUuniqueStates_and_summedPops_asJSON = Object.fromEntries(JHUuniqueStates_and_summedPops_asArray);
 
+        // Get array of populations for JHU unique states that are also contained in list of CDC unique states
         let mappedStates = [];
         for(let i = 0; i < cdcUniqueStates.length; i++) {
             if(JHUuniqueStates.includes(cdcUniqueStates[i])) {
@@ -84,31 +95,37 @@ let scaledPops = [];
             }
         }
 
+        // Compute population of United States and append this population to array of populations
         let usPop = 0;
         usPop += mappedPops.reduce((a, b) => a + b, 0)
-        
         mappedPops[mappedPops.lastIndexOf(0)] = usPop;
 
-        // obtained from: https://www.google.com/publicdata/explore?ds=kf7tgg1uo9ude_&met_y=population&idim=place:3651000&hl=en&dl=en
+        // Get population for New York City and append this population to array of populations
+            // obtained from: https://www.google.com/publicdata/explore?ds=kf7tgg1uo9ude_&met_y=population&idim=place:3651000&hl=en&dl=en
         mappedPops[mappedPops.indexOf(0)] = 8399000;
 
+        // Compute scaled population values
         scaledPops = mappedPops.map(x => Math.round(x/100000))
 
+        getBubblePlotTrace(CDCdata, mappedPops, scaledPops)
+        renderMap(CDCdata, mappedPops, scaledPops);
 
-        renderBubblePlot(data_allCauses);
-        renderMap(data_allCauses);
+
     })
-})()
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+}
 
-// CREATE BUBBLE PLOT
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function renderBubblePlot(data) {
+function getBubblePlotTrace(CDCdata, mappedPops, scaledPops) {
+
     let lookup = {};
+
+    // creates lookup table
+    // initializes template for new trace
     function getData(week_ending_date, state) {
         let byWeek, trace;
-        if (!(byWeek = lookup[week_ending_date])) {
+        if (!(byWeek = lookup[week_ending_date])) { // initially, this IS false ... enter brackets
             byWeek = lookup[week_ending_date] = {};
         }
         if (!(trace = byWeek[state])) {
@@ -122,28 +139,30 @@ function renderBubblePlot(data) {
         }
         return trace;
     }
-    for (let i = 0; i < data.length; i++) {
-        let datum = data[i];
-        let trace = getData(datum.week_ending_date, datum.state);
-        trace.x.push(datum.average_expected_count);
-        trace.y.push(datum.observed_number);
-        trace.id.push(datum.state);
+
+    // appends data to each trace in lookup table
+    for (let i = 0; i < CDCdata.length; i++) {
+        let trace = getData(CDCdata[i].week_ending_date, CDCdata[i].state);
+        trace.x.push(CDCdata[i].average_expected_count);
+        trace.y.push(CDCdata[i].observed_number);
+        trace.id.push(CDCdata[i].state);
     }
+
     let week_ending_date_s = Object.keys(lookup); // an array of all week ending dates
     let firstWeek = lookup[week_ending_date_s[week_ending_date_s.indexOf("2020-01-04")]];
     let state_s = Object.keys(firstWeek); // an array of all states
-    let traces = [];
+    let bubblePlotTrace = [];
     for (let i = 0; i < state_s.length; i++) {
-        let data = firstWeek[state_s[i]];
+        let CDCdata = firstWeek[state_s[i]];
         if(state_s[i] != "United States"){
-            traces.push({
+            bubblePlotTrace.push({
                 name: state_s[i], // appears as the legend item and on hover
-                x: data.x,
-                y: data.y,
+                x: CDCdata.x,
+                y: CDCdata.y,
                 hovertemplate: '<b>State:</b>\t' + state_s[i] +
-                               '<br><br> Expected deaths:\t %{x}' +
-                               '<br> Observed deaths:\t %{y}' + 
-                               '<br> Population:\t' + mappedPops[i],
+                                '<br><br> Expected deaths:\t %{x}' +
+                                '<br> Observed deaths:\t %{y}' + 
+                                '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
                     size:  (Math.log(scaledPops[i])) * 8, // controls size of first week              
@@ -154,14 +173,14 @@ function renderBubblePlot(data) {
                 }
             });
         } else {
-            traces.push({
+            bubblePlotTrace.push({
                 name: state_s[i], // appears as the legend item and on hover
-                x: data.x,
-                y: data.y,
+                x: CDCdata.x,
+                y: CDCdata.y,
                 hovertemplate: '<b>State:</b>\t' + state_s[i] +
-                               '<br><br> Expected deaths:\t %{x}' +
-                               '<br> Observed deaths:\t %{y}' + 
-                               '<br> Population:\t' + mappedPops[i],
+                                '<br><br> Expected deaths:\t %{x}' +
+                                '<br> Observed deaths:\t %{y}' + 
+                                '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
                     size:  (Math.log(scaledPops[i])) * 8, // controls size of first week              
@@ -173,7 +192,15 @@ function renderBubblePlot(data) {
             });
         }
     }
-    // Allows different frames of data for use when slider is moved
+    console.log('bubblePlotTrace', bubblePlotTrace)
+    getFrames(bubblePlotTrace, week_ending_date_s, state_s, getData, mappedPops, scaledPops);
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getFrames(bubblePlotTrace, week_ending_date_s, state_s, getData, mappedPops, scaledPops) {
+
     let frames = [];
     for (let i = week_ending_date_s.indexOf("2020-01-04"); i < week_ending_date_s.length; i++) {
         frames.push({
@@ -183,6 +210,14 @@ function renderBubblePlot(data) {
             })
         })
     }
+    console.log('frames:', frames)
+    getSliderSteps(bubblePlotTrace, frames, week_ending_date_s, mappedPops, scaledPops);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getSliderSteps(bubblePlotTrace, frames, week_ending_date_s, mappedPops, scaledPops) {
+
     let sliderSteps = [];
     for(let i = week_ending_date_s.indexOf("2020-01-04"); i < week_ending_date_s.length; i++) {
         sliderSteps.push({
@@ -195,6 +230,12 @@ function renderBubblePlot(data) {
             }]
         });
     }
+    getBubbleLayoutAndPlot(bubblePlotTrace, frames, sliderSteps);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getBubbleLayoutAndPlot(bubblePlotTrace, frames, sliderSteps) {
     let layout = {
         // title: 'Observed Deaths vs. Expected Deaths for All Causes of Death',
         xaxis: { title: 'Expected Number of Deaths' },
@@ -236,46 +277,72 @@ function renderBubblePlot(data) {
             type: 'buttons',
             pad: {t: 87, r: 10},
             buttons: [{
-              method: 'animate',
-              args: [null, {
+                method: 'animate',
+                args: [null, {
                 mode: 'immediate',
                 fromcurrent: true,
                 transition: {duration: 300},
                 frame: {duration: 500, redraw: false}
-              }],
-              label: 'Play'
+                }],
+                label: 'Play'
             }, {
-              method: 'animate',
-              args: [[null], {
+                method: 'animate',
+                args: [[null], {
                 mode: 'immediate',
                 transition: {duration: 0},
                 frame: {duration: 0, redraw: false}
-              }],
-              label: 'Pause'
+                }],
+                label: 'Pause'
             }]
-          }]
+            }]
     };
+
     Plotly.newPlot(
         'bubblePlotDiv', 
         {
-            data: traces,
+            data: bubblePlotTrace,
             frames: frames,
             layout: layout
         }, 
         {responsive: true}
     );
-};
+}
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// CREATE CHOROPLETH MAP
-
-function renderMap(cdcData) {
+function renderMap(cdcData, mappedPops, scaledPops) {
 
     let selectedState = [];
     let selectedPointNumbers = [];    
 
     Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', function(err, rows) {
+
+        // Compute ratios of observed / expected for each state
+
+        // let mapStates = unpack(rows, 'State');
+
+        // let sumObservedsByState = [];
+        // sumObservedsByState.length = 52;
+        // sumObservedsByState.fill(0);
+    
+        // let sumExpectedsByState = [];
+        // sumExpectedsByState.length = 52;
+        // sumExpectedsByState.fill(0);
+    
+        // for(let i = 0; i < mapStates.length; i++) {
+        //     for(let j = 0; j < cdcData.length; j++) {
+        //         if(cdcData[j].state === mapStates[i]) {
+        //             if(cdcData[j].observed_number != undefined && cdcData[j].average_expected_count != undefined) {
+        //                 sumObservedsByState[i] += parseInt(cdcData[j].observed_number);
+        //                 sumExpectedsByState[i] += parseInt(cdcData[j].average_expected_count);
+        //             }
+        //         }
+        //     }
+        // }
+
+        // let ratios = [];
+        // for(let i = 0; sumObservedsByState.length; i++) {
+        //     ratios.push(sumObservedsByState[i] / sumExpectedsByState[i]);
+        // }
+        // console.log(ratios);
 
         function unpack(rows, key) { return rows.map(function(row) { return row[key]; }); }
 
@@ -345,7 +412,7 @@ function renderMap(cdcData) {
                     else  
                         d.points[0].data.selectedpoints = undefined;
                     Plotly.redraw('plotlyMap');
-                    renderBubblePlot(filterData(cdcData, selectedState));
+                    getBubblePlotTrace(filterData(cdcData, selectedState), mappedPops, scaledPops);
 
                     // // Functionality for labelDiv
                     // let template = '';
@@ -389,9 +456,9 @@ function renderMap(cdcData) {
 
 function filterData(cdcData, selectedState) {
     let newData;
-    if(selectedState.length === 0) newData = cdcData;
-    else newData = cdcData.filter(dt => selectedState.indexOf(dt.state) !== -1);
+    if(selectedState.length === 0) 
+        newData = cdcData;
+    else 
+        newData = cdcData.filter(dt => selectedState.indexOf(dt.state) !== -1);
     return newData;
 }
-
-
