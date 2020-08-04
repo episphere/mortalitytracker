@@ -15,13 +15,13 @@ man1.ini=async _=>{
     return 'man1.js initialized'
 }
 
-man1.getcsv=async(url='https://episphere.github.io/mortalitytracker/strate/July2020/All%20States%20-%20All%20Cause.csv')=>{
+man1.getcsv=async(url='https://episphere.github.io/mortalitytracker/strata/July2020/All%20States%20-%20All%20Cause.csv')=>{
     let arr=[]
     let txt = await(await fetch(url)).text()
     let rows=txt.split(/[\n\r]+/).map(r=>r.split(','))
     let parms= rows[0]
     rows.slice(1).forEach((r,i)=>{
-        arr[i]=[]
+        arr[i]={}
         r.forEach((v,j)=>{
             if(parms[j]=='Date'){
                 arr[i][parms[j]]=new Date(v)
@@ -31,9 +31,9 @@ man1.getcsv=async(url='https://episphere.github.io/mortalitytracker/strate/July2
         })
     })
     // restrict range to January - June 2020
-    let t0 = new Date('2020-01-00T05:00:00.000Z')
-    let tf = new Date('2020-07-00T04:00:00.000Z')
-    arr=arr.filter(x =>(x.Date >= t0)&(x.Date <=tf ))
+    // let t0 = new Date('2020-01-00T05:00:00.000Z')
+    // let tf = new Date('2020-07-00T04:00:00.000Z')
+    // arr=arr.filter(x =>(x.Date >= t0)&(x.Date <=tf ))
     return arr
 }
 
