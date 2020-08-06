@@ -41,19 +41,54 @@ strata.getData=async()=>{
     return xx
 }
 
-strata.tabulateCounts=(div0=document.getElementById("countTabDiv"))=>{
-    let h='<input id="maleRadio" type="radio" value="Male" checked=true> Male<input id="femaleRadio" type="radio" value="Female" checked=true> Female'
+strata.selectCounts=(div0=document.getElementById("countTabDiv"))=>{
+    //let h='<input id="maleRadio" type="radio" value="Male" checked=true> Male<input id="femaleRadio" type="radio" value="Female" checked=true> Female'
+    let h=''
+    Object.keys(strata.data.stratValues).forEach(k=>{
+        h+=`<b style="color:maroon">${k}:</b>`
+        strata.data.stratValues[k].forEach(v=>{
+            h+=`<br><input id="${v}Radio" type="checkbox" value='{"${k}":"${v}"}' checked=true onchange="strata.filterSelected()"> ${v}`
+        })
+        h+='<br>'
+    })
+    h+='<div id=tabCountDiv></div>'
     div0.innerHTML=h
-    let div = document.createElement('div')
-    div0.appendChild(div)
-    h=''
-    //h=
+    strata.div0=div0
+    return div0
+}
 
+strata.filterSelected=()=>{
+    // filter
+    console.log('----begin----')
+    strata.filters={}
+    let filters = [...strata.div0.querySelectorAll('input')].filter(ip=>(!ip.checked)).forEach(ip=>{
+        console.log(ip.value)
+        let fi = JSON.parse(ip.value)
+        let k=Object.keys(fi)[0]
+        if(!strata.filters[k]){
+            strata.filters[k]=[]
+        }
+        strata.filters[k].push(fi[k])
+    })
+    console.log('----end----')
+    strata.data.filtered=strata.data.dt.filter(x=>{ // filters
+        let res=true
+        Object.keys(strata.filters).forEach(k=>{
+            strata.filters[k].forEach(v=>{
+                if(x[k]==v){
+                    res=false
+                }
+            })  
+        })
+        return res
+    })
+    console.log(strata.filters,strata.data.filtered)
 }
 
 strata.ini=async()=>{
     await strata.getData()
-    strata.tabulateCounts()
+    strata.selectCounts()
+    strata.filterSelected()
 }
 
 if(typeof(define)!='undefined'){
