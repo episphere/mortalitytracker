@@ -145,10 +145,19 @@ strata.tabulate=(div=document.getElementById('tabulateDiv'),dt=strata.data.filte
     div.appendChild(tb)
 }
 
+strata.getScript = async function(url){new Promise(function(resolve, reject) {
+    let s = document.createElement('script')
+    s.src=url
+    document.head.appendChild(s)
+    s.onload=function(){setTimeout(resolve,1000)}
+})};
+
 strata.ini=async()=>{
     await strata.getData()
     strata.selectCounts()
     strata.filterSelected()
+    //await strata.getScript('https://jonasalmeida.github.io/jmat/jmat.js')
+    //debugger
 }
 
 if(typeof(define)!='undefined'){
