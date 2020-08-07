@@ -96,10 +96,18 @@ strata.filterSelected=()=>{
 }
 
 strata.tabulate=(div=document.getElementById('tabulateDiv'),dt=strata.data.filtered,parms=strata.data.causes)=>{ // tabulate filtered results
-    div.innerHTML=`<p style="font-size:small">${Date()}, Exclusion filters: ${JSON.stringify(strata.filters)}</p>`
+    div.innerHTML=`<p style="font-size:small">${Date()}, <a href="https://data.cdc.gov/NCHS/Cumulative-Provisional-Counts-of-Deaths-by-Sex-Rac/mwk9-wnfr" target="_blank">data #mwk9-wnfr</a>, Exclusion filters: ${JSON.stringify(strata.filters)}</p>`
     let tb=document.createElement('table')
     //let race = [...new Set(strata.data.filtered.map(x=>x.race_ethnicity))]
     let age = [...new Set(strata.data.filtered.map(x=>x.age_group))]
+    .sort((a,b)=>{
+        //console.log(parseInt(a.match(/^([^\s\-]+).*/)[1]),parseInt(b.match(/^([^\s\-]+).*/)[1]))
+        if(parseInt(a.match(/^([^\s\-]+).*/)[1])>parseInt(b.match(/^([^\s\-]+).*/)[1])){
+            return 1
+        }else{
+            return -1
+        }
+    })
     let causes = [...strata.div0.querySelectorAll('input')].filter(ip=>(ip.checked)&(ip.className=='cause')).map(ip=>ip.value)
     // header
     let trh = document.createElement('tr')
