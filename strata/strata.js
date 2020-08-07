@@ -96,7 +96,7 @@ strata.filterSelected=()=>{
 }
 
 strata.tabulate=(div=document.getElementById('tabulateDiv'),dt=strata.data.filtered,parms=strata.data.causes)=>{ // tabulate filtered results
-    div.innerHTML=''
+    div.innerHTML=`<p style="font-size:small">${Date()}, Exclusion filters: ${JSON.stringify(strata.filters)}</p>`
     let tb=document.createElement('table')
     //let race = [...new Set(strata.data.filtered.map(x=>x.race_ethnicity))]
     let age = [...new Set(strata.data.filtered.map(x=>x.age_group))]
