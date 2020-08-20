@@ -1,8 +1,9 @@
+let tick = 0;
 
 // getAllData(url)
-    // Retrieves CDC mortality data for "All Causes of Death"
-    // Parameter:
-        // url = Request API url
+// Retrieves CDC mortality data for "All Causes of Death"
+// Parameter:
+// url = Request API url
 function getAllCDCdata(url) {
     let response = '';
     let xhr = new XMLHttpRequest(); // creating an XMLHTTPRequest
@@ -45,10 +46,10 @@ function getCDCuniqueStates(CDCdata) {
         // CDCdata
         // CDCuniqueStates
 
-function getScaledPops(CDCdata, cdcUniqueStates) {
+let mappedPops = [];
+let scaledPops = [];    
 
-    let mappedPops = [];
-    let scaledPops = [];
+function getScaledPops(CDCdata, cdcUniqueStates) {
 
     d3.csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv').then(function(data) {
         
@@ -107,8 +108,8 @@ function getScaledPops(CDCdata, cdcUniqueStates) {
         // Compute scaled population values
         scaledPops = mappedPops.map(x => Math.round(x/100000))
 
-        getBubblePlotTrace(CDCdata, mappedPops, scaledPops)
-        getChoroplethTrace(CDCdata, mappedPops, scaledPops);
+        getBubblePlotTrace(CDCdata, mappedPops, scaledPops, "2020-01-04")
+        getChoroplethTrace(CDCdata, mappedPops, scaledPops, "2020-01-04");
 
     })
 
@@ -116,10 +117,10 @@ function getScaledPops(CDCdata, cdcUniqueStates) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function getBubblePlotTrace(CDCdata, mappedPops, scaledPops) {
+function getBubblePlotTrace(CDCdata, mappedPops, scaledPops, selectedWeek) {
 
     // a lookup table organized by week ending date
-    let bubbleLookup = {};
+    let bubbleLookup = {};    // get data for bubble plot based on selected week from slider
 
     // append data to lookup table
     for (let i = 0; i < CDCdata.length; i++) {
@@ -144,15 +145,13 @@ function getBubblePlotTrace(CDCdata, mappedPops, scaledPops) {
         return trace;
     }
 
-    console.log('bubbleLookup', bubbleLookup)
-
     // create bubble plot trace
     let week_ending_date_s = Object.keys(bubbleLookup); // an array of all week ending dates
-    let firstWeek = bubbleLookup[week_ending_date_s[week_ending_date_s.indexOf("2020-01-04")]];
-    let state_s = Object.keys(firstWeek); // an array of all states
+    let singleWeekData = bubbleLookup[week_ending_date_s[week_ending_date_s.indexOf(selectedWeek)]];
+    let state_s = Object.keys(singleWeekData); // an array of all states
     let bubblePlotTrace = [];
     for (let i = 0; i < state_s.length; i++) {
-        let CDCdata = firstWeek[state_s[i]];
+        let CDCdata = singleWeekData[state_s[i]];
         if(state_s[i] != "United States"){
             bubblePlotTrace.push({
                 name: state_s[i], // appears as the legend item and on hover
@@ -177,9 +176,9 @@ function getBubblePlotTrace(CDCdata, mappedPops, scaledPops) {
                 x: CDCdata.x,
                 y: CDCdata.y,
                 hovertemplate: '<b>State:</b>\t' + state_s[i] +
-                               '<br><br> Expected deaths:\t %{x}' +
-                               '<br> Observed deaths:\t %{y}' + 
-                               '<br> Population:\t' + mappedPops[i],
+                                '<br><br> Expected deaths:\t %{x}' +
+                                '<br> Observed deaths:\t %{y}' + 
+                                '<br> Population:\t' + mappedPops[i],
                 mode: 'markers', // want markers in legend
                 marker: {
                     size:  (Math.log(scaledPops[i])) * 8, // controls size of first week              
@@ -191,9 +190,8 @@ function getBubblePlotTrace(CDCdata, mappedPops, scaledPops) {
             });
         }
     }
-    console.log('bubblePlotTrace', bubblePlotTrace)
-    getBubbleFrames(bubblePlotTrace, week_ending_date_s, state_s, setUpBubbleLookup, mappedPops, scaledPops);
     fillSliderOptions(week_ending_date_s, CDCdata);
+    getBubbleLayoutAndPlot(bubblePlotTrace);
 
 }
 
@@ -219,58 +217,9 @@ function fillSliderOptions(week_ending_date_s) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-function getBubbleFrames(bubblePlotTrace, week_ending_date_s, state_s, setUpBubbleLookup) {
 
-    let frames = [];
-    for (let i = week_ending_date_s.indexOf("2020-01-04"); i < week_ending_date_s.length; i++) {
-        frames.push({
-            name: week_ending_date_s[i],
-            data: state_s.map(function (state) {
-                return setUpBubbleLookup(week_ending_date_s[i], state);
-            })
-        })
-    }
-    console.log('bubbleFrames:', frames)
-    getBubbleLayoutAndPlot(bubblePlotTrace, frames);
+function getChoroplethTrace(CDCdata, mappedPops, scaledPops, selectedWeek) {
 
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-function getBubbleLayoutAndPlot(bubblePlotTrace, frames) {
-    let layout = {
-        // title: 'Observed Deaths vs. Expected Deaths for All Causes of Death',
-        xaxis: { title: 'Expected Number of Deaths' },
-        yaxis: {
-            title: {
-                text: 'Observed Number of Deaths',
-                standoff: 10
-            },
-            range: [0, 8500]
-        },
-        height: 600,
-        hovermode: 'closest'
-    };
-    Plotly.newPlot(
-        'bubblePlotDiv', 
-        {
-            data: bubblePlotTrace,
-            frames: frames,
-            layout: layout
-        }, 
-        {responsive: true}
-    );
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function getChoroplethTrace(CDCdata, mappedPops, scaledPops) {
 
     let mapStates;  
     let choroplethTrace = []; 
@@ -296,8 +245,6 @@ function getChoroplethTrace(CDCdata, mappedPops, scaledPops) {
                 trace.z.push(parseFloat((observedNumbersForSingleWeek[i] / expectedNumbersForSingleWeek[i]).toFixed(3)));      
         }
 
-        console.log('choroplethLookup', lookup)
-
         function unpack(rows, key) { return rows.map(function(row) { return row[key]; }); }
 
         // initialize template for new trace (i.e., the lookup table)
@@ -316,72 +263,59 @@ function getChoroplethTrace(CDCdata, mappedPops, scaledPops) {
             return trace;
         }
     
-        appendDataToChoroplethTrace("2020-01-04");
+        appendDataToChoroplethTrace(selectedWeek);
 
         // create choropleth map trace
-        function appendDataToChoroplethTrace(firstWeek) {
+        function appendDataToChoroplethTrace(selectedWeek) {
             let week_ending_date_s = Object.keys(lookup); // an array of all week ending dates
-            let firstWeekTrace = lookup[week_ending_date_s[week_ending_date_s.indexOf(firstWeek)]];
-            console.log('firstWeek', firstWeek)
+            let singleWeekData_trace = lookup[week_ending_date_s[week_ending_date_s.indexOf(selectedWeek)]];
             choroplethTrace.push({
                 type: 'choropleth',
                 locationmode: 'USA-states',
                 locations: unpack(rows, 'Postal'),
                 text: unpack(rows, 'State'),
                 showscale: true,
-                z: firstWeekTrace.z
+                z: singleWeekData_trace.z
             });
         }
 
-        getChoroplethFrames(choroplethTrace, setUpChoroplethLookup, mappedPops, scaledPops, CDCdata);
+        getChoroplethLayoutAndPlot(choroplethTrace, mappedPops, scaledPops, CDCdata, selectedWeek);
 
     });
 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function getChoroplethFrames(choroplethTrace, setUpChoroplethLookup, mappedPops, scaledPops, CDCdata) {
-
-    Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', function(rows) {
-
-        function unpack(rows, key) { return rows.map(function(row) { return row[key]; }); }
-
-        function forFrames(week) {
-            let trace = setUpChoroplethLookup(week);
-            let mapStates = unpack(rows, 'State');
-            let observedNumbersForSingleWeek = [];        
-            let expectedNumbersForSingleWeek = [];
-            for(let j = 0; j < mapStates.length; j++)
-                for(let k = 0; k < CDCdata.length; k++) 
-                    if((CDCdata[k].week_ending_date == week)  && (CDCdata[k].state === mapStates[j]))
-                        if(CDCdata[k].observed_number != undefined && CDCdata[k].average_expected_count != undefined) {
-                            observedNumbersForSingleWeek.push(parseInt(CDCdata[k].observed_number))
-                            expectedNumbersForSingleWeek.push(parseInt(CDCdata[k].average_expected_count))
-                        }
-            for(let i = 0; i < observedNumbersForSingleWeek.length; i++) 
-                trace.z.push(parseFloat((observedNumbersForSingleWeek[i] / expectedNumbersForSingleWeek[i]).toFixed(3)));  
-            return trace;    
-        }
-
-        let choroplethFrames = [];
-        for (let i = 0; i < global_week_ending_date_s.length; i++) {
-            choroplethFrames.push({
-                name: global_week_ending_date_s[i],
-                data: forFrames(global_week_ending_date_s[i])
-            })
-        }
-        console.log('choroplethFrames:', choroplethFrames)
-
-        getChoroplethLayoutAndPlot(choroplethTrace, mappedPops, scaledPops, CDCdata);
-
-    })
-
+        
+function getBubbleLayoutAndPlot(bubblePlotTrace) {
+    let layout = {
+        // title: 'Observed Deaths vs. Expected Deaths for All Causes of Death',
+        xaxis: { title: 'Expected Number of Deaths' },
+        yaxis: {
+            title: {
+                text: 'Observed Number of Deaths',
+                standoff: 10
+            },
+            range: [0, 8500]
+        },
+        height: 600,
+        hovermode: 'closest'
+    };
+    Plotly.newPlot(
+        'bubblePlotDiv', 
+        {
+            data: bubblePlotTrace,
+            layout: layout
+        }, 
+        {responsive: true}
+    );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
-function getChoroplethLayoutAndPlot(choroplethTrace, mappedPops, scaledPops, CDCdata) {
+function getChoroplethLayoutAndPlot(choroplethTrace, mappedPops, scaledPops, CDCdata, selectedWeek) {
+
+    tick++;
 
     let selectedState = [];
     let selectedPointNumbers = []; 
@@ -400,11 +334,13 @@ function getChoroplethLayoutAndPlot(choroplethTrace, mappedPops, scaledPops, CDC
     };
 
     //  divs
-    const labelDiv = document.createElement('div');
-        labelDiv.innerHTML = '';
-        labelDiv.id = 'mapLabel';
-        labelDiv.style.minHeight = '100px'
-    document.getElementById('choroplethDiv').appendChild(labelDiv)
+    if(tick == 1) {
+        const labelDiv = document.createElement('div');
+            labelDiv.innerHTML = '';
+            labelDiv.id = 'mapLabel';
+            labelDiv.style.minHeight = '100px'
+        document.getElementById('choroplethDiv').appendChild(labelDiv)
+    }
 
     Plotly.newPlot("mapDiv", choroplethTrace, layout, {showLink: false}).then(gd => {
 
@@ -426,7 +362,7 @@ function getChoroplethLayoutAndPlot(choroplethTrace, mappedPops, scaledPops, CDC
             else
                 d.points[0].data.selectedpoints = undefined;
             Plotly.redraw('mapDiv');
-            getBubblePlotTrace(filterDataAfterClick(CDCdata, selectedState), mappedPops, scaledPops);
+            getBubblePlotTrace(filterDataAfterClick(CDCdata, selectedState), mappedPops, scaledPops, selectedWeek);
 
             // Functionality for labels in labelDiv:
 
@@ -483,18 +419,23 @@ function filterDataAfterClick(CDCdata, selectedState) {
     if(selectedState.length === 0) 
         newData = CDCdata;
     else 
+        // only allow states that were selected from clicks to be included in newData
         newData = CDCdata.filter(data => selectedState.indexOf(data.state) !== -1);
-    console.log(newData)
     return newData;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function actionsAfterSlide(x) {
 
     // show value of selected week
     let indexOfSelectedWeek = Math.round(x * 0.3);
-    let selectedWeek = global_week_ending_date_s[indexOfSelectedWeek] // ***********
+    selectedWeek = global_week_ending_date_s[indexOfSelectedWeek] // ***********
     document.getElementById("slider_value").innerHTML = "Week of: " + selectedWeek;
 
     // get all CDC data
@@ -513,23 +454,7 @@ function actionsAfterSlide(x) {
     }
     let CDCdata = getAllCDCdata('https://data.cdc.gov/resource/xkkf-xrst?$limit=1000000');
 
-    // get selected traces for bubble plot and choropleth
-    let selectedDataForBubbles = CDCdata.filter(data => data.week_ending_date === selectedWeek);
-
-    let mapStates;
-    let selectedDataForChoropleth = [];
-    Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', function(rows) {
-        function unpack(rows, key) { return rows.map(function(row) { return row[key]; }); }
-        mapStates = unpack(rows, 'State');
-        for(let i = 0; i < selectedDataForBubbles.length; i++) 
-            if(mapStates.includes(selectedDataForBubbles[i].state))
-            selectedDataForChoropleth.push(selectedDataForBubbles[i])
-    })
-
-    console.log('selectedDataForBubbles', selectedDataForBubbles)
-    console.log('selectedDataForChoropleth', selectedDataForChoropleth)
-
-    
-
+    getBubblePlotTrace(CDCdata, mappedPops, scaledPops, selectedWeek);
+    getChoroplethTrace(CDCdata, mappedPops, scaledPops, selectedWeek);
 
 }
