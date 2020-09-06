@@ -22,9 +22,9 @@ let dataByRace = []
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic White")) // 0 
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Black")) // 1
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic American Indian or Alaska Native")) // 2
-dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Asian")) // 3
+dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Asian or Pacific Islander")) // 3
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Native Hawaiian or Other Pacific Islander")) // 4
-dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Hispanic or Latino")) // 5
+dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Hispanic")) // 5
 
 // --------------------------------------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ function getNumberOfDeaths(raceArray) {
         // (2.3.1) Filter properties of all data
         let filteredProps = []
         for(let i = 0; i < currentRace.length; i++)
-            filteredProps.push( (({age_group, covid_19_deaths}) => ({age_group, covid_19_deaths}))(currentRace[i]) );
+            filteredProps.push( (({age_group_new, covid_19_deaths}) => ({age_group_new, covid_19_deaths}))(currentRace[i]) );
 
         //(2.3.2) Remove entries where covid_19_deaths = Undefined
         noUndefineds = []
@@ -66,26 +66,21 @@ function getNumberOfDeaths(raceArray) {
                 return memo;
             }, {});
         }
-        var groupedData = groupBy(noUndefineds, 'age_group'); 
 
-        // (2.3.4) Get all unique ages (except for "All Ages")
-        let uniqueAges = Object.getOwnPropertyNames(groupedData)
-        let finalUniqueAges = [];
-        for(let i = 1; i < uniqueAges.length; i++)
-            finalUniqueAges.push(uniqueAges[i])    
+        let uniqueAges = ["Under 1 year", "1-4 years", "5-14 years", "15-24 years", "25-34 years", "35-44 years", "45-54 years", "55-64 years", "65-74 years", "75-84 years", "85 years and over"];
 
         // (2.3.5) Get number of deaths 
         let numDeathsArray = []
-        numDeathsArray.length = finalUniqueAges.length;
+        numDeathsArray.length = uniqueAges.length;
         numDeathsArray.fill(0)
-        for(let i = 0; i < finalUniqueAges.length; i++) 
+        for(let i = 0; i < uniqueAges.length; i++) 
             for(let j = 0; j < noUndefineds.length; j++) 
-                if(noUndefineds[j].age_group == finalUniqueAges[i]) 
+                if(noUndefineds[j].age_group_new == uniqueAges[i]) 
                     numDeathsArray[i] += parseInt(noUndefineds[j].covid_19_deaths);
         allNumDeathsArray.push(numDeathsArray)
     }
 
-    // (2.3.6) Merge data for "Non-Hispanic Asian" and "Non-Hispanic Native Hawaiian or Other Pacific Islander"
+    // (2.3.6) Merge data for "Non-Hispanic Asian or Pacific Islander" and "Non-Hispanic Native Hawaiian or Other Pacific Islander"
     for(let i = 0; i < allNumDeathsArray[3].length; i++) 
         allNumDeathsArray[3][i] += allNumDeathsArray[4][i]
     let finalTotalDeaths = [];
@@ -109,29 +104,13 @@ d3.csv('cdcWONDER_population.csv').then(function(data) {
 
     let populationsArr = new Array(5).fill(0).map(() => new Array(11).fill(0));
 
-    // Group data by age group
-    function groupBy(arr, property) {
-        return arr.reduce(function(memo, x) {
-            if (!memo[x[property]])
-                memo[x[property]] = []; 
-            memo[x[property]].push(x);
-            return memo;
-        }, {});
-    }
-    var groupedData = groupBy(noUndefineds, 'age_group'); 
-
-    // Get all unique ages (except for "All Ages")
-    let uniqueAges = Object.getOwnPropertyNames(groupedData)
-    let finalUniqueAges = [];
-    for(let i = 1; i < uniqueAges.length; i++)
-        finalUniqueAges.push(uniqueAges[i])
+    let uniqueAges = ["Under 1 year", "1-4 years", "5-14 years", "15-24 years", "25-34 years", "35-44 years", "45-54 years", "55-64 years", "65-74 years", "75-84 years", "85 years and over"];
     
-    for(let i = 0; i < finalUniqueRaces.length; i++) 
-        for(let j = 0; j < finalUniqueAges.length; j++) 
+    for(let i = 0; i < finalUniqueRaces.length; i++)
+        for(let j = 0; j < uniqueAges.length; j++)
             for(let k = 0; k < data.length; k++) 
-                if(data[k].race_and_hispanic_origin == finalUniqueRaces[i] && data[k].age_group == finalUniqueAges[j]) 
+                if(data[k].race_and_hispanic_origin == finalUniqueRaces[i] && data[k].age_group == uniqueAges[j]) 
                     populationsArr[i][j] = parseInt(data[k].population);
-
 
 // --------------------------------------------------------------------------------------------------------
 
@@ -153,7 +132,7 @@ d3.csv('cdcWONDER_population.csv').then(function(data) {
         let thisObj = {};
         thisObj.name = finalUniqueRaces[i];
         thisObj.type = 'bar';
-        thisObj.x = finalUniqueAges;
+        thisObj.x = uniqueAges;
         thisObj.y = mortalityRateArray[i];
         arrayForPlot.push(thisObj);
     }
