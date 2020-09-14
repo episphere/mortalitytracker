@@ -129,11 +129,11 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
     let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2019-20</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-18</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
-    h+='Data: [<a id="csvDataLink" href=""></a>]  [<a id="plotDataLink" href=""></a>]<sup><a href="https://episphere.github.io/plot" style="color:brown" target="_blank">plot</a></sup>'
+    h+='Data: [<a id="csvDataLink" href=""></a>]  [<a id="plotDataLink" href=""></a>]<sup><a href="https://episphere.github.io/plot" style="color:brown" target="_blank">csv</a></sup>'
     h+='<hr>'
     //h+='<p style="color:red">Plot under development:</p>'
     h+='<div id="plotlyWithCovidDiv"><span style="color:red">locating COVID-19 data, please wait ... </span></span></div>'
-    h+='Data: [<a id="layersDataLink" href=""></a>]<sup><a href="https://episphere.github.io/plot" style="color:brown" target="_blank">plot</a></sup>'
+    h+='Data: [<a id="layersDataLink" href=""></a>]<sup><a href="https://episphere.github.io/plot" style="color:brown" target="_blank">csv</a></sup>'
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
