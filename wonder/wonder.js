@@ -23,7 +23,7 @@ wonder.parserDiv=(div='wonderDivParser')=>{
     return div
 }
 
-wonder.parseTxt=(txt,fname,lastModifiedDate)=>{
+wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonderDataDiv'))=>{
     if(typeof(txt)=='object'){
         txt=txt.result
     }
@@ -63,8 +63,24 @@ wonder.parseTxt=(txt,fname,lastModifiedDate)=>{
     })
     y.dt=tb
     wonder.data.push(y)
+    if(div0){ // if a division is defined for visualization
+        let div=document.createElement('div')
+        //div.innerHTML='...'
+        div0.appendChild(div)
+        wonder.showData(div,y)
+    }
     //debugger
     return y
+}
+
+wonder.showData=(div,data)=>{
+    let h =`<hr>` // clear div
+    h += `<h3>${data.fname}</h3>`
+    h += `<li><b>Last modified:</b> ${data.lastModifiedDate}</li>`
+    h += `<li><b>Fields:</b> ${Object.keys(data.dt[0]).join(',')}</li>`
+
+    div.innerHTML=h
+    return div
 }
 
 if(typeof(define)!='undefined'){
