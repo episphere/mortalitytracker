@@ -15,7 +15,7 @@ h2 {
 }
 
 h3 {
-    color:#3F51B5
+    color:brown
 }
 h4 {
     color:#009688;
@@ -38,4 +38,13 @@ a:hover {
 }
 .label {
     color:blue
+}
+b {
+    color:brown
+}
+button {
+    color:navy
+}
+button:hover {
+    background-color:yellow
 }

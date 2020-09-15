@@ -8,7 +8,8 @@ wonder.parserDiv=(div='wonderDivParser')=>{
         div = document.getElementById(div)
     }
     div = div||document.createElement('div')
-    let h = `<div>Read file(s), drag&drop supported:<br><input type="file" id="loadFiles" multiple></div>`
+    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL:<br><input id="inputWonderURL" size=50 value="Underlying Cause of Death, 1999-2018 D91F042.txt"><button onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span></p></div>`
+    
     h+='<div id="wonderDataDiv"></div>'
     div.innerHTML=h
     loadFiles.onchange=evt=>{
@@ -21,6 +22,12 @@ wonder.parserDiv=(div='wonderDivParser')=>{
         }         
     }
     return div
+}
+
+wonder.loadFromURL=async(url)=>{
+    url=url||inputWonderURL.value // default picked from input with id inputWonderURL
+    let txt = await (await fetch(url)).text()
+    wonder.parseTxt(txt,url)
 }
 
 wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonderDataDiv'))=>{
@@ -77,8 +84,10 @@ wonder.showData=(div,data)=>{
     let h =`<hr>` // clear div
     h += `<h3>${data.fname}</h3>`
     h += `<li><b>Last modified:</b> ${data.lastModifiedDate}</li>`
-    h += `<li><b>Fields:</b> ${Object.keys(data.dt[0]).join(',')}</li>`
-
+    h += `<li><b>Fields (${Object.keys(data.dt[0]).length}):</b> ${Object.keys(data.dt[0]).join(',')}</li>`
+    h += `<li><b>Export (${data.dt.length}):</b> <button>JSON</button> <button>CSV</button></li>`
+    h += `<li><b>Show:</b> <button>Table</button> <button>Query</button> <button>Metadata</button></li>`
+    h += `<div id="showDataDetail"></div>`
     div.innerHTML=h
     return div
 }
