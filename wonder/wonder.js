@@ -8,7 +8,7 @@ wonder.parserDiv=(div='wonderDivParser')=>{
         div = document.getElementById(div)
     }
     div = div||document.createElement('div')
-    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL:<br><input id="inputWonderURL" size=50 value="Underlying Cause of Death, 1999-2018 D91F042.txt"><button onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span></p></div>`
+    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL: <button onclick="wonder.demo(1)" style="font-size:small">Demo1</button><button onclick="wonder.demo(2)" style="font-size:small">Demo2</button><button onclick="wonder.demo(3)" style="font-size:small">Demo3</button><br><input id="inputWonderURL" size=50><button id="loadURLbutton" onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span></p></div>`
     
     h+='<div id="wonderDataDiv"></div>'
     div.innerHTML=h
@@ -19,7 +19,7 @@ wonder.parserDiv=(div='wonderDivParser')=>{
                 wonder.parseTxt(this.result,loadFiles.files[i].name,loadFiles.files[i].lastModifiedDate) 
             }
             fr.readAsText(loadFiles.files[i]);
-        }         
+        }
     }
     return div
 }
@@ -28,6 +28,13 @@ wonder.loadFromURL=async(url)=>{
     url=url||inputWonderURL.value // default picked from input with id inputWonderURL
     let txt = await (await fetch(url)).text()
     wonder.parseTxt(txt,url)
+}
+
+wonder.demo=i=>{
+    let urls=['Underlying Cause of Death, 1999-2018 D91F042.txt','Underlying Cause of Death, 1999-2018 D91F044.txt','Underlying Cause of Death, 1999-2018 D91F045.txt']
+    let url=urls[i-1]
+    inputWonderURL.value='https://episphere.github.io/mortalitytracker/wonder/'+url
+    loadURLbutton.click()
 }
 
 wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonderDataDiv'))=>{
