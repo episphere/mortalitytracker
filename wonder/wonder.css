@@ -1,0 +1,53 @@
+body {
+    color:navy;
+    font-family:sans-serif;
+    border-style: solid;
+    border-width: 20;
+    border-color:white
+}
+
+h1 {
+    color:brown
+}
+
+h2 {
+    color:maroon
+}
+
+h3 {
+    color:brown;
+    font-size:large;
+    font-weight:bold;
+
+}
+h4 {
+    color:#009688;
+    font-size:large;
+}
+code {
+    color:green;
+    font-style:italic;
+}
+
+a:hover {
+    background-color:yellow;
+    color:red
+}
+
+.code {
+    color:maroon;
+    font-weight:bolder;
+    vertical-align:top
+}
+.label {
+    color:blue
+}
+b {
+    color:brown
+}
+button {
+    color:navy
+}
+button:hover {
+    background-color:yellow
+}
