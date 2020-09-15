@@ -87,12 +87,32 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
     return y
 }
 
+wonder.saveFile=function(x,fileName) { // x is the content of the file
+	var bb = new Blob([x]);
+   	var url = URL.createObjectURL(bb);
+	var a = document.createElement('a');
+   	a.href=url;
+	if (fileName){
+		if(typeof(fileName)=="string"){ // otherwise this is just a boolean toggle or something of the sort
+			a.download=fileName;
+		}
+		a.click() // then download it automatically 
+	} 
+	return a
+}
+
+wonder.saveJson=i=>{
+    let data = wonder.data[i-1]
+    wonder.saveFile(JSON.stringify(data),data.fname.match(/([^\/]+)\.[^\/]+$/)[1]+'.json')
+}
+
 wonder.showData=(div,data)=>{
+    let i = div.parentElement.childElementCount
     let h =`<hr>` // clear div
-    h += `<h3>${div.parentElement.childElementCount}. ${data.fname}</h3>`
+    h += `<h3>${i}. ${data.fname}</h3>`
     h += `<li><b>Last modified:</b> ${data.lastModifiedDate}</li>`
     h += `<li><b>Fields (${Object.keys(data.dt[0]).length}):</b> ${Object.keys(data.dt[0]).join(',')}</li>`
-    h += `<li><b>Export (${data.dt.length}):</b> <button>JSON</button> <button>CSV</button></li>`
+    h += `<li><b>Export (${data.dt.length}):</b> <button onclick="wonder.saveJson(${i})">JSON</button> <button>CSV</button></li>`
     h += `<li><b>Show:</b> <button>Table</button> <button>Query</button> <button>Metadata</button></li>`
     h += `<div id="showDataDetail"></div>`
     div.innerHTML=h
