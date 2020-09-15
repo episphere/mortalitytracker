@@ -18,7 +18,7 @@ wonder.parserDiv=(div='wonderDivParser')=>{
             fr.onload=function(){
                 wonder.parseTxt(this.result,loadFiles.files[i].name,loadFiles.files[i].lastModifiedDate) 
             }
-            fr.readAsText(loadFiles.files[0]);
+            fr.readAsText(loadFiles.files[i]);
         }         
     }
     return div
