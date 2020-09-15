@@ -80,7 +80,7 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
     if(div0){ // if a division is defined for visualization
         let div=document.createElement('div')
         //div.innerHTML='...'
-        div0.appendChild(div)
+        div0.prepend(div)
         wonder.showData(div,y)
     }
     //debugger
@@ -89,7 +89,7 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
 
 wonder.showData=(div,data)=>{
     let h =`<hr>` // clear div
-    h += `<h3>${data.fname}</h3>`
+    h += `<h3>${div.parentElement.childElementCount}. ${data.fname}</h3>`
     h += `<li><b>Last modified:</b> ${data.lastModifiedDate}</li>`
     h += `<li><b>Fields (${Object.keys(data.dt[0]).length}):</b> ${Object.keys(data.dt[0]).join(',')}</li>`
     h += `<li><b>Export (${data.dt.length}):</b> <button>JSON</button> <button>CSV</button></li>`
