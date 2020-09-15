@@ -109,8 +109,6 @@ wonder.saveJson=i=>{
 wonder.saveCsv=i=>{
     let data = wonder.data[i-1]
     wonder.saveFile(data.txt.slice(0,data.txt.match(/"---"/).index).replace(/\t/g,','),data.fname.match(/([^\/]+)\.[^\/]+$/)[1]+'.csv')
-
-    debugger
 }
 
 wonder.showData=(div,data)=>{
