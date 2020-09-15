@@ -46,8 +46,12 @@ b {
     color:brown
 }
 button {
-    color:navy
+    color:blue;
+    border-radius: 10px;
 }
 button:hover {
     background-color:yellow
+}
+input {
+    color:blue
 }
