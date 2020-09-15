@@ -106,13 +106,20 @@ wonder.saveJson=i=>{
     wonder.saveFile(JSON.stringify(data),data.fname.match(/([^\/]+)\.[^\/]+$/)[1]+'.json')
 }
 
+wonder.saveCsv=i=>{
+    let data = wonder.data[i-1]
+    wonder.saveFile(data.txt.slice(0,data.txt.match(/"---"/).index).replace(/\t/g,','),data.fname.match(/([^\/]+)\.[^\/]+$/)[1]+'.csv')
+
+    debugger
+}
+
 wonder.showData=(div,data)=>{
     let i = div.parentElement.childElementCount
     let h =`<hr>` // clear div
     h += `<h3>${i}. ${data.fname}</h3>`
     h += `<li><b>Last modified:</b> ${data.lastModifiedDate}</li>`
     h += `<li><b>Fields (${Object.keys(data.dt[0]).length}):</b> ${Object.keys(data.dt[0]).join(',')}</li>`
-    h += `<li><b>Export (${data.dt.length}):</b> <button onclick="wonder.saveJson(${i})">JSON</button> <button>CSV</button></li>`
+    h += `<li><b>Export (${data.dt.length}):</b> <button onclick="wonder.saveJson(${i})">JSON</button> <button onclick="wonder.saveCsv(${i})">CSV</button></li>`
     h += `<li><b>Show:</b> <button>Table</button> <button>Query</button> <button>Metadata</button></li>`
     h += `<div id="showDataDetail"></div>`
     div.innerHTML=h
