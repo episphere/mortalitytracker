@@ -83,7 +83,7 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
         div0.prepend(div)
         wonder.showData(div,y)
     }
-    //debugger
+    debugger
     return y
 }
 
