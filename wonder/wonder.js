@@ -8,7 +8,7 @@ wonder.parserDiv=(div='wonderDivParser')=>{
         div = document.getElementById(div)
     }
     div = div||document.createElement('div')
-    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL: <button onclick="wonder.demo(1)" style="font-size:small">Demo1</button><button onclick="wonder.demo(2)" style="font-size:small">Demo2</button><button onclick="wonder.demo(3)" style="font-size:small">Demo3</button><br><input id="inputWonderURL" size=50><button id="loadURLbutton" onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span></p></div>`
+    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL: <button onclick="wonder.demo(1)" style="font-size:small">Demo1</button><button onclick="wonder.demo(2)" style="font-size:small">Demo2</button><button onclick="wonder.demo(3)" style="font-size:small">Demo3</button><button onclick="wonder.demo(4)" style="font-size:small">Demo4</button><br><input id="inputWonderURL" size=50><button id="loadURLbutton" onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span></p></div>`
     
     h+='<div id="wonderDataDiv"></div>'
     div.innerHTML=h
@@ -31,7 +31,12 @@ wonder.loadFromURL=async(url)=>{
 }
 
 wonder.demo=i=>{
-    let urls=['Underlying Cause of Death, 1999-2018 D91F042.txt','Underlying Cause of Death, 1999-2018 D91F044.txt','Underlying Cause of Death, 1999-2018 D91F045.txt']
+    let urls=[
+        'Underlying Cause of Death, 1999-2018 D91F042.txt',
+        'Underlying Cause of Death, 1999-2018 D91F044.txt',
+        'Underlying Cause of Death, 1999-2018 D91F045.txt',
+        'Place of death jan-july 2015-2018 by state.txt'
+    ]
     let url=urls[i-1]
     inputWonderURL.value='https://episphere.github.io/mortalitytracker/wonder/'+url
     loadURLbutton.click()
@@ -83,7 +88,69 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
         div0.prepend(div)
         wonder.showData(div,y)
     }
-    debugger
+    y.meta={}
+    sep.push(rr.length)
+    sep.slice(0,-1).forEach((s,i)=>{
+    	let rs=rr.slice(s+1,sep[i+1]) // rows in this set
+    	let p0=null
+    	let p1=null
+    	let fun = function(){
+    		if(rs.length>0){ // while there are elements in the array
+    			let x=rs.shift(1)[0]
+    			console.log(x)
+    			//if(x.match(/^[^\:]+/)){ // is there a parameter
+    			if(x.match(/^[^0-9]+\:/)){ // is there a parameter
+    			    if(x.slice(-1)==":"){ // is a supra parameter
+    			    	p0=x.slice(0,-1)
+    			    	y.meta[p0]={}
+    			    	let x1=rs.shift(1)[0]
+    			    	if(x1.match(/^[^0-9]+\:/)){
+    			    		p1=x1.match(/^[^\:]+/)[0] // sub-parameter
+							y.meta[p0][p1]=x1.match(/\:([^\:]+)$/)[1]
+    			    	}else{
+    			    		if(typeof(y.meta[p0])=='object'){
+    			    			y.meta[p0]=''
+    			    		}
+    			    		y.meta[p0]+=x1
+    			    	}
+							
+    			    }else{
+    			    	if(p1){
+    			    		p1=x.match(/^[^\:]+/)[0] // sub-parameter
+							y.meta[p0][p1]=x.match(/\:([^\:]+)$/)[1]
+    			    	}else{
+    			    		p0=x.match(/^[^\:]+/)[0]
+							y.meta[p0]=x.match(/\:([^\:]+)$/)[1]
+    			    	}
+    			    }
+				}else{
+					if(p1){
+						y.meta[p0][p1]+=x
+					}else{
+						y.meta[p0]+=x
+					}
+				}
+    			//debugger
+    			fun()
+    		}else{
+    			return rs
+    		}
+    	}
+    	fun()
+    	/*
+    	rs.forEach(x=>{
+    		if(x[0].match(/^[^\:]+/)){ // is there a parameter
+    		    p=x[0].match(/^[^\:]+/)[0]
+    		    y.meta[p]=x[0].match(/\:([^\:]+)$/)[1]
+    		}else{
+    			y.meta[p]+=x[0].match(/\:([^\:]+)$/)[1]
+    		}
+    		debugger
+    	})
+    	*/
+    	//console.log(i,rs)
+    	//debugger
+    })
     return y
 }
 
