@@ -98,7 +98,7 @@ let finalTotalDeaths = getNumberOfDeaths(dataByRace)
 
 // (2.4) Create array (populationsArr) of populations for each group
 
-d3.csv('cdcWONDER_population.csv').then(function(data) {
+d3.csv('data/cdcWONDER_population.csv').then(function(data) {
 
     let finalUniqueRaces = ["Non-Hispanic White", "Non-Hispanic Black", "Non-Hispanic American Indian or Alaska Native", "Non-Hispanic Asian or Pacific Islander", "Hispanic or Latino"]
 
