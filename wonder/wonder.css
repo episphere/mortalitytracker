@@ -15,7 +15,10 @@ h2 {
 }
 
 h3 {
-    color:brown
+    color:brown;
+    font-size:large;
+    font-weight:bold;
+
 }
 h4 {
     color:#009688;
@@ -43,8 +46,12 @@ b {
     color:brown
 }
 button {
-    color:navy
+    color:blue;
+    border-radius: 10px;
 }
 button:hover {
     background-color:yellow
+}
+input {
+    color:blue
 }
