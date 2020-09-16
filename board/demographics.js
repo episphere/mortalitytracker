@@ -22,7 +22,7 @@ let dataByRace = []
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic White")) // 0 
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Black")) // 1
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic American Indian or Alaska Native")) // 2
-dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Asian or Pacific Islander")) // 3
+dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Asian")) // 3
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Non-Hispanic Native Hawaiian or Other Pacific Islander")) // 4
 dataByRace.push(CDCdata.filter(data => data.race_and_hispanic_origin == "Hispanic")) // 5
 
