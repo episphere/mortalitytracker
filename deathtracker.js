@@ -118,9 +118,9 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     }
     if(removeIncompleteStates){
         dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Carolina'));
-        dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Dakota'));
-        dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Connecticut'));
-        dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Pennsylvania'));
+        //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Dakota'));
+        //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Connecticut'));
+        //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Pennsylvania'));
     }
     //
     dtrack.data.all=dtrack.cleanData(dtrack.data.all)
