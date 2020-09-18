@@ -88,8 +88,12 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
         div0.prepend(div)
         wonder.showData(div,y)
     }
-    y.meta={}
-    sep.push(rr.length)
+    // html parsing returned as a function so it is missed by JSON stringify
+    y.queryHTML=_=>{return rr.slice(sep[0]+1,sep[1]).join('<br>')}
+    y.infoHTML=_=>{return rr.slice(sep[1]+1).filter(x=>x[0]!="---").join('<br>')}
+    //sep.push(rr.length)
+    //debugger
+    /*
     sep.slice(0,-1).forEach((s,i)=>{
     	let rs=rr.slice(s+1,sep[i+1]) // rows in this set
     	let p0=null
@@ -137,20 +141,10 @@ wonder.parseTxt=(txt,fname,lastModifiedDate,div0=document.getElementById('wonder
     		}
     	}
     	fun()
-    	/*
-    	rs.forEach(x=>{
-    		if(x[0].match(/^[^\:]+/)){ // is there a parameter
-    		    p=x[0].match(/^[^\:]+/)[0]
-    		    y.meta[p]=x[0].match(/\:([^\:]+)$/)[1]
-    		}else{
-    			y.meta[p]+=x[0].match(/\:([^\:]+)$/)[1]
-    		}
-    		debugger
-    	})
-    	*/
     	//console.log(i,rs)
     	//debugger
     })
+    */
     return y
 }
 
@@ -178,6 +172,14 @@ wonder.saveCsv=i=>{
     wonder.saveFile(data.txt.slice(0,data.txt.match(/"---"/).index).replace(/\t/g,','),data.fname.match(/([^\/]+)\.[^\/]+$/)[1]+'.csv')
 }
 
+wonder.showQuery=i=>{
+	let divs=document.querySelectorAll('#showButtonSelection')
+	let divi = divs[divs.length-i]
+	console.log(i,divi)
+	divi.innerHTML=wonder.data[i-1].queryHTML()
+	//debugger
+}
+
 wonder.showData=(div,data)=>{
     let i = div.parentElement.childElementCount
     let h =`<hr>` // clear div
@@ -185,8 +187,8 @@ wonder.showData=(div,data)=>{
     h += `<li><b>Last modified:</b> ${data.lastModifiedDate}</li>`
     h += `<li><b>Fields (${Object.keys(data.dt[0]).length}):</b> ${Object.keys(data.dt[0]).join(',')}</li>`
     h += `<li><b>Export (${data.dt.length}):</b> <button onclick="wonder.saveJson(${i})">JSON</button> <button onclick="wonder.saveCsv(${i})">CSV</button></li>`
-    h += `<li><b>Show:</b> <button>Table</button> <button>Query</button> <button>Metadata</button></li>`
-    h += `<div id="showDataDetail"></div>`
+    h += `<li><b>Show:</b> <button>Table</button> <button onclick="wonder.showQuery(${i})">Query</button> <button>Info</button></li>`
+    h += `<div id="showButtonSelection" style="font-size:small;color:green"></div>`
     div.innerHTML=h
     return div
 }
