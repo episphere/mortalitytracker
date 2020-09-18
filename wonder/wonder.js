@@ -8,8 +8,8 @@ wonder.parserDiv=(div='wonderDivParser')=>{
         div = document.getElementById(div)
     }
     div = div||document.createElement('div')
-    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL: <button onclick="wonder.demo(1)" style="font-size:small">Demo1</button><button onclick="wonder.demo(2)" style="font-size:small">Demo2</button><button onclick="wonder.demo(3)" style="font-size:small">Demo3</button><button onclick="wonder.demo(4)" style="font-size:small">Demo4</button><br><input id="inputWonderURL" size=50><button id="loadURLbutton" onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span></p></div>`
-    
+    let h = `<div><p>Read file(s), drag&drop supported:<br>Upload <input type="file" id="loadFiles" multiple></p><p>or from URL: <input id="inputWonderURL" size=50><button id="loadURLbutton" onclick="wonder.loadFromURL()">load</button><span onclick="window.open(inputWonderURL.value)" style="cursor:pointer;cursor:green">&#8599;</span>`
+    h += `<br><button onclick="wonder.demo(1)" style="font-size:small">1999-2018 D91F042</button><button onclick="wonder.demo(2)" style="font-size:small">1999-2018 D91F044</button><button onclick="wonder.demo(3)" style="font-size:small">1999-2018 D91F045</button><button onclick="wonder.demo(4)" style="font-size:small">Place of death jan-july 2015-2018 by state</button></p></div>`
     h+='<div id="wonderDataDiv"></div>'
     div.innerHTML=h
     loadFiles.onchange=evt=>{
