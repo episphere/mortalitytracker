@@ -32,7 +32,7 @@ man1.getcsv=async(url='https://episphere.github.io/mortalitytracker/mountains28/
     })
     // restrict range to March 3 to July 7
     let t0 = new Date('2020-03-03T05:00:00.000Z')
-    let tf = new Date('2020-07-07T04:00:00.000Z')
+    let tf = new Date('2020-07-28T04:00:00.000Z')
     arr=arr.filter(x =>(x.Date >= t0)&(x.Date <=tf ))
     return arr
 }
