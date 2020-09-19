@@ -865,7 +865,10 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
             size: "16"
           }
         }
-      }
+      },
+      zauto: false,
+      zmin: 0,
+      zmax: 200
     }];
     const layout = {
       title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"}`,
