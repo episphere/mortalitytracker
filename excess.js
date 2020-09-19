@@ -1,6 +1,9 @@
 const datasetURL = "https://data.cdc.gov/resource/xkkf-xrst"
 const format = "json"
 const defaultLimit = 1000
+const removeYears = [2014]
+const minMMWRWeek = 9
+const maxMMWRWeek = 30
 const excess = {}
 excess.data = {}
 
@@ -53,7 +56,6 @@ const loadHashParams = (selectElementId = "selectState") => {
 
 excess.cleanData = (data = {...dtrack.data.all}) => {
 
-  
   const causes = Object.assign({}, dtrack.data.causes)
   const states = [...dtrack.data.states]
   const shortNames = Object.assign({}, dtrack.data.shortName)
@@ -110,7 +112,8 @@ excess.ui = async (divId) => {
       await dtrack.ui()
     } catch (e) {}
   }
-  const { sortedStateWiseData: cleanedData, ...params } = excess.cleanData(dtrack.data.all) // Cloning the original object
+  const validYearsData = dtrack.data.all.filter(row => !removeYears.includes(row.mmwryear))
+  const { sortedStateWiseData: cleanedData, ...params } = excess.cleanData(validYearsData)
   excess.data.cleanedData = cleanedData
   excess.params = params
 
@@ -208,6 +211,7 @@ excess.ui = async (divId) => {
 excess.renderPlots = (plotsParentDivId="plotlyCompareDiv") => {
   excess.areaPlot(plotsParentDivId)
   excess.areaPlotCumulative(plotsParentDivId)
+  excess.choroplethPlot(plotsParentDivId)
   // excess.scatterPlot(plotsParentDivId)
   // excess.barChart(plotsParentDivId)
 }
@@ -355,7 +359,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
     type: "scatter",
     stackgroup: "excess_0",
     hovertemplate: "%{y}",
-    name: "Average Deaths from All Causes for 2014-2019",
+    name: "Average Deaths from All Causes for 2015-2019",
     line: {
       color: "blueviolet"
     },
@@ -388,7 +392,7 @@ excess.areaPlot = (plotsParentDivId="plotlyCompareDiv") => {
   const tracesToPlot = [averageOverOtherYearsTrace, averageOverOtherYearsTrace2, ...areaPlotTraces]
   // console.log(tracesToPlot)
   const layout = {
-    title: `Additional Deaths in <b style="color:green">${excess.stateSelected}</b> in 2020 compared to the Average Deaths from 2014-2019`,
+    title: `Additional Deaths in <b style="color:green">${excess.stateSelected}</b> in 2020 compared to the Average Deaths from 2015-2019`,
     legend: { 'orientation': "h" },
     yaxis: {
       title: "Number of Deaths"
@@ -428,8 +432,8 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     cumulativeAvgSum.push(Math.round(cumulativeAvgdSumTillThisWeek))
     return cumulativeAvgSum
   }, [])
-  
   cumulativeDeathsFor2020 = {}
+
   relevantCauses.forEach(cause => {
     // if (cause === relevantCauses[0]) {
       const key = excess.params.shortNames[cause]
@@ -452,7 +456,6 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     // const averageExcessForOutcome = outcomeSpecificData.reduce((prev, current) => prev + (current[keyMaps.observed_number] - current[compareWith]), 0) / outcomeSpecificData.length
     // const acceptableDeviation = averageExcessForOutcome < 0 ? averageExcessForOutcome * 2.5 : averageExcessForOutcome * -2.5
   })
-  
   // const upperBoundThresholdsFor2020 = dataFor2020.filter(row => row[keyMaps.outcome] === excess.params.outcomes[0]).map(row => row[keyMaps.upper_bound_threshold])
   // const outcomeNamesMap = {
   //   "All causes": "Including COVID-19",
@@ -509,7 +512,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
     type: "scatter",
     stackgroup: "cumulative",
     hovertemplate: "%{y}",
-    name: "Average Cumulative Deaths from All Causes for 2014-2019",
+    name: "Average Cumulative Deaths from All Causes for 2015-2019",
     line: {
       color: "blueviolet",
       width: 2
@@ -529,7 +532,7 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   console.log(areaPlotTraces)
   const tracesToPlot = [areaPlotTraces[0], areaPlotTraces[2], areaPlotTraces[1]]
   const layout = {
-    title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2014-2019 averaged`,
+    title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2015-2019 averaged`,
     legend: { 'orientation': "h" },
     yaxis: {
       title: 'Cumulative Count of Deaths'
@@ -724,6 +727,142 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
       "range": [0, maxYAxisRangeValue]
     }
   }
-
+  
   Plotly.newPlot(barChartDivId, dataForBarChart, layout, {responsive: true})
+}
+
+excess.changeChoroplethWeek = () => {
+  const sliderValue = document.getElementById("weekSelector").value
+  const weekendingDate = dtrack.data.weekends2020[sliderValue - 1]
+  const weekendMonth = weekendingDate.getMonth() + 1 < 10 ? "0" + (weekendingDate.getMonth() + 1) : weekendingDate.getMonth() + 1
+  const weekendDate = weekendingDate.getDate() < 10 ? "0" + weekendingDate.getDate() : weekendingDate.getDate()
+  document.getElementById("weekDisplay").value = weekendMonth + "/" + weekendDate + "/" + weekendingDate.getFullYear()
+  excess.mmwrWeekForChoropleth = sliderValue
+  excess.choroplethPlot(undefined, sliderValue, excess.nonCovidForChoropleth)
+}
+
+excess.changeChoroplethCause = (element) => {
+  const nonCovid = element.value !== "allCauses"
+  if (excess.nonCovidForChoropleth !== nonCovid) {
+    excess.nonCovidForChoropleth = nonCovid
+    excess.choroplethPlot(undefined, excess.mmwrWeekForChoropleth, nonCovid)
+  }
+}
+
+excess.mmwrWeekForChoropleth = 30
+excess.nonCovidForChoropleth = false
+excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSelected=excess.mmwrWeekForChoropleth, nonCovid=excess.nonCovidForChoropleth) => {
+  const nonStates = ["All States", "New York City"]
+  const statePopulations = await (await fetch("https://episphere.github.io/mortalitytracker/statePopulations.json")).json()
+
+  const plotsParentDiv = document.getElementById(plotsParentDivId)
+  const choroplethDivId = "excessDeathsChoropleth"
+  let choroplethDiv = document.getElementById(choroplethDivId)
+  if (!choroplethDiv) {
+    choroplethDiv = document.createElement("div")
+    choroplethDiv.setAttribute("id", choroplethDivId)
+    choroplethDiv.style.width = "100%"
+    choroplethDiv.style.height = "800px"
+    choroplethDiv.innerHTML = `<div id="options" style="width:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">
+      <div id="weekSelectorDiv">
+        <label for="weekSelector">Choose Week:</label>
+        <input type="range" id="weekSelector" name="weekSelector" min="9" max="30" style="width:400px;" value="30" onchange="excess.changeChoroplethWeek()"/>
+        <input type="text" id="weekDisplay" disabled value="07/28/2020"/>
+      </div>
+      <div id="causeSelectorDiv">
+        <input type="radio" id="allCausesForChoropleth" name="causeSelector" value="allCauses" checked onclick="excess.changeChoroplethCause(this)">
+        <label for="allCausesForChoropleth">&nbsp;All Causes</label>
+        <input style="margin-left: 2rem;" type="radio" id="nonCovidCausesForChoropleth" name="causeSelector" value="nonCovidCauses" onclick="excess.changeChoroplethCause(this)">
+        <label for="nonCovidCausesForChoropleth">&nbsp;Non-COVID Causes</label>
+    </div>`
+    plotsParentDiv.appendChild(choroplethDiv)
+    plotsParentDiv.appendChild(document.createElement("br"))
+    plotsParentDiv.appendChild(document.createElement("br"))
+    plotsParentDiv.appendChild(document.createElement("hr"))
+    plotsParentDiv.appendChild(document.createElement("br"))
+  }
+
+  // const relevantCausesForChoropleth = [...relevantCauses, "covid_19_u071_multiple_cause_of_death"]
+  const excessDeathsByStatePerWeek = excess.params.states.reduce((cumulativeObj, currentState) => {
+    if (!nonStates.includes(currentState)) {
+      const stateData = excess.data.cleanedData[currentState]
+      const dataForOtherYears = stateData.filter(row => row.mmwryear > 2014 && row.mmwryear < 2020)
+      const dataFor2020 = stateData.filter(row => row.mmwryear === 2020)
+      const cumulativeAvgDeathsForOtherYears = excess.params.mmwrWeeks.reduce((cumulativeAvgSum, week) => {
+        const deathsThisWeek = dataForOtherYears.filter(row => row[keyMaps.week] === week)
+        const avgThisWeek = deathsThisWeek.reduce((prev, current) =>  prev + (current[relevantCauses[0]] || 0), 0) / deathsThisWeek.length
+        const cumulativeAvgdSumTillThisWeek = cumulativeAvgSum.length === 0 ? avgThisWeek : cumulativeAvgSum[cumulativeAvgSum.length - 1] + avgThisWeek
+        cumulativeAvgSum.push(Math.round(cumulativeAvgdSumTillThisWeek))
+        return cumulativeAvgSum
+      }, [])
+      const cumulativeDeathsByCause = {
+        'allCausesCumulativeDeaths': [],
+        'nonCovidCumulativeDeaths': []
+      }
+      let allCausesCumSum = 0, covidCumSum = 0
+      excess.params.mmwrWeeks.forEach(week => {
+        const dataThisWeek = dataFor2020.find(row => row.mmwrweek === week)
+        allCausesCumSum = allCausesCumSum + (dataThisWeek[relevantCauses[0]] || 0)
+        covidCumSum = covidCumSum + (dataThisWeek[relevantCauses[1]] || 0)
+        const allCauseExcessDeaths = allCausesCumSum - cumulativeAvgDeathsForOtherYears[week - 1]
+        if (!statePopulations.find(x => x.state === currentState)) {
+          console.log(currentState)
+        }
+        cumulativeDeathsByCause['allCausesCumulativeDeaths'].push((allCauseExcessDeaths / statePopulations.find(x => x.state === currentState).population_2019) * 10**5)
+        cumulativeDeathsByCause['nonCovidCumulativeDeaths'].push(((allCauseExcessDeaths - covidCumSum)  / statePopulations.find(x => x.state === currentState).population_2019) * 10**5)
+      }, {})
+      cumulativeObj[currentState] = cumulativeDeathsByCause
+    }
+    return cumulativeObj
+  }, {})
+
+  // const dataForOtherYears = excess.data.cleanedData.filter(row => row.mmwryear > 2014 && row.mmwryear < 2020)
+  // const dataFor2020 = excess.data.cleanedData.filter
+  // const cumulativeAvgDeathsForOtherYearsPerState = excess.params.mmwrWeeks.reduce((cumulativeAvgSum, week) => {
+  //   const deathsThisWeek = dataForOtherYears.filter(row => row[keyMaps.week] === week)
+  //   const avgThisWeek = deathsThisWeek.reduce((prev, current) =>  prev + (current[relevantCauses[0]] || 0), 0) / deathsThisWeek.length
+  //   const cumulativeAvgdSumTillThisWeek = cumulativeAvgSum.length === 0 ? avgThisWeek : cumulativeAvgSum[cumulativeAvgSum.length - 1] + avgThisWeek
+  //   cumulativeAvgSum.push(Math.round(cumulativeAvgdSumTillThisWeek))
+  //   return cumulativeAvgSum
+  // }, [])
+  // const cumulativeDeathsFor2020 = relevantCausesForChoropleth.forEach(cause => {
+  //   const key = excess.params.shortNames[cause]
+  //   const cumulativeSum = (sum => value => sum += value)(0)
+  //   const cumulativeSumPerWeek = dataFor2020.map(row => isNaN(row[cause]) ? 0 : row[cause]).map(cumulativeSum)
+  //   cumulativeDeathsFor2020ForChoropleth[key] = cumulativeSumPerWeek
+  // })
+  // excess.cumulativeDeathsFor2020ByCause = {...cumulativeDeathsFor2020ForChoropleth, ...excess.cumulativeDeathsFor2020ByCause}
+  // console.log(excess.cumulativeDeathsFor2020ByCause)
+  Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', (err, rows) => {
+    const z = rows.map(x => { 
+      let excessDeathsForState = 0
+      if (excessDeathsByStatePerWeek[x['State']]) {
+        excessDeathsForState = nonCovid ? excessDeathsByStatePerWeek[x['State']]['nonCovidCumulativeDeaths'][mmwrWeekSelected] : excessDeathsByStatePerWeek[x['State']]['allCausesCumulativeDeaths'][mmwrWeekSelected]; 
+      }
+      return excessDeathsForState 
+    })
+    const negativeValues = z.filter(a => a < 0)
+    let colorscale = [[0,'rgb(255, 255, 255)'],[0.15,'rgb(254,237,222)'],[0.3,'rgb(253,208,162)'],[0.45,'rgb(253,174,107)'],[0.6,'rgb(253,141,60)'],[0.75,'rgb(241,105,19)'],[0.87,'rgb(217,72,1)'],[1,'rgb(140,45,4)']]
+    if (negativeValues.length > 0 && 0 - Math.min(negativeValues) > (z.reduce((a,b) => a+b, 0)/z.length) - 0) {
+      colorscale = [[0,'rgb(255,255,255)'],[0.5,'rgb(254,237,222)'],[1,'rgb(253,174,107)']]
+    }
+    const data = [{
+      type: 'choropleth',
+      locationmode: 'USA-states',
+      locations: rows.map(x => x['Postal']),
+      z,
+      text: rows.map(x=>x['State']),
+      colorscale: "YlOrRd",
+      reversescale: true,
+      autocolorscale: false
+    }];
+    const layout = {
+      title: 'Excess Mortality in 2020 vs 2015-2019 for All Causes per 100,000 people',
+      geo:{
+        scope: 'usa',
+        subunitcolor: 'rgb(255, 255, 255)',
+      }
+    };
+    Plotly.newPlot(choroplethDivId, data, layout, {responsive: true}); 
+  })
 }
