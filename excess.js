@@ -764,8 +764,9 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
     choroplethDiv = document.createElement("div")
     choroplethDiv.setAttribute("id", choroplethDivId)
     choroplethDiv.style.width = "100%"
-    choroplethDiv.style.height = "800px"
+    choroplethDiv.style.height = "700px"
     choroplethDiv.innerHTML = `<div id="options" style="width:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">
+      <p style="font-size:0.8rem;"><em>*Excluding North Carolina due to data inconsistencies</em></p>
       <div id="weekSelectorDiv">
         <label for="weekSelector">Choose Week:</label>
         <input type="range" id="weekSelector" name="weekSelector" min="9" max="30" style="width:400px;" value="30" oninput="excess.changeChoroplethWeek()"/>
@@ -778,6 +779,8 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
         <label for="nonCovidCausesForChoropleth">&nbsp;Non-COVID Causes</label>
     </div>`
     plotsParentDiv.appendChild(choroplethDiv)
+    plotsParentDiv.appendChild(document.createElement("br"))
+    plotsParentDiv.appendChild(document.createElement("br"))
     plotsParentDiv.appendChild(document.createElement("br"))
     plotsParentDiv.appendChild(document.createElement("br"))
     plotsParentDiv.appendChild(document.createElement("hr"))
@@ -868,7 +871,7 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
       },
       zauto: false,
       zmin: 0,
-      zmax: 200
+      zmax: nonCovid ? 80 : 200
     }];
     const layout = {
       title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"}`,
