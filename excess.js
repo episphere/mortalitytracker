@@ -736,7 +736,8 @@ excess.changeChoroplethWeek = () => {
   const weekendingDate = dtrack.data.weekends2020[sliderValue - 1]
   const weekendMonth = weekendingDate.getMonth() + 1 < 10 ? "0" + (weekendingDate.getMonth() + 1) : weekendingDate.getMonth() + 1
   const weekendDate = weekendingDate.getDate() < 10 ? "0" + weekendingDate.getDate() : weekendingDate.getDate()
-  document.getElementById("weekDisplay").value = weekendMonth + "/" + weekendDate + "/" + weekendingDate.getFullYear()
+  excess.cumulativeUptoDate = weekendMonth + "/" + weekendDate + "/" + weekendingDate.getFullYear()
+  document.getElementById("weekDisplay").value = excess.cumulativeUptoDate
   excess.mmwrWeekForChoropleth = sliderValue
   excess.choroplethPlot(undefined, sliderValue, excess.nonCovidForChoropleth)
 }
@@ -751,6 +752,7 @@ excess.changeChoroplethCause = (element) => {
 
 excess.mmwrWeekForChoropleth = 30
 excess.nonCovidForChoropleth = false
+excess.cumulativeUptoDate = "07/28/2020"
 excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSelected=excess.mmwrWeekForChoropleth, nonCovid=excess.nonCovidForChoropleth) => {
   const nonStates = ["All States", "New York City"]
   const statePopulations = await (await fetch("https://episphere.github.io/mortalitytracker/statePopulations.json")).json()
@@ -857,7 +859,7 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
       autocolorscale: false
     }];
     const layout = {
-      title: 'Excess Mortality in 2020 vs 2015-2019 for All Causes per 100,000 people',
+      title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"} per 100,000 people`,
       geo:{
         scope: 'usa',
         subunitcolor: 'rgb(255, 255, 255)',
