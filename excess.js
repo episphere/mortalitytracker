@@ -768,7 +768,7 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
     choroplethDiv.innerHTML = `<div id="options" style="width:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">
       <div id="weekSelectorDiv">
         <label for="weekSelector">Choose Week:</label>
-        <input type="range" id="weekSelector" name="weekSelector" min="9" max="30" style="width:400px;" value="30" onchange="excess.changeChoroplethWeek()"/>
+        <input type="range" id="weekSelector" name="weekSelector" min="9" max="30" style="width:400px;" value="30" oninput="excess.changeChoroplethWeek()"/>
         <input type="text" id="weekDisplay" disabled value="07/28/2020"/>
       </div>
       <div id="causeSelectorDiv">
@@ -856,10 +856,19 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
       text: rows.map(x=>x['State']),
       colorscale: "YlOrRd",
       reversescale: true,
-      autocolorscale: false
+      autocolorscale: false,
+      colorbar: {
+        title: {
+          text: "Excess Deaths per 100,000 people",
+          side: "right",
+          font: {
+            size: "16"
+          }
+        }
+      }
     }];
     const layout = {
-      title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"} per 100,000 people`,
+      title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"}`,
       geo:{
         scope: 'usa',
         subunitcolor: 'rgb(255, 255, 255)',
