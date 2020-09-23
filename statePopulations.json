@@ -1,210 +1,418 @@
 [
-    {
-      "state": "Alabama",
-      "population_2019": 4903185
-    },
-    {
-      "state": "Alaska",
-      "population_2019": 731545
-    },
-    {
-      "state": "Arizona",
-      "population_2019": 7278717
-    },
-    {
-      "state": "Arkansas",
-      "population_2019": 3017804
-    },
-    {
-      "state": "California",
-      "population_2019": 39512223
-    },
-    {
-      "state": "Colorado",
-      "population_2019": 5758736
-    },
-    {
-      "state": "Connecticut",
-      "population_2019": 3565287
-    },
-    {
-      "state": "Delaware",
-      "population_2019": 973764
-    },
-    {
-      "state": "District of Columbia",
-      "population_2019": 705749
-    },
-    {
-      "state": "Florida",
-      "population_2019": 21477737
-    },
-    {
-      "state": "Georgia",
-      "population_2019": 10617423
-    },
-    {
-      "state": "Hawaii",
-      "population_2019": 1415872
-    },
-    {
-      "state": "Idaho",
-      "population_2019": 1787065
-    },
-    {
-      "state": "Illinois",
-      "population_2019": 12671821
-    },
-    {
-      "state": "Indiana",
-      "population_2019": 6732219
-    },
-    {
-      "state": "Iowa",
-      "population_2019": 3155070
-    },
-    {
-      "state": "Kansas",
-      "population_2019": 2913314
-    },
-    {
-      "state": "Kentucky",
-      "population_2019": 4467673
-    },
-    {
-      "state": "Louisiana",
-      "population_2019": 4648794
-    },
-    {
-      "state": "Maine",
-      "population_2019": 1344212
-    },
-    {
-      "state": "Maryland",
-      "population_2019": 6045680
-    },
-    {
-      "state": "Massachusetts",
-      "population_2019": 6892503
-    },
-    {
-      "state": "Michigan",
-      "population_2019": 9986857
-    },
-    {
-      "state": "Minnesota",
-      "population_2019": 5639632
-    },
-    {
-      "state": "Mississippi",
-      "population_2019": 2976149
-    },
-    {
-      "state": "Missouri",
-      "population_2019": 6137428
-    },
-    {
-      "state": "Montana",
-      "population_2019": 1068778
-    },
-    {
-      "state": "Nebraska",
-      "population_2019": 1934408
-    },
-    {
-      "state": "Nevada",
-      "population_2019": 3080156
-    },
-    {
-      "state": "New Hampshire",
-      "population_2019": 1359711
-    },
-    {
-      "state": "New Jersey",
-      "population_2019": 8882190
-    },
-    {
-      "state": "New Mexico",
-      "population_2019": 2096829
-    },
-    {
-      "state": "New York",
-      "population_2019": 19453561
-    },
-    {
-      "state": "North Carolina",
-      "population_2019": 10488084
-    },
-    {
-      "state": "North Dakota",
-      "population_2019": 762062
-    },
-    {
-      "state": "Ohio",
-      "population_2019": 11689100
-    },
-    {
-      "state": "Oklahoma",
-      "population_2019": 3956971
-    },
-    {
-      "state": "Oregon",
-      "population_2019": 4217737
-    },
-    {
-      "state": "Pennsylvania",
-      "population_2019": 12801989
-    },
-    {
-      "state": "Puerto Rico",
-      "population_2019": 3193694
-    },
-    {
-      "state": "Rhode Island",
-      "population_2019": 1059361
-    },
-    {
-      "state": "South Carolina",
-      "population_2019": 5148714
-    },
-    {
-      "state": "South Dakota",
-      "population_2019": 884659
-    },
-    {
-      "state": "Tennessee",
-      "population_2019": 6829174
-    },
-    {
-      "state": "Texas",
-      "population_2019": 28995881
-    },
-    {
-      "state": "Utah",
-      "population_2019": 3205958
-    },
-    {
-      "state": "Vermont",
-      "population_2019": 623989
-    },
-    {
-      "state": "Virginia",
-      "population_2019": 8535519
-    },
-    {
-      "state": "Washington",
-      "population_2019": 7614893
-    },
-    {
-      "state": "West Virginia",
-      "population_2019": 1792147
-    },
-    {
-      "state": "Wisconsin",
-      "population_2019": 5822434
-    },
-    {
-      "state": "Wyoming",
-      "population_2019": 578759
-    }
-  ]
+  {
+    "state": "Alabama",
+    "population_2015": 4852347,
+    "population_2016": 4863525,
+    "population_2017": 4874486,
+    "population_2018": 4887681,
+    "population_2019": 4903185
+  },
+  {
+    "state": "Alaska",
+    "population_2015": 737498,
+    "population_2016": 741456,
+    "population_2017": 739700,
+    "population_2018": 735139,
+    "population_2019": 731545
+  },
+  {
+    "state": "Arizona",
+    "population_2015": 6829676,
+    "population_2016": 6941072,
+    "population_2017": 7044008,
+    "population_2018": 7158024,
+    "population_2019": 7278717
+  },
+  {
+    "state": "Arkansas",
+    "population_2015": 2978048,
+    "population_2016": 2989918,
+    "population_2017": 3001345,
+    "population_2018": 3009733,
+    "population_2019": 3017804
+  },
+  {
+    "state": "California",
+    "population_2015": 38918045,
+    "population_2016": 39167117,
+    "population_2017": 39358497,
+    "population_2018": 39461588,
+    "population_2019": 39512223
+  },
+  {
+    "state": "Colorado",
+    "population_2015": 5450623,
+    "population_2016": 5539215,
+    "population_2017": 5611885,
+    "population_2018": 5691287,
+    "population_2019": 5758736
+  },
+  {
+    "state": "Connecticut",
+    "population_2015": 3587122,
+    "population_2016": 3578141,
+    "population_2017": 3573297,
+    "population_2018": 3571520,
+    "population_2019": 3565287
+  },
+  {
+    "state": "Delaware",
+    "population_2015": 941252,
+    "population_2016": 948921,
+    "population_2017": 956823,
+    "population_2018": 965479,
+    "population_2019": 973764
+  },
+  {
+    "state": "District of Columbia",
+    "population_2015": 675400,
+    "population_2016": 685815,
+    "population_2017": 694906,
+    "population_2018": 701547,
+    "population_2019": 705749
+  },
+  {
+    "state": "Florida",
+    "population_2015": 20209042,
+    "population_2016": 20613477,
+    "population_2017": 20963613,
+    "population_2018": 21244317,
+    "population_2019": 21477737
+  },
+  {
+    "state": "Georgia",
+    "population_2015": 10178447,
+    "population_2016": 10301890,
+    "population_2017": 10410330,
+    "population_2018": 10511131,
+    "population_2019": 10617423
+  },
+  {
+    "state": "Hawaii",
+    "population_2015": 1422052,
+    "population_2016": 1427559,
+    "population_2017": 1424393,
+    "population_2018": 1420593,
+    "population_2019": 1415872
+  },
+  {
+    "state": "Idaho",
+    "population_2015": 1651059,
+    "population_2016": 1682380,
+    "population_2017": 1717715,
+    "population_2018": 1750536,
+    "population_2019": 1787065
+  },
+  {
+    "state": "Illinois",
+    "population_2015": 12858913,
+    "population_2016": 12820527,
+    "population_2017": 12778828,
+    "population_2018": 12723071,
+    "population_2019": 12671821
+  },
+  {
+    "state": "Indiana",
+    "population_2015": 6608422,
+    "population_2016": 6634304,
+    "population_2017": 6658078,
+    "population_2018": 6695497,
+    "population_2019": 6732219
+  },
+  {
+    "state": "Iowa",
+    "population_2015": 3120960,
+    "population_2016": 3131371,
+    "population_2017": 3141550,
+    "population_2018": 3148618,
+    "population_2019": 3155070
+  },
+  {
+    "state": "Kansas",
+    "population_2015": 2909011,
+    "population_2016": 2910844,
+    "population_2017": 2908718,
+    "population_2018": 2911359,
+    "population_2019": 2913314
+  },
+  {
+    "state": "Kentucky",
+    "population_2015": 4425976,
+    "population_2016": 4438182,
+    "population_2017": 4452268,
+    "population_2018": 4461153,
+    "population_2019": 4467673
+  },
+  {
+    "state": "Louisiana",
+    "population_2015": 4664628,
+    "population_2016": 4678135,
+    "population_2017": 4670560,
+    "population_2018": 4659690,
+    "population_2019": 4648794
+  },
+  {
+    "state": "Maine",
+    "population_2015": 1328262,
+    "population_2016": 1331317,
+    "population_2017": 1334612,
+    "population_2018": 1339057,
+    "population_2019": 1344212
+  },
+  {
+    "state": "Maryland",
+    "population_2015": 5985562,
+    "population_2016": 6003323,
+    "population_2017": 6023868,
+    "population_2018": 6035802,
+    "population_2019": 6045680
+  },
+  {
+    "state": "Massachusetts",
+    "population_2015": 6794228,
+    "population_2016": 6823608,
+    "population_2017": 6859789,
+    "population_2018": 6882635,
+    "population_2019": 6892503
+  },
+  {
+    "state": "Michigan",
+    "population_2015": 9931715,
+    "population_2016": 9950571,
+    "population_2017": 9973114,
+    "population_2018": 9984072,
+    "population_2019": 9986857
+  },
+  {
+    "state": "Minnesota",
+    "population_2015": 5482032,
+    "population_2016": 5522744,
+    "population_2017": 5566230,
+    "population_2018": 5606249,
+    "population_2019": 5639632
+  },
+  {
+    "state": "Mississippi",
+    "population_2015": 2988471,
+    "population_2016": 2987938,
+    "population_2017": 2988510,
+    "population_2018": 2981020,
+    "population_2019": 2976149
+  },
+  {
+    "state": "Missouri",
+    "population_2015": 6071732,
+    "population_2016": 6087135,
+    "population_2017": 6106670,
+    "population_2018": 6121623,
+    "population_2019": 6137428
+  },
+  {
+    "state": "Montana",
+    "population_2015": 1030475,
+    "population_2016": 1040859,
+    "population_2017": 1052482,
+    "population_2018": 1060665,
+    "population_2019": 1068778
+  },
+  {
+    "state": "Nebraska",
+    "population_2015": 1891277,
+    "population_2016": 1905616,
+    "population_2017": 1915947,
+    "population_2018": 1925614,
+    "population_2019": 1934408
+  },
+  {
+    "state": "Nevada",
+    "population_2015": 2866939,
+    "population_2016": 2917563,
+    "population_2017": 2969905,
+    "population_2018": 3027341,
+    "population_2019": 3080156
+  },
+  {
+    "state": "New Hampshire",
+    "population_2015": 1336350,
+    "population_2016": 1342307,
+    "population_2017": 1348787,
+    "population_2018": 1353465,
+    "population_2019": 1359711
+  },
+  {
+    "state": "New Jersey",
+    "population_2015": 8867949,
+    "population_2016": 8870827,
+    "population_2017": 8885525,
+    "population_2018": 8886025,
+    "population_2019": 8882190
+  },
+  {
+    "state": "New Mexico",
+    "population_2015": 2089291,
+    "population_2016": 2091630,
+    "population_2017": 2091784,
+    "population_2018": 2092741,
+    "population_2019": 2096829
+  },
+  {
+    "state": "New York",
+    "population_2015": 19654666,
+    "population_2016": 19633428,
+    "population_2017": 19589572,
+    "population_2018": 19530351,
+    "population_2019": 19453561
+  },
+  {
+    "state": "North Carolina",
+    "population_2015": 10031646,
+    "population_2016": 10154788,
+    "population_2017": 10268233,
+    "population_2018": 10381615,
+    "population_2019": 10488084
+  },
+  {
+    "state": "North Dakota",
+    "population_2015": 754066,
+    "population_2016": 754434,
+    "population_2017": 754942,
+    "population_2018": 758080,
+    "population_2019": 762062
+  },
+  {
+    "state": "Ohio",
+    "population_2015": 11617527,
+    "population_2016": 11634370,
+    "population_2017": 11659650,
+    "population_2018": 11676341,
+    "population_2019": 11689100
+  },
+  {
+    "state": "Oklahoma",
+    "population_2015": 3909500,
+    "population_2016": 3926331,
+    "population_2017": 3931316,
+    "population_2018": 3940235,
+    "population_2019": 3956971
+  },
+  {
+    "state": "Oregon",
+    "population_2015": 4015792,
+    "population_2016": 4089976,
+    "population_2017": 4143625,
+    "population_2018": 4181886,
+    "population_2019": 4217737
+  },
+  {
+    "state": "Pennsylvania",
+    "population_2015": 12784826,
+    "population_2016": 12782275,
+    "population_2017": 12787641,
+    "population_2018": 12800922,
+    "population_2019": 12801989
+  },
+  {
+    "state": "Rhode Island",
+    "population_2015": 1056065,
+    "population_2016": 1056770,
+    "population_2017": 1055673,
+    "population_2018": 1058287,
+    "population_2019": 1059361
+  },
+  {
+    "state": "South Carolina",
+    "population_2015": 4891938,
+    "population_2016": 4957968,
+    "population_2017": 5021268,
+    "population_2018": 5084156,
+    "population_2019": 5148714
+  },
+  {
+    "state": "South Dakota",
+    "population_2015": 853988,
+    "population_2016": 862996,
+    "population_2017": 872868,
+    "population_2018": 878698,
+    "population_2019": 884659
+  },
+  {
+    "state": "Tennessee",
+    "population_2015": 6591170,
+    "population_2016": 6646010,
+    "population_2017": 6708799,
+    "population_2018": 6771631,
+    "population_2019": 6829174
+  },
+  {
+    "state": "Texas",
+    "population_2015": 27470056,
+    "population_2016": 27914410,
+    "population_2017": 28295273,
+    "population_2018": 28628666,
+    "population_2019": 28995881
+  },
+  {
+    "state": "Utah",
+    "population_2015": 2981835,
+    "population_2016": 3041868,
+    "population_2017": 3101042,
+    "population_2018": 3153550,
+    "population_2019": 3205958
+  },
+  {
+    "state": "Vermont",
+    "population_2015": 625216,
+    "population_2016": 623657,
+    "population_2017": 624344,
+    "population_2018": 624358,
+    "population_2019": 623989
+  },
+  {
+    "state": "Virginia",
+    "population_2015": 8361808,
+    "population_2016": 8410106,
+    "population_2017": 8463587,
+    "population_2018": 8501286,
+    "population_2019": 8535519
+  },
+  {
+    "state": "Washington",
+    "population_2015": 7163657,
+    "population_2016": 7294771,
+    "population_2017": 7423362,
+    "population_2018": 7523869,
+    "population_2019": 7614893
+  },
+  {
+    "state": "West Virginia",
+    "population_2015": 1842050,
+    "population_2016": 1831023,
+    "population_2017": 1817004,
+    "population_2018": 1804291,
+    "population_2019": 1792147
+  },
+  {
+    "state": "Wisconsin",
+    "population_2015": 5760940,
+    "population_2016": 5772628,
+    "population_2017": 5790186,
+    "population_2018": 5807406,
+    "population_2019": 5822434
+  },
+  {
+    "state": "Wyoming",
+    "population_2015": 585613,
+    "population_2016": 584215,
+    "population_2017": 578931,
+    "population_2018": 577601,
+    "population_2019": 578759
+  },
+  {
+    "state": "Puerto Rico",
+    "population_2015": 3473232,
+    "population_2016": 3406672,
+    "population_2017": 3325286,
+    "population_2018": 3193354,
+    "population_2019": 3193694
+  }
+]
