@@ -529,7 +529,6 @@ excess.areaPlotCumulative = (plotsParentDivId="plotlyCompareDiv") => {
   
   areaPlotTraces.push(averageOverOtherYearsTrace)
   // areaPlotTraces.sort((trace1, trace2) => Math.max(...trace2.y) - Math.max(...trace1.y))
-  console.log(areaPlotTraces)
   const tracesToPlot = [areaPlotTraces[0], areaPlotTraces[2], areaPlotTraces[1]]
   const layout = {
     title: `Cumulative Deaths in <b style="color:green">${excess.stateSelected}</b> for 2020 vs. 2015-2019 averaged`,
@@ -754,9 +753,29 @@ excess.mmwrWeekForChoropleth = 30
 excess.nonCovidForChoropleth = false
 excess.cumulativeUptoDate = "07/28/2020"
 
+const addStates = (data, addFrom, addToState) => {
+  let newCleanedData = JSON.parse(JSON.stringify(data))
+  if (addFrom in data && addToState in data) {
+    newCleanedData[addToState] = newCleanedData[addToState].map(row => {
+      const addFromRow = newCleanedData[addFrom].find(row2 => row2.mmwrweek === row.mmwrweek && row2.mmwryear === row.mmwryear)
+      if (addFromRow) {
+        Object.keys(excess.params.causes).forEach(cause => {
+          if (cause in row && cause in addFromRow) {
+            row[cause] += addFromRow[cause]
+          }
+        })
+      }
+      return row
+    })
+  }
+  delete newCleanedData[addFrom]
+  return newCleanedData
+}
+
 excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSelected=excess.mmwrWeekForChoropleth, nonCovid=excess.nonCovidForChoropleth) => {
 
   const nonStates = ["All States", "New York City"]
+  const cleanedDataForChoroplethPlot = addStates(excess.data.cleanedData, "New York City", "New York")
   const statePopulations = await (await fetch("https://episphere.github.io/mortalitytracker/statePopulations.json")).json()
 
   const plotsParentDiv = document.getElementById(plotsParentDivId)
@@ -792,41 +811,50 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
   // const relevantCausesForChoropleth = [...relevantCauses, "covid_19_u071_multiple_cause_of_death"]
   const excessDeathsByStatePerWeek = excess.params.states.reduce((cumulativeObj, currentState) => {
     if (!nonStates.includes(currentState)) {
-      const stateData = excess.data.cleanedData[currentState].filter(row => row.mmwrweek >= minMMWRWeek && row.mmwrweek <= maxMMWRWeek)
+      const stateData = cleanedDataForChoroplethPlot[currentState].filter(row => row.mmwrweek >= minMMWRWeek && row.mmwrweek <= maxMMWRWeek)
       const dataForOtherYears = stateData.filter(row => row.mmwryear > 2014 && row.mmwryear < 2020)
       const dataFor2020 = stateData.filter(row => row.mmwryear === 2020)
-      const cumulativeAvgDeathsForOtherYears = excess.params.mmwrWeeks.reduce((cumulativeAvgSum, week) => {
+      
+      const currentStatePopulationAllYears = statePopulations.find(x => x.state === currentState)
+      const sumOfPopulations = Object.entries(currentStatePopulationAllYears).reduce((sum, [key, value]) => {
+        if (key !== "state") {
+          sum += value
+        }
+        return sum
+      }, 0)
+      const populationFor2020 = currentStatePopulationAllYears.population_2019
+      
+      const cumulativeAvgDeathsForOtherYears = {}
+      excess.params.mmwrWeeks.forEach(week => {
         if (week >= minMMWRWeek && week <= maxMMWRWeek) {
           const deathsThisWeek = dataForOtherYears.filter(row => row[keyMaps.week] === week)
-          const avgThisWeek = deathsThisWeek.reduce((prev, current) =>  prev + (current[relevantCauses[0]] || 0), 0) / deathsThisWeek.length
-          const cumulativeAvgdSumTillThisWeek = cumulativeAvgSum.length === 0 ? avgThisWeek : cumulativeAvgSum[cumulativeAvgSum.length - 1] + avgThisWeek
-          cumulativeAvgSum.push(Math.round(cumulativeAvgdSumTillThisWeek))
+          const sumOfDeathsThisWeek = deathsThisWeek.reduce((sum, current) =>  sum + (current[relevantCauses[0]] || 0), 0)
+          const deathsByPopulation = sumOfDeathsThisWeek/sumOfPopulations
+          cumulativeAvgDeathsForOtherYears[week] = deathsByPopulation
         }
-        return cumulativeAvgSum
-      }, [])
+      })
       const cumulativeDeathsByCause = {
         'allCausesCumulativeDeaths': [],
         'nonCovidCumulativeDeaths': []
       }
-      let allCausesCumSum = 0, covidCumSum = 0
+      
+      let allCausesExcessDeathsCumSum = 0, nonCovidExcessDeathsCumSum = 0
       excess.params.mmwrWeeks.forEach(week => {
         if (week >= minMMWRWeek && week <= maxMMWRWeek) {
           const dataThisWeek = dataFor2020.find(row => row.mmwrweek === week)
-          allCausesCumSum = allCausesCumSum + (dataThisWeek[relevantCauses[0]] || 0)
-          covidCumSum = covidCumSum + (dataThisWeek[relevantCauses[1]] || 0)
-          const allCauseExcessDeaths = allCausesCumSum - cumulativeAvgDeathsForOtherYears[week - minMMWRWeek]
-          if (!statePopulations.find(x => x.state === currentState)) {
-            console.log(currentState)
-          }
-          cumulativeDeathsByCause['allCausesCumulativeDeaths'].push((allCauseExcessDeaths / statePopulations.find(x => x.state === currentState).population_2019) * 10**5)
-          cumulativeDeathsByCause['nonCovidCumulativeDeaths'].push(((allCauseExcessDeaths - covidCumSum)  / statePopulations.find(x => x.state === currentState).population_2019) * 10**5)
+          const allCauseDeathsThisWeekByPopulation = (dataThisWeek[relevantCauses[0]] || 0) / populationFor2020
+          const allCauseExcessDeaths = (allCauseDeathsThisWeekByPopulation - cumulativeAvgDeathsForOtherYears[week])
+          allCausesExcessDeathsCumSum += allCauseExcessDeaths
+          const covidDeathsThisWeekByPopulation = (dataThisWeek[relevantCauses[1]] || 0) / populationFor2020
+          nonCovidExcessDeathsCumSum += (allCauseExcessDeaths - covidDeathsThisWeekByPopulation)
+          cumulativeDeathsByCause['allCausesCumulativeDeaths'].push(allCausesExcessDeathsCumSum * 10**5)
+          cumulativeDeathsByCause['nonCovidCumulativeDeaths'].push(nonCovidExcessDeathsCumSum * 10**5)
         }
       }, {})
       cumulativeObj[currentState] = cumulativeDeathsByCause
     }
     return cumulativeObj
   }, {})
-  console.log(excessDeathsByStatePerWeek)
 
   // const dataForOtherYears = excess.data.cleanedData.filter(row => row.mmwryear > 2014 && row.mmwryear < 2020)
   // const dataFor2020 = excess.data.cleanedData.filter
@@ -851,12 +879,8 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
       if (excessDeathsByStatePerWeek[x['State']]) {
         excessDeathsForState = nonCovid ? excessDeathsByStatePerWeek[x['State']]['nonCovidCumulativeDeaths'][mmwrWeekSelected - minMMWRWeek] : excessDeathsByStatePerWeek[x['State']]['allCausesCumulativeDeaths'][mmwrWeekSelected - minMMWRWeek]; 
       }
-      if (!excessDeathsForState) {
-        console.log(x['State'], excessDeathsForState, mmwrWeekSelected, minMMWRWeek)
-      }
       return excessDeathsForState 
     })
-    console.log(z)
     const negativeValues = z.filter(a => a < 0)
     let colorscale = [[0,'rgb(255, 255, 255)'],[0.15,'rgb(254,237,222)'],[0.3,'rgb(253,208,162)'],[0.45,'rgb(253,174,107)'],[0.6,'rgb(253,141,60)'],[0.75,'rgb(241,105,19)'],[0.87,'rgb(217,72,1)'],[1,'rgb(140,45,4)']]
     if (negativeValues.length > 0 && 0 - Math.min(negativeValues) > (z.reduce((a,b) => a+b, 0)/z.length) - 0) {
@@ -882,7 +906,7 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
       },
       zauto: false,
       zmin: 0,
-      zmax: nonCovid ? 80 : 200
+      zmax: nonCovid ? 80 : 300
     }];
     const layout = {
       title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"}`,
