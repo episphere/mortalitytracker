@@ -65,7 +65,7 @@ excess.cleanData = (data = {...dtrack.data.all}) => {
   const mmwrWeeks = [...dtrack.data.weeks].sort((a,b) => a - b)
   const maxMMWRWeek = Math.max(...mmwrWeeks)
   const weeks2020 = [ ...new Set(dtrack.data.all.filter(row => row[keyMaps.year] === 2020 && row.jurisdiction_of_occurrence === states.find(state => state !== "All States") && row[keyMaps.week_ending_date]).map(row => row[keyMaps.week_ending_date]).sort((a,b) => a-b)) ]
-
+  excess.weekends2020 = weeks2020
   // Move United States to top of states so that it is the default option in the select list.
   // const unitedStatesIndex = states.indexOf("United States")
   // states.splice(unitedStatesIndex, 1)
@@ -107,6 +107,9 @@ excess.cleanData = (data = {...dtrack.data.all}) => {
 }
 
 excess.ui = async (divId) => {
+  dtrack.ui.parms = {
+    incompleteRecords: true
+  }
   if (!dtrack.data.all) {
     try {
       await dtrack.ui()
@@ -730,49 +733,50 @@ excess.barChart = (plotsParentDivId = "plotlyCompareDiv") => {
   Plotly.newPlot(barChartDivId, dataForBarChart, layout, {responsive: true})
 }
 
-excess.changeChoroplethWeek = () => {
+const changeChoroplethWeek = () => {
   const sliderValue = document.getElementById("weekSelector").value
-  const weekendingDate = dtrack.data.weekends2020[sliderValue - 1]
+  const weekendingDate = new Date(excess.weekends2020[sliderValue].getTime())
+  // weekendingDate.setDate(weekendingDate.getDate() - 4)
   const weekendMonth = weekendingDate.getMonth() + 1 < 10 ? "0" + (weekendingDate.getMonth() + 1) : weekendingDate.getMonth() + 1
   const weekendDate = weekendingDate.getDate() < 10 ? "0" + weekendingDate.getDate() : weekendingDate.getDate()
   excess.cumulativeUptoDate = weekendMonth + "/" + weekendDate + "/" + weekendingDate.getFullYear()
   document.getElementById("weekDisplay").value = excess.cumulativeUptoDate
-  excess.mmwrWeekForChoropleth = sliderValue
-  excess.choroplethPlot(undefined, sliderValue, excess.nonCovidForChoropleth)
+  excess.params.mmwrWeekForChoropleth = sliderValue
+  excess.plotChoropleth(sliderValue, excess.params.nonCovidForChoropleth)
 }
 
-excess.changeChoroplethCause = (element) => {
+const changeChoroplethCause = (element) => {
   const nonCovid = element.value !== "allCauses"
-  if (excess.nonCovidForChoropleth !== nonCovid) {
-    excess.nonCovidForChoropleth = nonCovid
-    excess.choroplethPlot(undefined, excess.mmwrWeekForChoropleth, nonCovid)
+  if (excess.params.nonCovidForChoropleth !== nonCovid) {
+    excess.params.nonCovidForChoropleth = nonCovid
+    excess.plotChoropleth(excess.params.mmwrWeekForChoropleth, nonCovid)
   }
 }
 
-excess.mmwrWeekForChoropleth = 30
-excess.nonCovidForChoropleth = false
-excess.cumulativeUptoDate = "07/28/2020"
-
-const addStates = (data, addFrom, addToState) => {
-  let newCleanedData = JSON.parse(JSON.stringify(data))
-  if (addFrom in data && addToState in data) {
-    newCleanedData[addToState] = newCleanedData[addToState].map(row => {
-      const addFromRow = newCleanedData[addFrom].find(row2 => row2.mmwrweek === row.mmwrweek && row2.mmwryear === row.mmwryear)
-      if (addFromRow) {
-        Object.keys(excess.params.causes).forEach(cause => {
-          if (cause in row && cause in addFromRow) {
-            row[cause] += addFromRow[cause]
-          }
-        })
-      }
-      return row
-    })
+excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv") => {
+  
+  excess.params.mmwrWeekForChoropleth = 30
+  excess.params.nonCovidForChoropleth = false
+  excess.cumulativeUptoDate = "08/01/2020"
+  
+  const addStates = (data, addFrom, addToState) => {
+    let newCleanedData = JSON.parse(JSON.stringify(data))
+    if (addFrom in data && addToState in data) {
+      newCleanedData[addToState] = newCleanedData[addToState].map(row => {
+        const addFromRow = newCleanedData[addFrom].find(row2 => row2.mmwrweek === row.mmwrweek && row2.mmwryear === row.mmwryear)
+        if (addFromRow) {
+          Object.keys(excess.params.causes).forEach(cause => {
+            if (cause in row && cause in addFromRow) {
+              row[cause] += addFromRow[cause]
+            }
+          })
+        }
+        return row
+      })
+    }
+    delete newCleanedData[addFrom]
+    return newCleanedData
   }
-  delete newCleanedData[addFrom]
-  return newCleanedData
-}
-
-excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSelected=excess.mmwrWeekForChoropleth, nonCovid=excess.nonCovidForChoropleth) => {
 
   const nonStates = ["All States", "New York City"]
   const cleanedDataForChoroplethPlot = addStates(excess.data.cleanedData, "New York City", "New York")
@@ -787,19 +791,36 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
     choroplethDiv.style.width = "100%"
     choroplethDiv.style.height = "700px"
     choroplethDiv.innerHTML = `<div id="options" style="width:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">
-      <p style="font-size:0.8rem;"><em>*Excluding North Carolina due to data inconsistencies</em></p>
       <div id="weekSelectorDiv">
         <label for="weekSelector">Choose Week:</label>
-        <input type="range" id="weekSelector" name="weekSelector" min="9" max="30" style="width:400px;" value="30" oninput="excess.changeChoroplethWeek()"/>
-        <input type="text" id="weekDisplay" disabled value="07/28/2020"/>
+        <input type="range" id="weekSelector" name="weekSelector" min="9" max="30" style="width:400px;" value="30" oninput="changeChoroplethWeek()"/>
+        <input type="text" id="weekDisplay" disabled value="${excess.cumulativeUptoDate}"/>
       </div>
       <div id="causeSelectorDiv">
-        <input type="radio" id="allCausesForChoropleth" name="causeSelector" value="allCauses" checked onclick="excess.changeChoroplethCause(this)">
+        <input type="radio" id="allCausesForChoropleth" name="causeSelector" value="allCauses" checked onclick="changeChoroplethCause(this)">
         <label for="allCausesForChoropleth">&nbsp;All Causes</label>
-        <input style="margin-left: 2rem;" type="radio" id="nonCovidCausesForChoropleth" name="causeSelector" value="nonCovidCauses" onclick="excess.changeChoroplethCause(this)">
+        <input style="margin-left: 2rem;" type="radio" id="nonCovidCausesForChoropleth" name="causeSelector" value="nonCovidCauses" onclick="changeChoroplethCause(this)">
         <label for="nonCovidCausesForChoropleth">&nbsp;Non-COVID Causes</label>
+      </div>
+    </div>
+    <br/>
+    <div id="dataDownloadLinksDiv" style="display:flex; flex-direction:row; justify-content:space-evenly;">
+      <span id="allCausesDownloadLinks">
+        All Causes Data: &nbsp;
+        [<a href="https://episphere.github.io/mortalitytracker/excess/Excess%20Mortality%20per%20100k%20population%20-%20All%20Causes.csv" download="Excess Mortality per 100k population - All Causes.csv">CSV</a>]
+        &nbsp;
+        [<a href="https://episphere.github.io/mortalitytracker/excess/Excess%20Mortality%20per%20100k%20population%20-%20All%20Causes.json" download="Excess Mortality per 100k population - All Causes.json">JSON</a>]
+      </span>
+      <br/>
+      <span id="nonCovidDownloadLinks">
+        Non-COVID Causes Data: &nbsp;
+        [<a href="https://episphere.github.io/mortalitytracker/excess/Excess%20Mortality%20per%20100k%20population%20-%20Non-COVID.csv" download="Excess Mortality per 100k population - Non-COVID.csv">CSV</a>]
+        &nbsp;
+        [<a href="https://episphere.github.io/mortalitytracker/excess/Excess%20Mortality%20per%20100k%20population%20-%20Non-COVID.json" download="Excess Mortality per 100k population - Non-COVID.json">JSON</a>]
+      </span>
     </div>`
     plotsParentDiv.appendChild(choroplethDiv)
+    plotsParentDiv.appendChild(document.createElement("br"))
     plotsParentDiv.appendChild(document.createElement("br"))
     plotsParentDiv.appendChild(document.createElement("br"))
     plotsParentDiv.appendChild(document.createElement("br"))
@@ -809,8 +830,12 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
   }
 
   // const relevantCausesForChoropleth = [...relevantCauses, "covid_19_u071_multiple_cause_of_death"]
+  let allCauseCsvString = "jurisdiction_of_occurrence,all_causes_excess_upto_03/07/2020_per_100k,all_causes_excess_upto_03/14/2020_per_100k,all_causes_excess_upto_03/21/2020_per_100k,all_causes_excess_upto_03/28/2020_per_100k,all_causes_excess_upto_04/04/2020_per_100k,all_causes_excess_upto_04/11/2020_per_100k,all_causes_excess_upto_04/18/2020_per_100k,all_causes_excess_upto_04/25/2020_per_100k,all_causes_excess_upto_05/02/2020_per_100k,all_causes_excess_upto_05/09/2020_per_100k,all_causes_excess_upto_05/16/2020_per_100k,all_causes_excess_upto_05/23/2020_per_100k,all_causes_excess_upto_05/30/2020_per_100k,all_causes_excess_upto_06/06/2020_per_100k,all_causes_excess_upto_06/13/2020_per_100k,all_causes_excess_upto_06/20/2020_per_100k,all_causes_excess_upto_06/27/2020_per_100k,all_causes_excess_upto_07/04/2020_per_100k,all_causes_excess_upto_07/11/2020_per_100k,all_causes_excess_upto_07/18/2020_per_100k,all_causes_excess_upto_07/25/2020_per_100k,all_causes_excess_upto_08/01/2020_per_100k"
+  let nonCovidCsvString = "jurisdiction_of_occurrence,non_covid_excess_upto_03/07/2020_per_100k,non_covid_excess_upto_03/14/2020_per_100k,non_covid_excess_upto_03/21/2020_per_100k,non_covid_excess_upto_03/28/2020_per_100k,non_covid_excess_upto_04/04/2020_per_100k,non_covid_excess_upto_04/11/2020_per_100k,non_covid_excess_upto_04/18/2020_per_100k,non_covid_excess_upto_04/25/2020_per_100k,non_covid_excess_upto_05/02/2020_per_100k,non_covid_excess_upto_05/09/2020_per_100k,non_covid_excess_upto_05/16/2020_per_100k,non_covid_excess_upto_05/23/2020_per_100k,non_covid_excess_upto_05/30/2020_per_100k,non_covid_excess_upto_06/06/2020_per_100k,non_covid_excess_upto_06/13/2020_per_100k,non_covid_excess_upto_06/20/2020_per_100k,non_covid_excess_upto_06/27/2020_per_100k,non_covid_excess_upto_07/04/2020_per_100k,non_covid_excess_upto_07/11/2020_per_100k,non_covid_excess_upto_07/18/2020_per_100k,non_covid_excess_upto_07/25/2020_per_100k,non_covid_excess_upto_08/01/2020_per_100k"
   const excessDeathsByStatePerWeek = excess.params.states.reduce((cumulativeObj, currentState) => {
     if (!nonStates.includes(currentState)) {
+      let stateCSVAllCausesLine = `\n${currentState}`
+      let stateCSVNonCovidLine = `\n${currentState}`
       const stateData = cleanedDataForChoroplethPlot[currentState].filter(row => row.mmwrweek >= minMMWRWeek && row.mmwrweek <= maxMMWRWeek)
       const dataForOtherYears = stateData.filter(row => row.mmwryear > 2014 && row.mmwryear < 2020)
       const dataFor2020 = stateData.filter(row => row.mmwryear === 2020)
@@ -844,18 +869,72 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
           const dataThisWeek = dataFor2020.find(row => row.mmwrweek === week)
           const allCauseDeathsThisWeekByPopulation = (dataThisWeek[relevantCauses[0]] || 0) / populationFor2020
           const allCauseExcessDeaths = (allCauseDeathsThisWeekByPopulation - cumulativeAvgDeathsForOtherYears[week])
-          allCausesExcessDeathsCumSum += allCauseExcessDeaths
+          allCausesExcessDeathsCumSum += allCauseExcessDeaths * (10**5)
           const covidDeathsThisWeekByPopulation = (dataThisWeek[relevantCauses[1]] || 0) / populationFor2020
-          nonCovidExcessDeathsCumSum += (allCauseExcessDeaths - covidDeathsThisWeekByPopulation)
-          cumulativeDeathsByCause['allCausesCumulativeDeaths'].push(allCausesExcessDeathsCumSum * 10**5)
-          cumulativeDeathsByCause['nonCovidCumulativeDeaths'].push(nonCovidExcessDeathsCumSum * 10**5)
+          nonCovidExcessDeathsCumSum += (allCauseExcessDeaths - covidDeathsThisWeekByPopulation) * (10**5)
+          cumulativeDeathsByCause['allCausesCumulativeDeaths'].push(allCausesExcessDeathsCumSum)
+          cumulativeDeathsByCause['nonCovidCumulativeDeaths'].push(nonCovidExcessDeathsCumSum)
+          stateCSVAllCausesLine += `,${allCausesExcessDeathsCumSum}`
+          stateCSVNonCovidLine += `,${nonCovidExcessDeathsCumSum}`
         }
       }, {})
       cumulativeObj[currentState] = cumulativeDeathsByCause
+      allCauseCsvString += stateCSVAllCausesLine
+      nonCovidCsvString += stateCSVNonCovidLine
     }
     return cumulativeObj
   }, {})
+  console.log(allCauseCsvString)
+  console.log(nonCovidCsvString)
 
+  excess.plotChoropleth = (mmwrWeekSelected=excess.params.mmwrWeekForChoropleth, nonCovid=excess.params.nonCovidForChoropleth) => {
+    Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', (err, rows) => {
+      const z = rows.map(x => { 
+        let excessDeathsForState = 0
+        if (excessDeathsByStatePerWeek[x['State']]) {
+          excessDeathsForState = nonCovid ? excessDeathsByStatePerWeek[x['State']]['nonCovidCumulativeDeaths'][mmwrWeekSelected - minMMWRWeek] : excessDeathsByStatePerWeek[x['State']]['allCausesCumulativeDeaths'][mmwrWeekSelected - minMMWRWeek]; 
+        }
+        return excessDeathsForState 
+      })
+      const negativeValues = z.filter(a => a < 0)
+      let colorscale = [[0,'rgb(255, 255, 255)'],[0.15,'rgb(254,237,222)'],[0.3,'rgb(253,208,162)'],[0.45,'rgb(253,174,107)'],[0.6,'rgb(253,141,60)'],[0.75,'rgb(241,105,19)'],[0.87,'rgb(217,72,1)'],[1,'rgb(140,45,4)']]
+      if (negativeValues.length > 0 && 0 - Math.min(negativeValues) > (z.reduce((a,b) => a+b, 0)/z.length) - 0) {
+        colorscale = [[0,'rgb(255,255,255)'],[0.5,'rgb(254,237,222)'],[1,'rgb(253,174,107)']]
+      }
+      const data = [{
+        type: 'choropleth',
+        locationmode: 'USA-states',
+        locations: rows.map(x => x['Postal']),
+        z,
+        text: rows.map(x=>x['State']),
+        colorscale: "YlOrRd",
+        reversescale: true,
+        autocolorscale: false,
+        colorbar: {
+          title: {
+            text: "Excess Deaths per 100,000 people",
+            side: "right",
+            font: {
+              size: "16"
+            }
+          }
+        },
+        zauto: false,
+        zmin: 0,
+        zmax: nonCovid ? 80 : 300
+      }];
+      const layout = {
+        title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"}`,
+        geo:{
+          scope: 'usa',
+          subunitcolor: 'rgb(255, 255, 255)',
+        }
+      };
+      Plotly.newPlot(choroplethDivId, data, layout, {responsive: true}); 
+    })
+  }
+
+  excess.plotChoropleth(excess.params.mmwrWeekForChoropleth, excess.params.nonCovidForChoropleth)
   // const dataForOtherYears = excess.data.cleanedData.filter(row => row.mmwryear > 2014 && row.mmwryear < 2020)
   // const dataFor2020 = excess.data.cleanedData.filter
   // const cumulativeAvgDeathsForOtherYearsPerState = excess.params.mmwrWeeks.reduce((cumulativeAvgSum, week) => {
@@ -873,48 +952,4 @@ excess.choroplethPlot = async (plotsParentDivId="plotlyCompareDiv", mmwrWeekSele
   // })
   // excess.cumulativeDeathsFor2020ByCause = {...cumulativeDeathsFor2020ForChoropleth, ...excess.cumulativeDeathsFor2020ByCause}
   // console.log(excess.cumulativeDeathsFor2020ByCause)
-  Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv', (err, rows) => {
-    const z = rows.map(x => { 
-      let excessDeathsForState = 0
-      if (excessDeathsByStatePerWeek[x['State']]) {
-        excessDeathsForState = nonCovid ? excessDeathsByStatePerWeek[x['State']]['nonCovidCumulativeDeaths'][mmwrWeekSelected - minMMWRWeek] : excessDeathsByStatePerWeek[x['State']]['allCausesCumulativeDeaths'][mmwrWeekSelected - minMMWRWeek]; 
-      }
-      return excessDeathsForState 
-    })
-    const negativeValues = z.filter(a => a < 0)
-    let colorscale = [[0,'rgb(255, 255, 255)'],[0.15,'rgb(254,237,222)'],[0.3,'rgb(253,208,162)'],[0.45,'rgb(253,174,107)'],[0.6,'rgb(253,141,60)'],[0.75,'rgb(241,105,19)'],[0.87,'rgb(217,72,1)'],[1,'rgb(140,45,4)']]
-    if (negativeValues.length > 0 && 0 - Math.min(negativeValues) > (z.reduce((a,b) => a+b, 0)/z.length) - 0) {
-      colorscale = [[0,'rgb(255,255,255)'],[0.5,'rgb(254,237,222)'],[1,'rgb(253,174,107)']]
-    }
-    const data = [{
-      type: 'choropleth',
-      locationmode: 'USA-states',
-      locations: rows.map(x => x['Postal']),
-      z,
-      text: rows.map(x=>x['State']),
-      colorscale: "YlOrRd",
-      reversescale: true,
-      autocolorscale: false,
-      colorbar: {
-        title: {
-          text: "Excess Deaths per 100,000 people",
-          side: "right",
-          font: {
-            size: "16"
-          }
-        }
-      },
-      zauto: false,
-      zmin: 0,
-      zmax: nonCovid ? 80 : 300
-    }];
-    const layout = {
-      title: `Excess Mortality upto ${excess.cumulativeUptoDate} vs 2015-2019 for ${nonCovid ? "All Causes except COVID-19" : "All Causes"}`,
-      geo:{
-        scope: 'usa',
-        subunitcolor: 'rgb(255, 255, 255)',
-      }
-    };
-    Plotly.newPlot(choroplethDivId, data, layout, {responsive: true}); 
-  })
 }
