@@ -423,10 +423,10 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
                 allTraces=dtrack.traceAll(allTraces)
             }
         }
-    let titleRight='Total raw additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
+    let titleRight='Raw total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
-            titleRight='Total raw additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+            titleRight='Raw total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
         }
     }
     if(document.getElementById('mortalityAdditional')){
@@ -756,10 +756,10 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             allTraces=dtrack.traceAll(allTraces)
         }
     }
-    let titleRight='Total raw additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
+    let titleRight='Raw total additional mortality (<span style="font-size:x-large"> &#8285; </span>)'
     if(document.getElementById('mortalityRate')){
         if(mortalityRate.checked){
-            titleRight='Total raw additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
+            titleRight='Raw total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
         }
     }
     
