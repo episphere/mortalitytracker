@@ -254,7 +254,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality**; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><span style="color:red"> [unadjusted for demographic shift]</span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:medium"><b style="color:gray">*</b> Important: this functionality is provided for convenience, direct comparison of mortality between states is disadvised given the significant demographic differences; <b style="color:gray">**</b> Raw mortality in excess of the last 5 year's average, <b style="color:gray">without adjusting for shift in demographic structure</b>. See also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; <b style="color:gray">***</b> For QAQC of states with incomplete records, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
+    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality**; <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><span id="warningShift" style="color:red" hidden=false> unadjusted for demographic shift </span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:medium"><b style="color:gray">*</b> Important: this functionality is provided for convenience, direct comparison of mortality between states is disadvised given the significant demographic differences; <b style="color:gray">**</b> Raw mortality in excess of the last 5 year's average, <b style="color:gray">without adjusting for shift in demographic structure</b>. See also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; <b style="color:gray">***</b> For QAQC of states with incomplete records, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -1100,6 +1100,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     }
      mortalityAdditional.onchange=()=>{
          mortalityAdditionalReplot.hidden=false
+         warningShift.hidden=true
         if(mortalityAdditional.checked){
             dtrack.legendX=1.2
         }else{
@@ -1118,6 +1119,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     mortalityAdditional.disabled=false
     incompleteRecords.disabled=false
     mortalityAdditionalReplot.hidden=mortalityRateReplot.hidden=incompleteRecordsReplot.hidden=true
+    warningShift.hidden=false
     layersDataLink.innerText=selectState.value+' dataLayers.json'
     layersDataLink.href='#'
     layersDataLink.onclick=()=>{
