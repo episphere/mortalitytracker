@@ -845,6 +845,15 @@ dtrack.getCovid=async()=>{
             return v-dtrack.data.covid['New York City'].county[nm].deaths[i]
         })
     })
+    // reset for day 117 county swap
+    let ny=['New York','New York City']
+    ny.forEach(ste=>{
+        let k = dtrack.data.covid[ste].deaths[117]-dtrack.data.covid[ste].deaths[116]
+        let n = dtrack.data.covid[ste].deaths.length
+        for(var i = 117;i<n;i++){
+            dtrack.data.covid[ste].deaths[i]=dtrack.data.covid[ste].deaths[i]-k
+        }
+    })
 }
 
 dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
