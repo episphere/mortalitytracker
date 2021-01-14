@@ -6,10 +6,21 @@ strata={
     data:{}
 }
 
+strata.getJSON=async(url)=>{
+    let dt = await localforage.getItem(url)
+    if(!dt){
+        dt = await (await fetch(url)).json()
+        localforage.setItem(url,dt)
+    }
+    return dt
+}
+
 strata.getData=async()=>{
     let url='https://data.cdc.gov/resource/mwk9-wnfr.json'
     // get sex race and age data
-    let xx = await d3.json(url)
+    // let xx = await d3.json(url)
+    // let xx = await (await fetch(url)).json()
+    let xx = await strata.getJSON(url)
     strata.data.stratParms=["sex", "race_ethnicity", "age_group"]
     strata.data.numParms=[ "year", "mmwrweek", "allcause", "naturalcause", "septicemia_a40_a41", "malignant_neoplasms_c00_c97", "diabetes_mellitus_e10_e14", "alzheimer_disease_g30", "influenza_and_pneumonia_j09", "chronic_lower_respiratory", "other_diseases_of_respiratory", "nephritis_nephrotic_syndrome", "symptoms_signs_and_abnormal", "diseases_of_heart_i00_i09", "cerebrovascular_diseases", "covid_19_u071_multiple_cause", "covid_19_u071_underlying"]
     strata.data.dateParms=["data_as_of", "analysis_period_start_date", "analysis_period_end_date"]
@@ -60,7 +71,7 @@ strata.selectCounts=(div0=document.getElementById("countTabDiv"))=>{
     h += '</td></tr></table>'
     h+='<hr>'
     h+='<div id=tabulateDiv></div>'
-    h+='<hr>'
+    //h+='<hr>'
     div0.innerHTML=h
     strata.div0=div0
     return div0
@@ -139,10 +150,12 @@ strata.tabulate=(div=document.getElementById('tabulateDiv'),dt=strata.data.filte
             tr.appendChild(td)
         })
     })
-
-
-
     div.appendChild(tb)
+    strata.getPopDiv()
+}
+
+strata.getPopDiv = async(div=document.getElementById('getPopDiv'))=>{
+    4
 }
 
 strata.getScript = async function(url){new Promise(function(resolve, reject) {

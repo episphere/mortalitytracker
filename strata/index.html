@@ -2,12 +2,13 @@
     <link rel="stylesheet" href="strata.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.9.0/localforage.min.js" integrity="sha512-GkJRKF+k/yzHfJUg9LrNLQhS0jorQe4kES+GHkqtQThCJ5z5A1KwCXH0GYbJApDh/a3ERFvq9xbRJY9mEXzQiA==" crossorigin="anonymous"></script>
     <script src="http://localhost:8000/census/census.js"></script>
     <script src="strata.js"></script>
     <title>Stratification of mortality</title>
 </head>
 <body>
-<h1>Stratification of mortality <sup style="font-size:medium;color:green"><a href="https://dceg.cancer.gov/" target="_blank" style="color:green">DCEG, Jan-Jul 2020</a></sup><br><span style="font-size:small;color:blue">[<a href="https://github.com/episphere/mortalitytracker/tree/master/strata" target="_blank">code</a>] [<a href="https://github.com/episphere/mortalitytracker/issues" target="_blank">issues</a>] [<a href="https://observablehq.com/@episphere/census" target="_blank" style="font-size:small;">notebook</a>] [<a href="https://gitter.im/episphere/DeathTracker" target="_blank">gitter</a>]</span></h1>
+<h1>Stratification of mortality <sup style="font-size:medium;color:green"><a href="https://dceg.cancer.gov/" target="_blank" style="color:green">DCEG</a>, Jan-Jul 2020</sup><br><span style="font-size:small;color:blue">[<a href="https://github.com/episphere/mortalitytracker/tree/master/strata" target="_blank">code</a>] [<a href="https://github.com/episphere/mortalitytracker/issues" target="_blank">issues</a>] [<a href="https://observablehq.com/@episphere/census" target="_blank" style="font-size:small;">notebook</a>] [<a href="https://gitter.im/episphere/DeathTracker" target="_blank">gitter</a>]</span></h1>
 <hr>
 <p>Comparative stratification of causes of mortality during COVID-19 using CDC sources modulated by demographic reference from the Census Bureau. For reference on estimating mortality adjusted by demography see <a href="https://pubmed.ncbi.nlm.nih.gov/33316174" target="_blank">Ann Intern Med 2020 Dec 15. doi: 10.7326/M20-7385</a>.<p>
 <h2>Methods</h2>
@@ -17,6 +18,12 @@ The primary data sources are the same used for the parent <a href="https://episp
 The reference data sources used in this analysis, with counts frozen and the end of July, are kept with <a href="" target="_blank">open source in the public domain</a>.
 </p>
 <h2>Analysis</h2>
-<h3>Cross tabulation of <a href="https://data.cdc.gov/NCHS/Cumulative-Provisional-Counts-of-Deaths-by-Sex-Rac/mwk9-wnfr" target="_blank">January-June counts</a>.</h3>
+<h3>1. Cross tabulation of <a href="https://data.cdc.gov/NCHS/Cumulative-Provisional-Counts-of-Deaths-by-Sex-Rac/mwk9-wnfr" target="_blank">January-June 2020 counts</a>.</h3>
+<hr>
 <div id="countTabDiv">...</div>
+<hr>
+<h3>2. Population age structure for selected strata</h3>
+<p> The automatic adjustment is performed by querying Census data from past years and projecting it for the first half of 2020. See YouTube webcast link above for a recorded demonstration.</p>
+<div id="getPopDiv"> <span style="color:red">Loading data from US Census...</span></div>
+
 </body>

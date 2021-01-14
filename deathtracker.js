@@ -199,7 +199,7 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
     // all states
     let allStates=[]
     let parmsNum = Object.keys(dtrack.data.form)
-    dtrack.data.weeks=[... new Set(dtrack.data.all.filter(d=>d.mmwryear==2020).map(d=>d.mmwrweek))]
+    dtrack.data.weeks=[... new Set(dtrack.data.all.filter(d=>d.mmwryear==2020).map(d=>d.mmwrweek))].filter(d=>d)
     dtrack.data.years=[... new Set(dtrack.data.all.map(d=>d.mmwryear))]
     //dtrack.data.weekends2018=[]
     //dtrack.data.weekends2019=[]
@@ -505,8 +505,16 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         //let data = stateData.filter(x=>x.mmwryear==yr)
         let data=stateData.filter(x=>(x.mmwryear==yr&x.mmwrweek<=dtrack.data.weeks.slice(-1)[0]))
         let trace={
-            x:dtrack.data['weekends'+yr].map(d=>{
-                d.setYear(2020)
+            x:dtrack.data['weekends'+yr].filter(d=>d).map(d=>{
+                /*
+                try{
+                    d.setYear(2020)
+                }catch(err){
+                    d,yr
+                    debugger
+                }
+                //d.setYear(2020)
+                */
                 return d
             }),
             y:data.map(x=>x[selectCause.value]),
@@ -764,7 +772,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     }
     
     let layout = {
-        title:`<span style="font-size:small">Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b></span>`,
+        title:`<span style="font-size:small">Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends2020.filter(d=>d).slice(-1)[0].toDateString().slice(0,10)}</b></span>`,
         hovermode: 'closest',
         height:530,
         xaxis: {
