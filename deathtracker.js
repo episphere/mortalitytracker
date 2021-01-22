@@ -525,7 +525,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     }
     dtrack.data.traces=traces
     //dtrack.data.years.sort().slice(0,-2).forEach(yr=>{ // all years exept the last two, 2020 and 2021
-    dtrack.data.refYears=[2015,2016,2017,2018,2019]
+    dtrack.data.refYears=[2014,2015,2016,2017,2018,2019]
     dtrack.data.refYears.forEach(yr=>{ // reference 5 year period
         addTrace(yr)
     })
