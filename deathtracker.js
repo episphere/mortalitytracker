@@ -948,7 +948,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         min:dtrack.data.weeks.map(x=>0)
     }
     let ni = [] // number of valid counts
-    traces.slice(1).forEach(r=>{
+    traces.slice(1,5).forEach(r=>{
         r.y.map((v,i)=>{
             if(ni.length<=i){ni[i]=0}
             if(v){
