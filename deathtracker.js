@@ -308,7 +308,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         let n = dtrack.data.weekends2020.length
         let traceOfCovid={
             x:dtrack.data.weekends2020,
-            y:yOfCovid.slice(0,n-3),
+            y:yOfCovid,//.slice(0,n-3),
             type: 'scatter',
             mode: 'lines+markers',
             name: 'of COVID',
@@ -324,7 +324,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         }
         let traceOfCovidSum={
             x:dtrack.data.weekends2020,
-            y:dtrack.sum(yOfCovid.slice(0,n-3)),
+            y:dtrack.sum(yOfCovid),//(yOfCovid.slice(0,n-3)),
             type: 'scatter',
             mode: 'lines',
             name: 'CDC',
@@ -338,7 +338,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         let yWithCovid=stateData.map(d=>d.covid_19_u071_multiple_cause_of_death)        
         let traceWithCovid={
             x:dtrack.data.weekends2020,
-            y:yWithCovid.slice(0,n-3),
+            y:yWithCovid,//.slice(0,n-3),
             type: 'scatter',
             mode: 'lines',
             name: 'with COVID',
@@ -365,7 +365,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         }
         let traceOfCovidTemp={
             x:dtrack.data.weekends2020.slice(-3),
-            y:yOfCovid.slice(-3),
+            y:yOfCovid,//.slice(-3),
             type: 'scatter',
             mode: 'markers',
             name: 'in progress',
@@ -411,12 +411,15 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         let allTraces = []
         if(document.getElementById('mortalityAdditional')){
             if(mortalityAdditional.checked){
-                allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+                //allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+                allTraces=[traceCovid,traceWithCovid,traceOfCovid,traceCovidSum,traceOfCovidSum]
             }else{
-                allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+                //allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+                allTraces=[traceCovid,traceWithCovid,traceOfCovid]
             }
         }else{
-            allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+            //allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+            allTraces=[traceCovid,traceWithCovid,traceOfCovid]
         }
             
         
@@ -530,16 +533,21 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         addTrace(yr)
     })
 
-    let data2020 = stateData.filter(x=>x.mmwryear==2020)
-    //let weeks = data2020.map(x=>parseInt(x.mmwrweek))
+    //let data2020 = stateData.filter(x=>(x.mmwryear>=2020&x.allcause>0))
+    let data2020 = stateData.filter(x=>(x.mmwryear==2020))
     let weeks = dtrack.data.weeks
     let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
     if(delay>2){delay=-delay} // for unusually short series
-    //y2020=data2020.map(x=>x[selectCause.value]).slice(0,-2+delay) 
-    //debugger
     let trace2020 = {
-        x:dtrack.data.weekends2020.slice(0,-2+delay),  //weeks,
-        y:data2020.map(x=>x[selectCause.value]).slice(0,-2+delay),
+        //x:dtrack.data.weekends2020.slice(0,-2+delay),  //weeks,
+        x:(dtrack.data.weekends2020.concat(dtrack.data.weekends2020.slice(0,data2020.length-dtrack.data.weekends2020.length))).map((xi,i)=>{
+            if(i>=dtrack.data.weekends2020.length){
+                return Date(xi.toString().replace('2020','2021'))
+            }else{
+                return xi
+            }
+        }),
+        y:data2020.map(x=>x[selectCause.value]),//.slice(0,-2+delay),
         type: 'scatter',
         mode: 'lines+markers',
         name: '2020 CDC',
@@ -698,9 +706,11 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
+    //let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020])
     if(document.getElementById('mortalityAdditional')){
         if(mortalityAdditional.checked){
+            //allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp,traceExcess])
             allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp,traceExcess])
         }
     }   
@@ -728,8 +738,8 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
 
         }
         let trace2020ofCovid = {
-            x:dtrack.data.weekends2020.slice(0,-3+delay),  //weeks,
-            y:data2020.map((x,i)=>x.covid_19_u071_underlying_cause_of_death+traceAvg.y[i]).slice(0,-3+delay),
+            x:dtrack.data.weekends2020,//.slice(0,-3+delay),  //weeks,
+            y:data2020.map((x,i)=>x.covid_19_u071_underlying_cause_of_death+traceAvg.y[i]),//.slice(0,-3+delay),
             type: 'scatter',
             mode: 'lines',
             name: 'COVID CDC',
@@ -745,12 +755,15 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         let allTraces=[]
         if(document.getElementById('mortalityAdditional')){
             if(mortalityAdditional.checked){
-                allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+                //allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+                allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020])
             }else{
-                allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+                //allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+                allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020])
             }  
         }else{
-            allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+            //allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+            allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020])
         }
              
     }
@@ -771,7 +784,8 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         hovermode: 'closest',
         height:530,
         xaxis: {
-            title: 'Date of calendar day in 2020'
+            title: 'Date of calendar day in 2020',
+            //range: [new Date('Dec 31 2019'),new Date('Dec 31 2020')]
         },
         yaxis: {
             title: dtrack.ytitle
@@ -901,7 +915,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let selectCause_value='All Cause'
     let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause_value]).length // different states / causes updating at different rates
     if(delay>2){delay=-delay+2}
-    let y2020=data2020.map(x=>x[selectCause_value]).slice(0,-3+delay) 
+    let y2020=data2020.map(x=>x[selectCause_value])//.slice(0,-3+delay) 
     //debugger
     /*
     let trace2020 = {
@@ -1006,8 +1020,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let delayAllCause=dtrack.data.weekends2020.length-data2020.map(x=>x["All Cause"]).length // different states / causes updating at different rates
     if(delayAllCause>2){delayAllCause=-delayAllCause+2} // for unusually short series
     let traceAllCause={
-        x:dtrack.data.weekends2020.slice(0,-3+delay),
-        y:data2020.map(s=>s.allcause).slice(0,-3+delay),
+        x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+        y:data2020.map(s=>s.allcause),//.slice(0,-3+delay),
         name:'All Cause <sub>2020</sub>',
         type: 'scatter',
         mode: 'lines',
@@ -1017,8 +1031,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         }
     }
     let traceNaturalCause={
-        x:dtrack.data.weekends2020.slice(0,-3+delay),
-        y:data2020.map(s=>s.naturalcause).slice(0,-3+delay),
+        x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+        y:data2020.map(s=>s.naturalcause),//.slice(0,-3+delay),
         name:'NaturalCause',
         type: 'scatter',
         mode: 'lines',
@@ -1034,8 +1048,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
             let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[c]).length // different states / causes updating at different rates
             if(delay>2){delay=-delay+2} // for unusually short series
             let trace={
-                x:dtrack.data.weekends2020.slice(0,-3+delay),
-                y:data2020.map(s=>s[c]).slice(0,-3+delay),
+                x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+                y:data2020.map(s=>s[c]),//.slice(0,-3+delay),
                 //name:dtrack.data.causes[c].slice(0,10),
                 name:dtrack.data.shortName[c].slice(0,12),
                 type: 'scatter',
@@ -1175,7 +1189,8 @@ dtrack.csvData=(traces,layout)=>{
             txt=`Date,Average 2015-2019,of COVID, with CIVID`
             trc1 = traces.filter(x=>x.name=="of COVID")[0]
             trc2 = traces.filter(x=>x.name=="with COVID")[0]
-            trc1.x.slice(0,-3).forEach((xi,i)=>{
+            //trc1.x.slice(0,-3).forEach((xi,i)=>{
+            trc1.x.forEach((xi,i)=>{
                 txt+=`\n${xi.toISOString()},0,${trc1.y[i]},${trc2.y[i]}`
             })
         }
