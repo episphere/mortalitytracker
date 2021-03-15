@@ -128,7 +128,7 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
     // move All States from end to beginning
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
-    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020 for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2020-21</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-19</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
+    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020<sup>+</sup> for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2020-21</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-19</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
     h+='Data: [<a id="csvDataLink" href=""></a>]  [<a id="plotDataLink" href=""></a>]<sup><a href="https://episphere.github.io/plot" style="color:brown" target="_blank">csv</a></sup>'
     h+='<hr>'
@@ -450,11 +450,11 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     }
         
     let layout={
-            title:`Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+            title:`Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
             hovermode: 'closest',
             autosize:true,
             xaxis: {
-                title: 'Date of calendar day in 2020'
+                title: 'Date'
             },
             yaxis: {
                 title:dtrack.ytitle,
@@ -577,7 +577,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         y:data20201.map(x=>x[selectCause.value]).slice(0,-delay),//.slice(0,-2+delay),
         type: 'scatter',
         mode: 'lines+markers',
-        name: '2020+ CDC',
+        name: '2020<sup>+</sup> CDC',
         marker: {
             color:'maroon',
             size:8
@@ -816,11 +816,11 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     }
     
     let layout = {
-        title:`<span style="font-size:small">Comparing 2020 with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b></span>`,
+        title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b></span>`,
         hovermode: 'closest',
         height:530,
         xaxis: {
-            title: 'Date of calendar day in 2020',
+            title: 'Date',
             //range: [new Date('Dec 31 2019'),new Date('Dec 31 2020')]
         },
         yaxis: {
