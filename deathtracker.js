@@ -111,6 +111,7 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000')).json())
     dtrack.data.all=dtrack.data.all.concat(await (await fetch('https://data.cdc.gov/resource/3yf8-kanr.json?$limit=10000&$offset=10000')).json())
     dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='United States'))
+    
     // remove problematic states
     let removeIncompleteStates=true
     if(dtrack.ui.parms){
@@ -215,7 +216,8 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
             //dtrack.data.weekends2020[i]=dtrack.data.all.filter(d=>d.mmwrweek==wk&d.mmwryear==2020).map(d=>d.weekendingdate)[0]
         })
     })
-        
+    dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52)))
+    //debugger
     //yrs=[... new Set(dtrack.data.all.map(d=>d.mmwryear))]
     dtrack.data.years.forEach(yr=>{
         dtrack.data.weeks.forEach(wk=>{
@@ -305,6 +307,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         // covid_19_u071_underlying_cause_of_death
         let yOfCovid=stateData.map(d=>d.covid_19_u071_underlying_cause_of_death)
         dtrack.data.weekends2020=dtrack.data.weekends2020.map(d=>new Date(d.setYear(2020))) // making sure its 2020
+        //dtrack.data.weekends20201=[]
+        dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52)))
+        debugger
         let n = dtrack.data.weekends2020.length
         let traceOfCovid={
             x:dtrack.data.weekends2020,
@@ -535,10 +540,13 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
 
     //let data2020 = stateData.filter(x=>(x.mmwryear>=2020&x.allcause>0))
     let data2020 = stateData.filter(x=>(x.mmwryear==2020))
-    let weeks = dtrack.data.weeks
-    let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
-    if(delay>2){delay=-delay} // for unusually short series
-    let trace2020 = {
+    let data20201 = stateData.filter(x=>(x.mmwryear>=2020)).filter(x=>x.allcause>0)
+    let weeks = dtrack.data.weeks.concat(dtrack.data.weeks.map(x=>x+52))
+    //let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[selectCause.value]).length // different states / causes updating at different rates
+    //if(delay>2){delay=-delay} // for unusually short series
+    let delay = 6 // weeks
+    //debugger
+    let trace20201 = { // the old trace2020 actually ...
         //x:dtrack.data.weekends2020.slice(0,-2+delay),  //weeks,
         x:(dtrack.data.weekends2020.concat(dtrack.data.weekends2020.slice(0,data2020.length-dtrack.data.weekends2020.length))).map((xi,i)=>{
             if(i>=dtrack.data.weekends2020.length){
@@ -562,13 +570,37 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         //fillcolor: 'rgba(128,0,0,0.2)'
         fillcolor: 'rgba(0,100,255,0.2)'
     }
+
+    let trace2020 = {
+        //x:dtrack.data.weekends2020.slice(0,-2+delay),  //weeks,
+        x:dtrack.data.weekends20201,
+        y:data20201.map(x=>x[selectCause.value]).slice(0,-delay),//.slice(0,-2+delay),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '2020+ CDC',
+        marker: {
+            color:'maroon',
+            size:8
+        },
+        line:{
+            width:3
+        },
+        fill: 'tonexty',
+        //fillcolor: 'rgba(128,0,0,0.2)'
+        fillcolor: 'rgba(0,100,255,0.2)'
+    }
+
+
+    //debugger
     let tempy=dtrack.trim(data2020.map(x=>x[selectCause.value]))
     let tempx=dtrack.data.weekends2020.slice(0,tempy.length)
     let trace2020temp = {
         //x:dtrack.data.weekends2020.slice(-3,-1),  //weeks,
         //y:data2020.map(x=>x[selectCause.value]).slice(-3+delay),
-        x:tempx.slice(-3),
-        y:tempy.slice(-3),
+        //x:tempx.slice(-3),
+        //y:tempy.slice(-3),
+        x:dtrack.data.weekends20201.slice(trace2020.y.length),
+        y:data20201.map(x=>x[selectCause.value]).slice(-delay),
         type: 'scatter',
         //mode: 'lines+markers',
         mode: 'markers',
@@ -610,9 +642,9 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     })
     valueRange.avg=valueRange.avg.map((v,i)=>v/ni[i]) // average
 
-    let traceAvg={
-        x:dtrack.data.weekends2020,
-        y:valueRange.avg,
+    let traceAvg={ // dev2021
+        x:dtrack.data.weekends20201,
+        y:valueRange.avg.concat(valueRange.avg).slice(0,trace2020.y.length),
         type: 'scatter',
         mode: 'lines+markers',
         name: '2015-19<br>average',
@@ -632,18 +664,20 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     traceAvgBlank.x=trace2020.x
     traceAvgBlank.name='________'
 
-    var traceMin = {
-      x: dtrack.data.weekends2020,
-      y: valueRange.min,
+    var traceMin = { // dev2021
+      //x: dtrack.data.weekends2020,
+      x: dtrack.data.weekends20201,
+      //y: valueRange.min,
+      y: valueRange.min.concat(valueRange.min).slice(0,trace2020.y.length),
       fill: 'toself',
       type: 'scatter',
       mode: 'none',
       fillcolor: 'rgba(200,200,200,0)',
       name:'(2015-19)'
     }
-    var traceMax = {
-      x: dtrack.data.weekends2020,
-      y: valueRange.max,
+    var traceMax = { // dev2021
+      x: dtrack.data.weekends20201,
+      y: valueRange.max.concat(valueRange.max).slice(0,trace2020.y.length),
       fill: 'tonexty',
       type: 'scatter',
       mode: 'none',
@@ -706,8 +740,8 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     if((titleCause)=="Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)"){
         titleCause = 'Unclassified symptoms, signs and abnormal findings'
     }
-    //let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
-    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020])
+    let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp])
+    //let allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020])
     if(document.getElementById('mortalityAdditional')){
         if(mortalityAdditional.checked){
             //allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,trace2020,trace2020temp,traceExcess])
@@ -759,10 +793,12 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
                 allTraces=traces.slice(1).concat([traceExcess,traceMin,traceMax,traceAvg,traceAvgBlank,cvTrace,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020])
             }else{
                 //allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+                //debugger
                 allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020])
             }  
         }else{
             //allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020,trace2020temp])
+            //debugger
             allTraces=traces.slice(1).concat([traceMin,traceMax,traceAvg,traceAvgBlank,JSON.parse(JSON.stringify(traceAvgBlank)),trace2020ofCovid,trace2020])
         }
              
