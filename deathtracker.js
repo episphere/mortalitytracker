@@ -301,7 +301,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     }else{ /// PLOT COVID
         location.hash='cause='+document.getElementById('selectCause').value+'&state='+document.getElementById('selectState').value
         //console.log('plot '+document.getElementById('selectCause').value)
-        let stateData = dtrack.data.all.filter(x=>(x.jurisdiction_of_occurrence==selectState.value&x.mmwryear==2020))
+        let stateData = dtrack.data.all.filter(x=>(x.jurisdiction_of_occurrence==selectState.value&x.mmwryear>=2020))
         // dtrack.data.weekends2020
         let traces = []
         // covid_19_u071_underlying_cause_of_death
@@ -309,11 +309,15 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         dtrack.data.weekends2020=dtrack.data.weekends2020.map(d=>new Date(d.setYear(2020))) // making sure its 2020
         //dtrack.data.weekends20201=[]
         dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52)))
-        debugger
-        let n = dtrack.data.weekends2020.length
+        // remove trail of zeros
+
+        //debugger
+        //let n = dtrack.data.weekends2020.length
+        let n = dtrack.data.all.filter(x=>(x.jurisdiction_of_occurrence==selectState.value&x.mmwryear>=2020&x.allcause>0)).length
+        let delay = 6
         let traceOfCovid={
-            x:dtrack.data.weekends2020,
-            y:yOfCovid,//.slice(0,n-3),
+            x:dtrack.data.weekends20201,
+            y:yOfCovid.slice(0,n-delay),
             type: 'scatter',
             mode: 'lines+markers',
             name: 'of COVID',
@@ -369,8 +373,8 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             //visible:false
         }
         let traceOfCovidTemp={
-            x:dtrack.data.weekends2020.slice(-3),
-            y:yOfCovid,//.slice(-3),
+            x:dtrack.data.weekends20201.slice(n-delay),
+            y:yOfCovid.slice(n-delay,n),
             type: 'scatter',
             mode: 'markers',
             name: 'in progress',
@@ -416,15 +420,15 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         let allTraces = []
         if(document.getElementById('mortalityAdditional')){
             if(mortalityAdditional.checked){
-                //allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
-                allTraces=[traceCovid,traceWithCovid,traceOfCovid,traceCovidSum,traceOfCovidSum]
+                allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid,traceCovidSum,traceOfCovidSum]
+                //allTraces=[traceCovid,traceWithCovid,traceOfCovid,traceCovidSum,traceOfCovidSum]
             }else{
-                //allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
-                allTraces=[traceCovid,traceWithCovid,traceOfCovid]
+                allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+                //allTraces=[traceCovid,traceWithCovid,traceOfCovid]
             }
         }else{
-            //allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
-            allTraces=[traceCovid,traceWithCovid,traceOfCovid]
+            allTraces=[traceCovid,traceWithCovid,traceOfCovidTemp,traceOfCovid]
+            //allTraces=[traceCovid,traceWithCovid,traceOfCovid]
         }
             
         
