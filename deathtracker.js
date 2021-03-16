@@ -314,6 +314,10 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         //debugger
         //let n = dtrack.data.weekends2020.length
         let n = dtrack.data.all.filter(x=>(x.jurisdiction_of_occurrence==selectState.value&x.mmwryear>=2020&x.allcause>0)).length
+        dtrack.data.latest={
+            week:n,
+            date:dtrack.data.weekends20201[n]
+        }
         let delay = 6
         let traceOfCovid={
             x:dtrack.data.weekends20201,
@@ -452,9 +456,10 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     }else{
         dtrack.legendX=1.02
     }
-        
+
+    //debugger
     let layout={
-            title:`Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b>`,
+            title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends20201[n].toDateString()}</span>`,
             hovermode: 'closest',
             autosize:true,
             xaxis: {
@@ -818,9 +823,9 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
             titleRight='Raw total additional mortality per 100K (<span style="font-size:x-large"> &#8285; </span>)'
         }
     }
-    
+    //debugger
     let layout = {
-        title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</b></span>`,
+        title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends20201[trace2020.y.length+delay].toDateString()}</b></span>`,
         hovermode: 'closest',
         height:530,
         xaxis: {
@@ -1132,6 +1137,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     if(mortalityRate.checked){
         allTraces=dtrack.traceAll(allTraces)
     }
+    //debugger
     let layout={
         title:`<span style="font-size:small">COVID-19 mortality context for <b style="color:green">${selectState.value}</b>, pop. <span style="color:navy">${dtrack.data.covid[selectState.value].Population.toLocaleString()}</span><br>latest CDC record: ${dtrack.data.weekends2020.slice(-1)[0].toDateString().slice(0,10)}</span>`, // latest record: ${dtrack.data.covid['All States'].dates.slice(-1)[0].toDateString().slice(0,10)}</b>`,
         height:570,
