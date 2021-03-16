@@ -259,6 +259,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
         div=document.getElementById(div)
     }
     h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality; ** <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><span id="warningShift" style="color:red" hidden=false> unadjusted for demographic shift </span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:medium"><b style="color:gray">*</b> Important: this functionality is provided for convenience, direct comparison of mortality between states is disadvised given the significant demographic differences <b style="color:gray">**</b>; Raw mortality in excess of the last 5 year's average, <b style="color:gray">without <a href="https://pubmed.ncbi.nlm.nih.gov/33316174" target="_blank">adjusting for shift in demographic structure</a></b>. See also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; <b style="color:gray">***</b> For QAQC of states with incomplete records, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
+    h+='<p style="color:grey">Note, comparisons with prior years do not account for changes in the age-distribution of the US population over time. For additional information on the impact of these changes, please see <a href="https://www.acpjournals.org/doi/10.7326/M20-7385" target="_blank">Shiels et al (2020)</a>.</p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
         h+=`<br><b style="color:maroon">${dtrack.data.shortName[c]}</b>: ${dtrack.data.causes[c]}`
@@ -831,7 +832,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
         delay:delay
     }
     let layout = {
-        title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.weekends20201[trace2020.y.length+delay].toDateString()}</b></span>`,
+        title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${titleCause}</b>, latest CDC record: ${dtrack.data.latest.date.toDateString()}</b></span>`,
         hovermode: 'closest',
         height:530,
         xaxis: {
