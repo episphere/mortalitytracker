@@ -1009,7 +1009,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
 
     // shaded range
     let valueRange={
-        x:dtrack.data.weeks,
+        x:dtrack.data.weeks.concat(dtrack.data.weeks),
         avg:dtrack.data.weeks.map(x=>0),
         max:dtrack.data.weeks.map(x=>0),
         min:dtrack.data.weeks.map(x=>0)
@@ -1031,8 +1031,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     valueRange.avg=valueRange.avg.map((v,i)=>v/ni[i]) // average
 
     let traceAvg={
-        x:dtrack.data.weekends2020,
-        y:valueRange.avg,
+        x:dtrack.data.weekends20201.slice(0,dtrack.data.latest.week),
+        y:valueRange.avg.concat(valueRange.avg),
         type: 'scatter',
         mode: 'lines',
         name: 'average<sub>2015-9</sub>',
@@ -1052,8 +1052,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     }
     */
     var traceMin = {
-      x: dtrack.data.weekends2020,
-      y: valueRange.min,
+      x: traceAvg.x,
+      y: valueRange.min.concat(valueRange.min),
       fill: 'toself',
       type: 'scatter',
       mode: 'none',
@@ -1061,8 +1061,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
       name:'__________'
     }
     var traceMax = {
-      x: dtrack.data.weekends2020,
-      y: valueRange.max,
+      x: traceAvg.x,
+      y: valueRange.max.concat(valueRange.max),
       fill: 'tonexty',
       type: 'scatter',
       mode: 'none',
@@ -1073,7 +1073,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     let delayAllCause=dtrack.data.weekends2020.length-data2020.map(x=>x["All Cause"]).length // different states / causes updating at different rates
     if(delayAllCause>2){delayAllCause=-delayAllCause+2} // for unusually short series
     let traceAllCause={
-        x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+        //x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+        x:traceAvg.x.slice(0,-dtrack.data.latest.delay),
         y:data2020.map(s=>s.allcause),//.slice(0,-3+delay),
         name:'All Cause <sub>2020</sub>',
         type: 'scatter',
@@ -1084,7 +1085,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
         }
     }
     let traceNaturalCause={
-        x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+        //x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+        x:traceAllCause.x,
         y:data2020.map(s=>s.naturalcause),//.slice(0,-3+delay),
         name:'NaturalCause',
         type: 'scatter',
@@ -1101,7 +1103,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
             let delay=dtrack.data.weekends2020.length-data2020.map(x=>x[c]).length // different states / causes updating at different rates
             if(delay>2){delay=-delay+2} // for unusually short series
             let trace={
-                x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+                //x:dtrack.data.weekends2020,//.slice(0,-3+delay),
+                x:traceAllCause.x,
                 y:data2020.map(s=>s[c]),//.slice(0,-3+delay),
                 //name:dtrack.data.causes[c].slice(0,10),
                 name:dtrack.data.shortName[c].slice(0,12),
