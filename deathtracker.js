@@ -1235,7 +1235,7 @@ dtrack.csvData=(traces,layout)=>{
     csvDataLink.href=location.hash
     csvDataLink.onclick=function(){
         let txt=`Date,Average 2015-2019,${shortVarName}`
-        let trc1 = traces.filter(x=>x.name=="2020 CDC")
+        let trc1 = traces.filter(x=>x.name=="2020<sup>+</sup> CDC")
         if(trc1.length==1){ // this is not covid
             trc1=trc1[0]
             let trc2 = traces.filter(x=>x.name=="2015-19<br>average")[0]
