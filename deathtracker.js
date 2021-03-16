@@ -828,7 +828,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     //debugger //trace2020.y.length+delay[trace2020.y.length+delay].toDateString()
     dtrack.data.latest={
         week:trace2020.y.length+delay,
-        date:dtrack.data.weekends20201[61],
+        date:dtrack.data.weekends20201[trace2020.y.length+delay],
         delay:delay
     }
     let layout = {
