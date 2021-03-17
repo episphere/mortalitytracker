@@ -138,6 +138,7 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     h+='<hr>'
     h+='<div id="dataDictionaryDiv"></div>'
     div.innerHTML=h
+    dtrack.data.states=[dtrack.data.states[0]].concat(dtrack.data.states.slice(1).sort())
     dtrack.data.states.forEach(s=>{
         let opt=document.createElement('option')
         opt.value=opt.innerText=s
