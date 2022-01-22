@@ -218,7 +218,7 @@ dtrack.cleanData=(dt=dtrack.data.all)=>{
         })
     })
     //dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52)))
-    dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52))).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52*2)))
+    dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857))).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857*2)))
     //debugger
     //yrs=[... new Set(dtrack.data.all.map(d=>d.mmwryear))]
     dtrack.data.years.forEach(yr=>{
@@ -312,7 +312,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         dtrack.data.weekends2020=dtrack.data.weekends2020.map(d=>new Date(d.setYear(2020))) // making sure its 2020
         //dtrack.data.weekends20201=[]
         //dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52)))
-        dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52))).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52*2)))
+        dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857))).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857*2)))
         // remove trail of zeros
 
         //debugger
