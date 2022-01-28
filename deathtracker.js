@@ -341,7 +341,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             fillcolor: 'rgba(0,100,255,0.2)'
         }
         let traceOfCovidSum={
-            x:dtrack.data.weekends2020,
+            x:dtrack.data.weekends20201.slice(0,n-6),
             y:dtrack.sum(yOfCovid),//(yOfCovid.slice(0,n-3)),
             type: 'scatter',
             mode: 'lines',
@@ -354,8 +354,9 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
             yaxis:'y2'
         }
         let yWithCovid=stateData.map(d=>d.covid_19_u071_multiple_cause_of_death)        
+        let tlength = dtrack.data.weekends20201.filter(d=>d<Date.now())
         let traceWithCovid={
-            x:dtrack.data.weekends2020,
+            x:dtrack.data.weekends20201.slice(0,n-6),
             y:yWithCovid,//.slice(0,n-3),
             type: 'scatter',
             mode: 'lines',
