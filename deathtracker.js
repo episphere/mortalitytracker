@@ -1038,7 +1038,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
 
     let traceAvg={
         x:dtrack.data.weekends20201.slice(0,dtrack.data.latest.week),
-        y:valueRange.avg.concat(valueRange.avg),
+        y:valueRange.avg.concat(valueRange.avg).concat(valueRange.avg),
         type: 'scatter',
         mode: 'lines',
         name: 'average<sub>2015-9</sub>',
@@ -1059,7 +1059,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     */
     var traceMin = {
       x: traceAvg.x,
-      y: valueRange.min.concat(valueRange.min),
+      y: valueRange.min.concat(valueRange.min).concat(valueRange.min),
       fill: 'toself',
       type: 'scatter',
       mode: 'none',
@@ -1068,7 +1068,7 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     }
     var traceMax = {
       x: traceAvg.x,
-      y: valueRange.max.concat(valueRange.max),
+      y: valueRange.max.concat(valueRange.max).concat(valueRange.max),
       fill: 'tonexty',
       type: 'scatter',
       mode: 'none',
