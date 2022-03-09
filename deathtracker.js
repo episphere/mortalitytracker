@@ -683,7 +683,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
       //x: dtrack.data.weekends2020,
       x: dtrack.data.weekends20201,
       //y: valueRange.min,
-      y: valueRange.min.concat(valueRange.min).slice(0,trace2020.y.length),
+      y: valueRange.min.concat(valueRange.min).concat(valueRange.min).slice(0,trace2020.y.length),
       fill: 'toself',
       type: 'scatter',
       mode: 'none',
@@ -692,7 +692,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
     }
     var traceMax = { // dev2021
       x: dtrack.data.weekends20201,
-      y: valueRange.max.concat(valueRange.max).slice(0,trace2020.y.length),
+      y: valueRange.max.concat(valueRange.max).concat(valueRange.max).slice(0,trace2020.y.length),
       fill: 'tonexty',
       type: 'scatter',
       mode: 'none',
