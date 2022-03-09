@@ -659,7 +659,7 @@ dtrack.plotlyCompare=async(div='plotlyCompareDiv')=>{
 
     let traceAvg={ // dev2021
         x:dtrack.data.weekends20201,
-        y:valueRange.avg.concat(valueRange.avg).slice(0,trace2020.y.length),
+        y:valueRange.avg.concat(valueRange.avg).concat(valueRange.avg).slice(0,trace2020.y.length),
         type: 'scatter',
         mode: 'lines+markers',
         name: '2015-19<br>average',
