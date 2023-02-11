@@ -464,6 +464,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     }
 
     //debugger
+    n=dtrack.data.weekends20201.length-1
     let layout={
             title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends20201[n].toDateString()}</span>`,
             hovermode: 'closest',
