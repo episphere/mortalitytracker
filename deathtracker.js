@@ -312,7 +312,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
         dtrack.data.weekends2020=dtrack.data.weekends2020.map(d=>new Date(d.setYear(2020))) // making sure its 2020
         //dtrack.data.weekends20201=[]
         //dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52)))
-        dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857))).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857*2)))
+        dtrack.data.weekends20201=dtrack.data.weekends2020.concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857))).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857*2)).concat(dtrack.data.weekends2020.map((x,i)=>new Date(x*1+604800000*52.22857*3))))
         // remove trail of zeros
 
         //debugger
@@ -464,7 +464,7 @@ dtrack.plotlyCompareCovid=async(div='plotlyCompareDiv')=>{
     }
 
     //debugger
-    n=dtrack.data.weekends20201.length-1
+    //n=dtrack.data.weekends20201.length-1
     let layout={
             title:`<span style="font-size:small">Comparing 2020<sup>+</sup> with 2015-2019 death records in <b style="color:green">${selectState.value}</b> by<br><b style="color:maroon">${selectCause.value}</b>, latest record: ${dtrack.data.weekends20201[n].toDateString()}</span>`,
             hovermode: 'closest',
