@@ -118,7 +118,7 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
         removeIncompleteStates=!dtrack.ui.parms.incompleteRecords
     }
     if(removeIncompleteStates){
-        dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Carolina'));
+        //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Carolina'));
         //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='North Dakota'));
         //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Connecticut'));
         //dtrack.data.all=dtrack.data.all.filter(d=>(d.jurisdiction_of_occurrence!='Pennsylvania'));
@@ -128,7 +128,7 @@ dtrack.ui=async(div='deathtrackerDiv')=>{
     dtrack.data.states=[...new Set(dtrack.data.all.map(x=>x.jurisdiction_of_occurrence))]
     // move All States from end to beginning
     dtrack.data.states.unshift(dtrack.data.states.slice(-1)[0]);dtrack.data.states.pop()
-    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020<sup>+</sup> for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2020-21</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-19</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
+    let h='<hr>Comparing causes of death by <select id="selectCause" onchange="dtrack.plotlyCompareCovid()"></select><br> in 2015-19 and 2020<sup>+</sup> for <select id="selectState" onchange="dtrack.plotlyCompareCovid();setTimeout(dtrack.plotlyWithCovid,1000)"></select> [CDC sources: <a href="https://data.cdc.gov/resource/muzy-jte6" target="_blank">2020-23</a>, <a href="https://data.cdc.gov/resource/3yf8-kanr" target="_blank">2015-19</a>; <a href="https://episphere.github.io/corona/UStable" target="_blank">COVID</a>]'
     h+='<div id="plotlyCompareDiv"></div>'
     h+='Data: [<a id="csvDataLink" href=""></a>]  [<a id="plotDataLink" href=""></a>]<sup><a href="https://episphere.github.io/plot" style="color:brown" target="_blank">csv</a></sup>'
     h+='<hr>'
@@ -260,7 +260,7 @@ dtrack.dataDictionary=(div='dataDictionaryDiv')=>{
     if(typeof(div)=='string'){
         div=document.getElementById(div)
     }
-    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality; ** <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><span id="warningShift" style="color:red" hidden=false> unadjusted for demographic shift </span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:medium"><b style="color:gray">*</b> Important: this functionality is provided for convenience, direct comparison of mortality between states is disadvised given the significant demographic differences <b style="color:gray">**</b>; Raw mortality in excess of the last 5 year's average, <b style="color:gray">without <a href="https://pubmed.ncbi.nlm.nih.gov/33316174" target="_blank">adjusting for shift in demographic structure</a></b>. See also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; <b style="color:gray">***</b> For QAQC of states with incomplete records, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
+    h=`<p><input id="mortalityRate" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate mortality as weekly rate per 100K people*; <span id="mortalityRateReplot" style="color:red" hidden=true>replotting, please wait ...</span><br><input id="mortalityAdditional" type="checkbox" style="height:16px;width:16px" disabled=false> Calculate additional mortality; ** <span id="mortalityAdditionalReplot" style="color:red" hidden=true>replotting, please wait ...</span><span id="warningShift" style="color:red" hidden=false> unadjusted for demographic shift </span><br><input id="incompleteRecords" type="checkbox" style="height:16px;width:16px" disabled=false checked=true> Include States with incomplete records***; <span id="incompleteRecordsReplot" style="color:red;font-size:small" hidden=true>replotting, please wait ...</span><br><span style="color:gray;font-size:medium"><b style="color:gray">*</b> Important: this functionality is provided for convenience, direct comparison of mortality between states is disadvised given the significant demographic differences <b style="color:gray">**</b>; Raw mortality in excess of the last 5 year's average, <b style="color:gray">without <a href="https://pubmed.ncbi.nlm.nih.gov/33316174" target="_blank">adjusting for shift in demographic structure</a></b>. See also <a href="./excess" target="_blank">Excess Mortality</a> for a simplified plot; <b style="color:gray">***</b> For QAQC of states with incomplete records, total counts will be meaningless. For COVID data resolved to county level see <a href="https://episphere.github.io/corona/UStable" target="_blank">US table</a>.</span></p>`
     h+='<p style="color:grey">Note, comparisons with prior years do not account for changes in the age-distribution of the US population over time. For additional information on the impact of these changes, please see <a href="https://www.acpjournals.org/doi/10.7326/M20-7385" target="_blank">Shiels et al (2020)</a>.</p>'
     h+='<h3>Data dictionary</h3><p>'
     Object.keys(dtrack.data.causes).forEach(c=>{
@@ -1208,7 +1208,8 @@ dtrack.plotlyWithCovid=async(div='plotlyWithCovidDiv')=>{
     }
     mortalityRate.disabled=false
     mortalityAdditional.disabled=false
-    incompleteRecords.disabled=false
+    incompleteRecords.disabled=true
+    incompleteRecords.checked=true
     mortalityAdditionalReplot.hidden=mortalityRateReplot.hidden=incompleteRecordsReplot.hidden=true
     warningShift.hidden=false
     layersDataLink.innerText=selectState.value+' dataLayers.json'
